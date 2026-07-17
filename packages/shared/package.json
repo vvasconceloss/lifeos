@@ -1,0 +1,23 @@
+{
+  "name": "@lifeos/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "node",
+    "typescript",
+    "fastify",
+    "habits"
+  ],
+  "author": {
+    "name": "Victor Vasconcelos",
+    "email": "vvasconcelos.dev@gmail.com",
+    "url": "https://github.com/vvasconceloss"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "lifeos",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A personal life management system for tracking habits, goals, projects, and long-term personal growth.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "node",
+    "typescript",
+    "fastify",
+    "habits"
+  ],
+  "author": {
+    "name": "Victor Vasconcelos",
+    "email": "vvasconcelos.dev@gmail.com",
+    "url": "https://github.com/vvasconceloss"
+  },
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.3.0",
+      "onFail": "download"
+    }
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "@types/node": "^24.13.3"
+  }
+}
