@@ -1,13 +1,14 @@
-import Fastify from 'fastify';
+import { corsPlugin } from './plugins/cors';
+import { systemRoutes } from './routes/system.routes';
+import Fastify, { type FastifyInstance } from 'fastify';
 
-export function buildApp() {
-  const app = Fastify();
-
-  app.get('/health', async () => {
-    return {
-      status: 'ok',
-    };
+export async function buildApp(): Promise<FastifyInstance> {
+  const fastify = Fastify({
+    logger: true
   });
 
-  return app;
+  await fastify.register(corsPlugin);
+  await fastify.register(systemRoutes, { prefix: '/v1' });
+
+  return fastify;
 }
