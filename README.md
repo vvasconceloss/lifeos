@@ -121,17 +121,6 @@ pnpm --filter @lifeos/api test
 
 ---
 
-# Development Principles
-
-- Keep the code simple.
-- Prefer readability over clever solutions.
-- Separate responsibilities.
-- Use strong typing end to end.
-- Avoid unnecessary abstractions until a second use case demands them.
-- Build a solid foundation before increasing complexity.
-
----
-
 # Requirements
 
 - Node.js 20+
