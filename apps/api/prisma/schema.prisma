@@ -8,8 +8,53 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id            String   @id @default(uuid())
+  email         String   @unique
   password_hash String
+  createdAt     DateTime @default(now())
+  pillars       Pillar[]
+  habits        Habit[]
+}
+
+model Pillar {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habits Habit[]
+
+  @@index([userId])
+}
+
+model Habit {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  pillarId    String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  archivedAt  DateTime?
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)
+  completions HabitCompletion[]
+
+  @@index([userId])
+  @@index([pillarId])
+}
+
+model HabitCompletion {
+  id        String   @id @default(uuid())
+  habitId   String
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId, date])
 }
