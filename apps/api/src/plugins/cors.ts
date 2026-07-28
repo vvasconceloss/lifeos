@@ -17,7 +17,7 @@ export const corsPlugin = fp(async (fastify: FastifyInstance) => {
       callback(new Error('Not allowed by CORS'), false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'csrf-token'],
     credentials: true,
     maxAge: 86400,
   });
