@@ -180,15 +180,15 @@ Example `POST /auth/register`:
 - Do not let this decision block development — it can be adjusted later.
 
 ### Tasks
-- [ ] Create the `User` model in Prisma
-- [ ] Run the `add_users` migration
+- [x] Create the `User` model in Prisma
+- [x] Run the `add_users` migration
 - [ ] Implement `auth.schemas.ts` with validation (Zod) for register/login
 - [ ] Implement `auth.service.ts` (password hashing, JWT generation/verification)
 - [ ] Implement `POST /auth/register`
 - [ ] Implement `POST /auth/login`
 - [ ] Implement `GET /auth/me`
-- [ ] Configure JWT in an httpOnly cookie
-- [ ] Configure basic CORS and CSRF
+- [x] Configure JWT in an httpOnly cookie
+- [x] Configure basic CORS and CSRF
 - [ ] Write tests:
   - [ ] Register a user successfully
   - [ ] Reject a duplicate email
