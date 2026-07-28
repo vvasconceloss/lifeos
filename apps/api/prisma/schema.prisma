@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password_hash String
-  createdAt     DateTime @default(now())
-  pillars       Pillar[]
-  habits        Habit[]
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pillars Pillar[]
+  habits  Habit[]
 }
 
 model Pillar {
@@ -35,12 +38,14 @@ model Habit {
   description String?
   userId      String
   pillarId    String
+  frequency   String    @default("DAILY")
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   archivedAt  DateTime?
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)
+  pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Cascade)
   completions HabitCompletion[]
 
   @@index([userId])
