@@ -7,13 +7,17 @@ import { systemRoutes } from './routes/system.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import Fastify, { type FastifyInstance } from 'fastify';
 
-export async function buildApp(): Promise<FastifyInstance> {
+export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstance> {
   const fastify = Fastify({
     logger: true
   });
 
   await fastify.register(cookiesPlugin);
-  await fastify.register(csrfPlugin);
+
+  if (opts?.csrf !== false) {
+    await fastify.register(csrfPlugin);
+  }
+
   await fastify.register(jwtPlugin);
   await fastify.register(corsPlugin);
 
