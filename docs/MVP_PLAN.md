@@ -116,11 +116,11 @@ No goals, levels, or metrics at this stage.
 - Uniqueness constraint: `@@unique([habitId, date])` enforced at the database level.
 
 ### Tasks
-- [ ] Document the entity diagram (User → Pillar → Habit → Completion)
-- [ ] Write the business rules for each entity into a reference document (`/docs/domain-rules.md`)
-- [ ] Validate with mental test cases (e.g., "can I mark the same habit twice on the same day?")
-- [ ] Confirm the `@@unique([habitId, date])` constraint is planned in the Prisma schema
-- [ ] Review and approve the model before moving to Phase 2
+- [x] Document the entity diagram (User → Pillar → Habit → Completion)
+- [x] Write the business rules for each entity into a reference document (`/docs/domain-rules.md`)
+- [x] Validate with mental test cases (e.g., "can I mark the same habit twice on the same day?")
+- [x] Confirm the `@@unique([habitId, date])` constraint is planned in the Prisma schema
+- [x] Review and approve the model before moving to Phase 2
 
 ### Completion criteria
 An approved domain document exists, with the entity model and business rules written down, before any product code is written.
