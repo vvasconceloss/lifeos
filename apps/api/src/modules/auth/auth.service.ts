@@ -26,7 +26,7 @@ export async function createUser(data: RegisterBody): Promise<UserResponse> {
   });
 
   if (existing) {
-    throw new Error("EMAIL_ALREADY_EXISTS");
+    throw new Error(AUTH_ERRORS.EMAIL_ALREADY_EXISTS);
   }
 
   const passwordHash = hashPassword(data.password);
@@ -51,13 +51,13 @@ export async function authenticate(
   });
 
   if (!user) {
-    throw new Error("INVALID_CREDENTIALS");
+    throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
   }
 
   const valid = comparePassword(password, user.passwordHash);
 
   if (!valid) {
-    throw new Error("INVALID_CREDENTIALS");
+    throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
   }
 
   return toUserResponse(user);
