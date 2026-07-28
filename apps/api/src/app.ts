@@ -4,6 +4,7 @@ import { corsPlugin } from './plugins/cors';
 import { csrfPlugin } from './plugins/csrf';
 import { cookiesPlugin } from './plugins/cookie';
 import { systemRoutes } from './routes/system.routes';
+import { authRoutes } from './modules/auth/auth.routes';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -11,12 +12,13 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: true
   });
 
+  await fastify.register(cookiesPlugin);
+  await fastify.register(csrfPlugin);
   await fastify.register(jwtPlugin);
   await fastify.register(corsPlugin);
-  await fastify.register(csrfPlugin);
-  await fastify.register(cookiesPlugin);
 
   await fastify.register(systemRoutes, { prefix: '/v1' });
+  await fastify.register(authRoutes, { prefix: '/v1/auth' });
 
   return fastify;
 }
