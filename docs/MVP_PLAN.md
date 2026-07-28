@@ -182,21 +182,21 @@ Example `POST /auth/register`:
 ### Tasks
 - [x] Create the `User` model in Prisma
 - [x] Run the `add_users` migration
-- [ ] Implement `auth.schemas.ts` with validation (Zod) for register/login
-- [ ] Implement `auth.service.ts` (password hashing, JWT generation/verification)
-- [ ] Implement `POST /auth/register`
-- [ ] Implement `POST /auth/login`
-- [ ] Implement `GET /auth/me`
+- [x] Implement `auth.schemas.ts` with validation (Zod) for register/login
+- [x] Implement `auth.service.ts` (password hashing, JWT generation/verification)
+- [x] Implement `POST /auth/register`
+- [x] Implement `POST /auth/login`
+- [x] Implement `GET /auth/me`
 - [x] Configure JWT in an httpOnly cookie
 - [x] Configure basic CORS and CSRF
-- [ ] Write tests:
-  - [ ] Register a user successfully
-  - [ ] Reject a duplicate email
-  - [ ] Reject an invalid password
-  - [ ] Log in successfully
-  - [ ] Reject incorrect credentials
-  - [ ] Access `/auth/me` while authenticated
-  - [ ] Reject `/auth/me` without authentication
+- [x] Write tests:
+  - [x] Register a user successfully
+  - [x] Reject a duplicate email
+  - [x] Reject an invalid password
+  - [x] Log in successfully
+  - [x] Reject incorrect credentials
+  - [x] Access `/auth/me` while authenticated
+  - [x] Reject `/auth/me` without authentication
 
 ### Completion criteria
 All authentication tests pass, and it is possible to register, authenticate, and validate a session via direct API calls (e.g., Postman/curl).
@@ -896,7 +896,7 @@ These modules should only be considered after the core product proves its value 
 
 ```text
 M1  — Foundation                    [DONE]
-M2  — Authentication
+M2  — Authentication                [DONE]
 M3  — Pillars
 M4  — Habits
 M5  — Habit Completions
