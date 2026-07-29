@@ -444,17 +444,17 @@ Login → Dashboard → Habit → Mark as completed → API → PostgreSQL → D
 ```
 
 ### Tasks
-- [ ] Create the `HabitCompletion` model in Prisma and run the migration (with the `@@unique` constraint)
-- [ ] Implement `GET /completions` with date range filtering
-- [ ] Implement `PUT /habits/:id/completions/:date` (idempotent)
-- [ ] Implement `DELETE /habits/:id/completions/:date`
-- [ ] Write tests:
-  - [ ] Mark a habit as completed
-  - [ ] Marking the same habit twice on the same day does not duplicate the record
-  - [ ] Unmark a completed habit
-  - [ ] List completions within a date range
-- [ ] Add the "mark as completed" interaction in the habits/dashboard UI
-- [ ] Test the end-to-end flow: login → mark habit → refresh → state persists
+- [x] Create the `HabitCompletion` model in Prisma and run the migration (with the `@@unique` constraint)
+- [x] Implement `GET /completions` with date range filtering
+- [x] Implement `PUT /habits/:id/completions/:date` (idempotent)
+- [x] Implement `DELETE /habits/:id/completions/:date`
+- [x] Write tests:
+  - [x] Mark a habit as completed
+  - [x] Marking the same habit twice on the same day does not duplicate the record
+  - [x] Unmark a completed habit
+  - [x] List completions within a date range
+- [x] Add the "mark as completed" interaction in the habits/dashboard UI
+- [x] Test the end-to-end flow: login → mark habit → refresh → state persists
 
 ### Completion criteria
 The user can mark and unmark habits as completed on any date, with uniqueness guaranteed at the database level, and the state is correctly reflected in the interface.
@@ -899,7 +899,7 @@ M1  — Foundation                    [DONE]
 M2  — Authentication                [DONE]
 M3  — Pillars                       [DONE]
 M4  — Habits                        [DONE]    
-M5  — Habit Completions
+M5  — Habit Completions             [DONE]
 M6  — Dashboard
 M7  — Weekly Tracker
 M8  — Basic Analytics
