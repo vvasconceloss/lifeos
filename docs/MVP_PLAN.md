@@ -298,18 +298,18 @@ Health · Engineering · Knowledge · Relationships · Leisure · Inner Growth
 ```
 
 ### Tasks
-- [ ] Create the `Pillar` model in Prisma and run the migration
-- [ ] Implement `GET /pillars` (filtered by authenticated `userId`)
-- [ ] Implement `POST /pillars`
-- [ ] Implement `PATCH /pillars/:id`
-- [ ] Implement `DELETE /pillars/:id` with the "do not delete if it has habits" validation
-- [ ] Write backend tests for all endpoints (including the delete error case)
-- [ ] Create the `/pillars` frontend page
-- [ ] Implement pillar listing
-- [ ] Implement pillar creation (form/modal)
-- [ ] Implement name editing
-- [ ] Implement deletion with error feedback when the pillar is not empty
-- [ ] Test the full flow: create, edit, try to delete with habits, delete when empty
+- [x] Create the `Pillar` model in Prisma and run the migration
+- [x] Implement `GET /pillars` (filtered by authenticated `userId`)
+- [x] Implement `POST /pillars`
+- [x] Implement `PATCH /pillars/:id`
+- [x] Implement `DELETE /pillars/:id` with the "do not delete if it has habits" validation
+- [x] Write backend tests for all endpoints (including the delete error case)
+- [x] Create the `/pillars` frontend page
+- [x] Implement pillar listing
+- [x] Implement pillar creation (form/modal)
+- [x] Implement name editing
+- [x] Implement deletion with error feedback when the pillar is not empty
+- [x] Test the full flow: create, edit, try to delete with habits, delete when empty
 
 ### Completion criteria
 The user can fully manage their pillars through the interface, and the deletion business rule is enforced both in the backend and reflected in the UI.
@@ -897,7 +897,7 @@ These modules should only be considered after the core product proves its value 
 ```text
 M1  — Foundation                    [DONE]
 M2  — Authentication                [DONE]
-M3  — Pillars
+M3  — Pillars                       [DONE]
 M4  — Habits
 M5  — Habit Completions
 M6  — Dashboard
