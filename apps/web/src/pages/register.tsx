@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { useAuth } from "@/hooks/use-auth";
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import type { RegisterData } from "@/contexts/AuthContextBase";
 
 interface FieldErrors {
@@ -28,13 +28,19 @@ function validate(data: RegisterData): FieldErrors {
 }
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { user, loading, register } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      window.location.href = "/app";
+    }
+  }, [user, loading]);
 
   async function handleSubmit(e: ChangeEvent) {
     e.preventDefault();
@@ -51,6 +57,7 @@ export default function RegisterPage() {
 
     try {
       await register(data);
+      window.location.href = "/app";
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
         setApiError("This email is already registered");

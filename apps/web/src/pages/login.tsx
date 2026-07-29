@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { useAuth } from "@/hooks/use-auth";
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 
 interface FieldErrors {
   email?: string;
@@ -22,12 +22,18 @@ function validate(email: string, password: string): FieldErrors {
 }
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { user, loading, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      window.location.href = "/app";
+    }
+  }, [user, loading]);
 
   async function handleSubmit(e: ChangeEvent) {
     e.preventDefault();
@@ -41,6 +47,7 @@ export default function LoginPage() {
 
     try {
       await login({ email: email.trim(), password });
+      window.location.href = "/app";
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         setApiError("Invalid email or password");
