@@ -53,9 +53,9 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 
 1. **User ownership** — A pillar always belongs to exactly one user. The `userId` is set at creation and is immutable.
 2. **User isolation** — A user can only see, edit, or delete their own pillars. All queries must include `userId` in the filter.
-3. **Cascade delete** — Deleting a pillar permanently removes it and all associated habits and habit completions. The user is warned before deletion.
+3. **Block deletion with habits** — A pillar cannot be deleted while it still has active habits. The user must archive or delete the habits first. This prevents accidental data loss and forces explicit intent.
 4. **Name** — Required and must be between 1 and 100 characters.
-5. **Pillar deletion scope** — There is no restriction on deleting a pillar with habits. Cascade deletion handles associated records.
+5. **Pillar deletion scope** — Deleting a pillar is only allowed when it has no associated habits.
 
 ---
 
@@ -146,7 +146,7 @@ These scenarios were validated during Phase 1 to confirm the rules are consisten
 1. **Duplicate completion** — Marking the same habit twice on the same day results in no change (idempotent). The second `PUT` is a no-op.
 2. **Future completion** — Trying to mark a habit for tomorrow is rejected (400 Bad Request).
 3. **Archive visibility** — An archived habit disappears from the dashboard and tracker. Its completion history is preserved.
-4. **Cascade delete** — Deleting a pillar with 5 habits and 30 completions removes all records in one operation.
+4. **Blocked delete** — Deleting a pillar with 5 habits is rejected with an error. The user must resolve the habits first.
 5. **User isolation** — User A creates a habit. User B cannot see, modify, or complete it, even if User B knows the habit's ID.
 6. **Optional description** — Creating a habit with only a name succeeds. The `description` field is `null` in the database.
 7. **Unmark past completion** — A completion from 30 days ago can be unmarked without restriction.
