@@ -1,0 +1,179 @@
+import { Archive, Check, Pencil, Trash2, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface Pillar {
+  id: string;
+  name: string;
+  color: string | null;
+}
+
+interface Habit {
+  id: string;
+  name: string;
+  description: string | null;
+  pillarId: string;
+  pillarName: string;
+  isActive: boolean;
+  archivedAt: string | null;
+}
+
+function Spinner() {
+  return (
+    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
+
+export function HabitCard({
+  habit,
+  editingId,
+  editName,
+  editDescription,
+  editPillarId,
+  pillars,
+  savingId,
+  deletingId,
+  archivingId,
+  onEditName,
+  onEditDescription,
+  onEditPillarId,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onArchive,
+  onDelete,
+}: {
+  habit: Habit;
+  editingId: string | null;
+  editName: string;
+  editDescription: string;
+  editPillarId: string;
+  pillars: Pillar[];
+  savingId: string | null;
+  deletingId: string | null;
+  archivingId: string | null;
+  onEditName: (v: string) => void;
+  onEditDescription: (v: string) => void;
+  onEditPillarId: (v: string) => void;
+  onStartEdit: (h: Habit) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: (id: string) => void;
+  onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (editingId === habit.id) {
+    return (
+      <li className="rounded-lg border border-border bg-card px-4 py-4 shadow-xs">
+        <div className="flex flex-col gap-2">
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => onEditName(e.target.value)}
+            className="block rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onSaveEdit(habit.id);
+              if (e.key === "Escape") onCancelEdit();
+            }}
+          />
+          <input
+            type="text"
+            value={editDescription}
+            onChange={(e) => onEditDescription(e.target.value)}
+            placeholder="Description"
+            className="block rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <select
+            value={editPillarId}
+            onChange={(e) => onEditPillarId(e.target.value)}
+            className="block rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {pillars.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <div className="flex gap-1 self-end">
+            <button
+              onClick={() => onSaveEdit(habit.id)}
+              disabled={savingId === habit.id || !editName.trim()}
+              className="rounded-md p-1.5 text-foreground/65 hover:text-foreground disabled:opacity-50"
+            >
+              {savingId === habit.id ? <Spinner /> : <Check className="size-4" />}
+            </button>
+            <button
+              onClick={onCancelEdit}
+              className="rounded-md p-1.5 text-foreground/65 hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+      </li>
+    );
+  }
+
+  return (
+    <li className="rounded-lg border border-border bg-card px-4 py-4 shadow-xs transition-colors hover:bg-accent/30">
+      <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span
+            className={`text-sm ${
+              habit.isActive ? "text-foreground" : "text-foreground/50 line-through"
+            }`}
+          >
+            {habit.name}
+          </span>
+          {habit.description && (
+            <span className="truncate text-xs text-foreground/50">
+              {habit.description}
+            </span>
+          )}
+        </div>
+        {habit.isActive && (
+          <>
+            <Tooltip>
+              <TooltipTrigger
+                render={<button />}
+                onClick={() => onStartEdit(habit)}
+                className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+              >
+                <Pencil className="size-4" />
+              </TooltipTrigger>
+              <TooltipContent>Edit</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={<button />}
+                onClick={() => onArchive(habit.id)}
+                disabled={archivingId === habit.id}
+                className="rounded-md p-1.5 text-foreground/50 hover:text-foreground disabled:opacity-50"
+              >
+                {archivingId === habit.id ? <Spinner /> : <Archive className="size-4" />}
+              </TooltipTrigger>
+              <TooltipContent>Archive</TooltipContent>
+            </Tooltip>
+          </>
+        )}
+        <Tooltip>
+          <TooltipTrigger
+            render={<button />}
+            onClick={() => onDelete(habit.id)}
+            disabled={deletingId === habit.id}
+            className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
+          >
+            {deletingId === habit.id ? <Spinner /> : <Trash2 className="size-4" />}
+          </TooltipTrigger>
+          <TooltipContent>Delete</TooltipContent>
+        </Tooltip>
+      </div>
+    </li>
+  );
+}
