@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useEffect, useState, type ChangeEvent } from "react";
-import { Archive, Check, ChevronDown, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Archive, Check, CheckCircle2, Circle, ChevronDown, Pencil, Plus, Trash2, X } from "lucide-react";
 
 interface Pillar {
   id: string;
@@ -50,16 +50,26 @@ export default function SettingsHabitsPage() {
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const today = new Date().toISOString().split("T")[0] as string;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [habitsRes, pillarsRes] = await Promise.all([
+        const [habitsRes, pillarsRes, compRes] = await Promise.all([
           api.get<{ habits: Habit[] }>("/habits"),
           api.get<{ pillars: Pillar[] }>("/pillars"),
+          api.get<{ completions: Array<{ habitId: string }> }>(
+            `/completions?from=${today}&to=${today}`,
+          ),
         ]);
         setHabits(habitsRes.data.habits);
         setPillars(pillarsRes.data.pillars);
+        setCompletedIds(
+          new Set(compRes.data.completions.map((c) => c.habitId)),
+        );
       } catch {
         toast.error("Failed to load data");
       } finally {
@@ -68,7 +78,7 @@ export default function SettingsHabitsPage() {
     }
 
     fetchData();
-  }, []);
+  }, [today]);
 
   const displayedHabits = showArchived
     ? habits
@@ -147,6 +157,35 @@ export default function SettingsHabitsPage() {
       toast.error("Failed to archive habit");
     } finally {
       setArchivingId(null);
+    }
+  }
+
+  async function toggleCompletion(habitId: string) {
+    const wasCompleted = completedIds.has(habitId);
+    setCompletedIds((prev) => {
+      const next = new Set(prev);
+      if (wasCompleted) next.delete(habitId);
+      else next.add(habitId);
+      return next;
+    });
+
+    setTogglingId(habitId);
+    try {
+      if (wasCompleted) {
+        await api.delete(`/habits/${habitId}/completions/${today}`);
+      } else {
+        await api.put(`/habits/${habitId}/completions/${today}`);
+      }
+    } catch {
+      setCompletedIds((prev) => {
+        const next = new Set(prev);
+        if (wasCompleted) next.add(habitId);
+        else next.delete(habitId);
+        return next;
+      });
+      toast.error("Failed to update completion");
+    } finally {
+      setTogglingId(null);
     }
   }
 
@@ -313,12 +352,32 @@ export default function SettingsHabitsPage() {
                             </>
                           ) : (
                             <>
-                              <div className="flex flex-1 flex-col">
+                              {habit.isActive && (
+                                <button
+                                  onClick={() => toggleCompletion(habit.id)}
+                                  disabled={togglingId === habit.id}
+                                  className="shrink-0 rounded-md p-0.5 text-foreground/50 hover:text-primary disabled:opacity-50"
+                                  aria-label={
+                                    completedIds.has(habit.id)
+                                      ? "Unmark as completed"
+                                      : "Mark as completed"
+                                  }
+                                >
+                                  {completedIds.has(habit.id) ? (
+                                    <CheckCircle2 className="size-5 text-primary" />
+                                  ) : togglingId === habit.id ? (
+                                    <Spinner />
+                                  ) : (
+                                    <Circle className="size-5" />
+                                  )}
+                                </button>
+                              )}
+                              <div className="flex min-w-0 flex-1 flex-col">
                                 <span className={`text-sm ${habit.isActive ? "text-foreground" : "text-foreground/50 line-through"}`}>
                                   {habit.name}
                                 </span>
                                 {habit.description && (
-                                  <span className="text-xs text-foreground/50">
+                                  <span className="truncate text-xs text-foreground/50">
                                     {habit.description}
                                   </span>
                                 )}
