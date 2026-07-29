@@ -1,19 +1,21 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
-import { CheckCircle2, Circle, Settings, LogOut } from "lucide-react";
+import { AppLayout } from "@/components/app-layout";
+import { CheckSquare, Square, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Pillar {
   id: string;
   name: string;
+  color: string | null;
 }
 
 interface Habit {
   id: string;
   name: string;
-  description: string | null;
   pillarId: string;
   pillarName: string;
   isActive: boolean;
@@ -21,6 +23,32 @@ interface Habit {
 
 interface Completion {
   habitId: string;
+  date: string;
+}
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function getWeekBounds(date: Date) {
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(date);
+  monday.setDate(date.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return { monday, sunday };
+}
+
+function formatDate(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatLabel(d: Date) {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[d.getMonth()]} ${d.getDate()}`;
 }
 
 function Spinner() {
@@ -33,57 +61,69 @@ function Spinner() {
 }
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [completions, setCompletions] = useState<Completion[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
 
-  const today = new Date().toISOString().split("T")[0] as string;
+  const today = new Date();
+  const userCreatedAt = user?.createdAt ? new Date(user.createdAt) : null;
+  const todayStr = formatDate(today);
+
+  const baseDate = new Date(today);
+  baseDate.setDate(baseDate.getDate() + weekOffset * 7);
+  const { monday, sunday } = getWeekBounds(baseDate);
+  const from = formatDate(monday);
+  const to = formatDate(sunday);
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return formatDate(d);
+  });
+
+  function isDateDisabled(dateStr: string) {
+    if (dateStr > todayStr) return true;
+    if (userCreatedAt && dateStr < formatDate(userCreatedAt)) return true;
+    return false;
+  }
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
         const [habitsRes, pillarsRes, compRes] = await Promise.all([
           api.get<{ habits: Habit[] }>("/habits"),
           api.get<{ pillars: Pillar[] }>("/pillars"),
           api.get<{ completions: Completion[] }>(
-            `/completions?from=${today}&to=${today}`,
+            `/completions?from=${from}&to=${to}`,
           ),
         ]);
         setHabits(habitsRes.data.habits);
         setPillars(pillarsRes.data.pillars);
-        setCompletedIds(
-          new Set(compRes.data.completions.map((c) => c.habitId)),
-        );
+        setCompletions(compRes.data.completions);
       } catch {
         toast.error("Failed to load dashboard");
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
-  }, [today]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [from, to]);
 
   const activeHabits = habits.filter((h) => h.isActive);
-  const completedCount = activeHabits.filter((h) => completedIds.has(h.id)).length;
-  const progress = activeHabits.length > 0
-    ? Math.round((completedCount / activeHabits.length) * 100)
-    : 0;
+  const visibleCompleted = completions.length;
+  const weekTotalDays = activeHabits.length * weekDays.length;
+  const isCurrentWeek = weekOffset === 0;
+  const todayCompleted = completions.filter(
+    (c) => c.habitId && c.date.startsWith(todayStr),
+  ).length;
+  const progress = isCurrentWeek
+    ? (activeHabits.length > 0 ? Math.round((todayCompleted / activeHabits.length) * 100) : 0)
+    : (weekTotalDays > 0 ? Math.round((visibleCompleted / weekTotalDays) * 100) : 0);
 
   const habitsByPillar = pillars
     .map((p) => ({
@@ -92,29 +132,33 @@ export default function DashboardPage() {
     }))
     .filter((g) => g.habits.length > 0);
 
-  async function toggleCompletion(habitId: string) {
-    const wasCompleted = completedIds.has(habitId);
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (wasCompleted) next.delete(habitId);
-      else next.add(habitId);
-      return next;
-    });
+  function isCompleted(habitId: string, date: string) {
+    return completions.some((c) => c.habitId === habitId && c.date.startsWith(date));
+  }
 
-    setTogglingId(habitId);
+  async function toggleCell(habitId: string, date: string) {
+    const wasCompleted = isCompleted(habitId, date);
+    const cellKey = `${habitId}-${date}`;
+
+    setCompletions((prev) =>
+      wasCompleted
+        ? prev.filter((c) => !(c.habitId === habitId && c.date.startsWith(date)))
+        : [...prev, { habitId, date: `${date}T00:00:00.000Z` }],
+    );
+
+    setTogglingId(cellKey);
     try {
       if (wasCompleted) {
-        await api.delete(`/habits/${habitId}/completions/${today}`);
+        await api.delete(`/habits/${habitId}/completions/${date}`);
       } else {
-        await api.put(`/habits/${habitId}/completions/${today}`);
+        await api.put(`/habits/${habitId}/completions/${date}`);
       }
     } catch {
-      setCompletedIds((prev) => {
-        const next = new Set(prev);
-        if (wasCompleted) next.add(habitId);
-        else next.delete(habitId);
-        return next;
-      });
+      setCompletions((prev) =>
+        wasCompleted
+          ? [...prev, { habitId, date: `${date}T00:00:00.000Z` }]
+          : prev.filter((c) => !(c.habitId === habitId && c.date.startsWith(date))),
+      );
       toast.error("Failed to update");
     } finally {
       setTogglingId(null);
@@ -123,46 +167,8 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen flex-col bg-background">
-        <header className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h1 className="text-lg font-semibold text-foreground">LifeOS</h1>
-          <div className="relative flex items-center gap-3" ref={menuRef}>
-            <span className="text-sm text-foreground/65">{user?.email}</span>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
-              aria-label="Settings"
-            >
-              <Settings className="size-5" />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
-                <a
-                  href="/settings/pillars"
-                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  Pillars
-                </a>
-                <a
-                  href="/settings/habits"
-                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  Habits
-                </a>
-                <hr className="my-1 border-border" />
-                <button
-                  onClick={logout}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  <LogOut className="size-4" />
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        <main className="mx-auto w-full max-w-lg px-4 py-8">
+      <AppLayout>
+        <main className="mx-auto w-full max-w-3xl px-4 py-8">
           {loading ? (
             <div className="flex justify-center py-20">
               <Spinner />
@@ -175,95 +181,157 @@ export default function DashboardPage() {
               <p className="mb-6 text-sm text-foreground/65">
                 Start by creating your first habit.
               </p>
-              <a
-                href="/settings/habits"
+              <Link
+                to="/settings/habits"
                 className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 Create habit
-              </a>
+              </Link>
             </div>
           ) : (
             <>
-              {/* Progress section */}
-              <section className="mb-8">
-                <h2 className="mb-1 text-sm font-medium text-foreground/65">
-                  Today&apos;s Progress
-                </h2>
-                <div className="flex items-center gap-3">
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className="shrink-0 text-sm font-semibold text-foreground">
-                    {progress}%
-                  </span>
+              {/* Week navigation + Today button */}
+              <div className="mb-6 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setWeekOffset(weekOffset - 1)}
+                    className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+                    aria-label="Previous week"
+                  >
+                    <ChevronLeft className="size-5" />
+                  </button>
+                  {!isCurrentWeek && (
+                    <button
+                      onClick={() => setWeekOffset(0)}
+                      className="rounded-md px-2 py-1 text-xs font-medium text-foreground/60 hover:text-foreground"
+                    >
+                      Today
+                    </button>
+                  )}
                 </div>
-                <p className="mt-1 text-xs text-foreground/50">
-                  {completedCount} of {activeHabits.length} habits done
-                </p>
-              </section>
 
-              {/* Habits by pillar */}
-              <div className="space-y-6">
-                {habitsByPillar.map((group) => (
-                  <section key={group.id}>
-                    <h2 className="mb-2 text-sm font-semibold text-foreground">
-                      {group.name}
-                    </h2>
-                    <ul className="space-y-1">
-                      {group.habits.map((habit) => {
-                        const isCompleted = completedIds.has(habit.id);
-                        return (
-                          <li
-                            key={habit.id}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent/50"
-                          >
-                            <button
-                              onClick={() => toggleCompletion(habit.id)}
-                              disabled={togglingId === habit.id}
-                              className="shrink-0 rounded-full p-0.5 text-foreground/50 hover:text-primary disabled:opacity-50"
-                              aria-label={
-                                isCompleted
-                                  ? "Unmark as completed"
-                                  : "Mark as completed"
-                              }
+                <h2 className="text-sm font-semibold text-foreground">
+                  {formatLabel(monday)} – {formatLabel(sunday)}
+                </h2>
+
+                <button
+                  onClick={() => setWeekOffset(weekOffset + 1)}
+                  className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+                  aria-label="Next week"
+                >
+                  <ChevronRight className="size-5" />
+                </button>
+              </div>
+
+              {/* Today's Progress bar (always visible) */}
+              <div className="mb-6 rounded-lg border border-border p-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground/65">
+                    {isCurrentWeek ? "Today's Progress" : "Week Progress"}
+                  </span>
+                  <span className="text-xs font-semibold text-foreground">{progress}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-border">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-foreground/60">
+                  {isCurrentWeek
+                    ? `${todayCompleted} of ${activeHabits.length} habits done today`
+                    : `${visibleCompleted} completions this week`}
+                </p>
+              </div>
+
+              {/* Weekly table */}
+              <div className="overflow-x-auto">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse" style={{ tableLayout: "auto" }}>
+                    <thead>
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-foreground/60" />
+                        {weekDays.map((d, i) => {
+                          const disabled = isDateDisabled(d);
+                          return (
+                            <th
+                              key={d}
+                              className={`px-0 py-2 text-center text-xs font-medium ${d === todayStr
+                                ? "text-foreground"
+                                : disabled
+                                  ? "text-foreground/40"
+                                  : "text-foreground/65"
+                                }`}
                             >
-                              {isCompleted ? (
-                                <CheckCircle2 className="size-6 text-primary" />
-                              ) : togglingId === habit.id ? (
-                                <Spinner />
-                              ) : (
-                                <Circle className="size-6" />
-                              )}
-                            </button>
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className={`text-sm ${isCompleted
-                                  ? "text-foreground/50 line-through"
-                                  : "text-foreground"
-                                  }`}
-                              >
-                                {habit.name}
-                              </p>
-                              {habit.description && (
-                                <p className="truncate text-xs text-foreground/50">
-                                  {habit.description}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                ))}
+                              {DAYS[i]}
+                              <br />
+                              <span className="text-[10px]">{d.slice(8)}</span>
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {habitsByPillar.flatMap((group) =>
+                        group.habits.map((habit) => (
+                          <tr key={habit.id}>
+                            <td
+                              className={`border-l-[3px] px-3 py-3 text-sm text-foreground ${group.color ? "" : "border-l-transparent"
+                                }`}
+                              style={group.color ? { borderLeftColor: group.color } : undefined}
+                            >
+                              <div className="text-sm font-medium text-foreground">{habit.name}</div>
+                              <div className="text-[11px] text-foreground/50">{group.name}</div>
+                            </td>
+                            {weekDays.map((date) => {
+                              const done = isCompleted(habit.id, date);
+                              const cellKey = `${habit.id}-${date}`;
+                              const isToday = date === todayStr;
+                              const disabled = isDateDisabled(date);
+                              return (
+                                <td
+                                  key={date}
+                                  className={`px-0 text-center align-middle ${isToday && !disabled ? "bg-accent/30" : ""
+                                    }`}
+                                >
+                                  {disabled ? (
+                                    <span className="mx-auto flex size-9 items-center justify-center text-foreground/30">
+                                      <Square className="size-4" />
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => toggleCell(habit.id, date)}
+                                      disabled={togglingId === cellKey}
+                                      className="mx-auto flex size-9 items-center justify-center rounded-lg text-foreground/60 transition-colors hover:bg-accent hover:text-primary active:scale-95 disabled:opacity-50"
+                                      aria-label={
+                                        done
+                                          ? `Unmark ${habit.name} for ${date}`
+                                          : `Mark ${habit.name} for ${date}`
+                                      }
+                                    >
+                                      {done ? (
+                                        <CheckSquare className="size-6 text-primary" />
+                                      ) : togglingId === cellKey ? (
+                                        <Spinner />
+                                      ) : (
+                                        <Square className="size-6" />
+                                      )}
+                                    </button>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        )),
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </>
           )}
         </main>
-      </div>
+      </AppLayout>
     </ProtectedRoute>
   );
 }
