@@ -28,7 +28,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
 
       const pillar = await createPillar(
         request.user.sub,
-        parsed.data.name,
+        parsed.data,
       );
 
       return reply.status(201).send({ pillar });
@@ -53,7 +53,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
       const pillar = await updatePillar(
         id,
         request.user.sub,
-        parsed.data.name,
+        parsed.data,
       );
 
       if (!pillar) {

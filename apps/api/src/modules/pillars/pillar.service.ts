@@ -1,15 +1,17 @@
 import { prisma } from "../../db/client";
-import type { PillarResponse } from "./pillar.schemas";
+import type { CreatePillarBody, PillarResponse, UpdatePillarBody } from "./pillar.schemas";
 
 function toResponse(pillar: {
   id: string;
   name: string;
+  color: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): PillarResponse {
   return {
     id: pillar.id,
     name: pillar.name,
+    color: pillar.color,
     createdAt: pillar.createdAt,
     updatedAt: pillar.updatedAt,
   };
@@ -17,10 +19,14 @@ function toResponse(pillar: {
 
 export async function createPillar(
   userId: string,
-  name: string,
+  data: CreatePillarBody,
 ): Promise<PillarResponse> {
   const pillar = await prisma.pillar.create({
-    data: { userId, name },
+    data: {
+      userId,
+      name: data.name,
+      ...(data.color ? { color: data.color } : {}),
+    },
   });
 
   return toResponse(pillar);
@@ -29,7 +35,7 @@ export async function createPillar(
 export async function updatePillar(
   id: string,
   userId: string,
-  name: string,
+  data: UpdatePillarBody,
 ): Promise<PillarResponse | null> {
   const pillar = await prisma.pillar.findFirst({
     where: { id, userId },
@@ -39,7 +45,10 @@ export async function updatePillar(
 
   const updated = await prisma.pillar.update({
     where: { id },
-    data: { name },
+    data: {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.color !== undefined ? { color: data.color } : {}),
+    },
   });
 
   return toResponse(updated);
