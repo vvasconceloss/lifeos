@@ -21,11 +21,21 @@ export default function AppPage() {
             </button>
           </div>
         </header>
-
-        <main className="flex flex-1 items-center justify-center">
-          <p className="text-muted-foreground">
-            Dashboard coming soon.
-          </p>
+        <main className="mx-auto w-full max-w-lg px-4 py-8">
+          <nav className="space-y-2">
+            <a
+              href="/app"
+              className="flex rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Dashboard
+            </a>
+            <a
+              href="/settings/pillars"
+              className="flex rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Pillars
+            </a>
+          </nav>
         </main>
       </div>
     </ProtectedRoute>
