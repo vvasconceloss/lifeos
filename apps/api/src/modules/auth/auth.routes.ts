@@ -1,5 +1,5 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { registerBodySchema, loginBodySchema } from './auth.schemas';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { createUser, authenticate, getUserById, AUTH_ERRORS } from './auth.service';
 
 const cookieOptions = {
@@ -61,6 +61,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       }
       throw error;
     }
+  });
+
+  fastify.post('/logout', async (_request, reply) => {
+    reply.clearCookie('token', { path: '/' });
+    return { ok: true };
   });
 
   fastify.post('/login', async (request, reply) => {
