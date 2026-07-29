@@ -1,5 +1,6 @@
-import RegisterPage from "./pages/register";
+import AppPage from "./pages/app";
 import LoginPage from "./pages/login";
+import RegisterPage from "./pages/register";
 import { createRouter, RouterProvider, createRoute, createRootRoute } from "@tanstack/react-router";
 
 const rootRoute = createRootRoute();
@@ -16,7 +17,13 @@ const loginRoute = createRoute({
   component: LoginPage,
 });
 
-const routeTree = rootRoute.addChildren([registerRoute, loginRoute]);
+const appRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/app",
+  component: AppPage,
+});
+
+const routeTree = rootRoute.addChildren([registerRoute, loginRoute, appRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
