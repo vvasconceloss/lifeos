@@ -206,7 +206,7 @@ export default function SettingsHabitsPage() {
     <ProtectedRoute>
       <div className="flex min-h-screen flex-col bg-background">
         <header className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h1 className="text-lg font-semibold text-foreground">LifeOS</h1>
+          <a href="/app" className="text-lg font-semibold text-foreground hover:text-primary">LifeOS</a>
           <div className="flex items-center gap-4">
             <span className="text-sm text-foreground/65">{user?.email}</span>
             <button
