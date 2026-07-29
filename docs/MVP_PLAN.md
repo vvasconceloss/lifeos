@@ -529,13 +529,13 @@ Read          ✓   ○   ✓   ○   ✓   ○   ○
 - `/tracker` → full weekly view.
 
 ### Tasks
-- [ ] Create the `/tracker` page
-- [ ] Implement completions query for the current week (using `GET /completions`)
-- [ ] Implement the habits × days-of-week table
-- [ ] Allow marking/unmarking directly in the table (reusing `PUT`/`DELETE /completions/:date`)
-- [ ] Implement navigation between weeks (previous/next)
-- [ ] Handle empty states and habits created mid-week
-- [ ] Test the full flow: mark past days, navigate between weeks, confirm persistence
+- [x] Create the `/tracker` page
+- [x] Implement completions query for the current week (using `GET /completions`)
+- [x] Implement the habits × days-of-week table
+- [x] Allow marking/unmarking directly in the table (reusing `PUT`/`DELETE /completions/:date`)
+- [x] Implement navigation between weeks (previous/next)
+- [x] Handle empty states and habits created mid-week
+- [x] Test the full flow: mark past days, navigate between weeks, confirm persistence
 
 ### Completion criteria
 The user can view and edit the completion state of all habits across a week, with navigation between weeks.
