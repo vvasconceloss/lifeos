@@ -5,7 +5,8 @@ import { describe, expect, it, afterAll } from 'vitest';
 const createdEmails: string[] = [];
 
 function uniqueEmail(): string {
-  const email = `test-${Date.now()}-${createdEmails.length}@lifeos.com`;
+  const suffix = Math.random().toString(36).slice(2, 10);
+  const email = `test-${suffix}@lifeos.com`;
   createdEmails.push(email);
   return email;
 }
