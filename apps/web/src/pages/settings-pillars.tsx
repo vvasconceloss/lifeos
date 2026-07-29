@@ -1,14 +1,16 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
-import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Pencil, Trash2, X, Check, Plus, Settings, LogOut } from "lucide-react";
+import { AppLayout } from "@/components/app-layout";
+import { NewPillarModal } from "@/components/new-pillar-modal";
+import { PillarCard } from "@/components/pillar-card";
 
 interface Pillar {
   id: string;
   name: string;
+  color: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,27 +25,13 @@ function Spinner() {
 }
 
 export default function SettingsPillarsPage() {
-  const { logout, user } = useAuth();
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newName, setNewName] = useState("");
-  const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   useEffect(() => {
     async function fetchPillars() {
@@ -60,44 +48,28 @@ export default function SettingsPillarsPage() {
     fetchPillars();
   }, []);
 
-  async function handleCreate(e: ChangeEvent) {
-    e.preventDefault();
-    const name = newName.trim();
-    if (!name) return;
-
-    setCreating(true);
-    try {
-      const res = await api.post<{ pillar: Pillar }>("/pillars", { name });
-      setPillars((prev) => [...prev, res.data.pillar]);
-      setNewName("");
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error("Name must be between 1 and 100 characters");
-      } else {
-        toast.error("Failed to create pillar");
-      }
-    } finally {
-      setCreating(false);
-    }
+  function handleCreated(pillar: Pillar) {
+    setPillars((prev) => [...prev, pillar]);
   }
 
   function startEdit(pillar: Pillar) {
     setEditingId(pillar.id);
     setEditName(pillar.name);
+    setEditColor(pillar.color ?? "");
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setEditName("");
   }
 
   async function saveEdit(id: string) {
-    const name = editName.trim();
-    if (!name) return;
-
+    if (!editName.trim()) return;
     setSavingId(id);
     try {
-      const res = await api.patch<{ pillar: Pillar }>(`/pillars/${id}`, { name });
+      const body: Record<string, string> = { name: editName.trim() };
+      if (editColor) body.color = editColor;
+      else body.color = "";
+      const res = await api.patch<{ pillar: Pillar }>(`/pillars/${id}`, body);
       setPillars((prev) =>
         prev.map((p) => (p.id === id ? res.data.pillar : p)),
       );
@@ -134,67 +106,14 @@ export default function SettingsPillarsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen flex-col bg-background">
-        <header className="flex items-center justify-between border-b border-border px-6 py-4">
-          <a href="/app" className="text-lg font-semibold text-foreground hover:text-primary">LifeOS</a>
-          <div className="relative flex items-center gap-3" ref={menuRef}>
-            <span className="text-sm text-foreground/65">{user?.email}</span>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
-              aria-label="Settings"
-            >
-              <Settings className="size-5" />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
-                <a
-                  href="/app"
-                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  Dashboard
-                </a>
-                <a
-                  href="/settings/habits"
-                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  Habits
-                </a>
-                <hr className="my-1 border-border" />
-                <button
-                  onClick={logout}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
-                >
-                  <LogOut className="size-4" />
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
+      <AppLayout>
         <main className="mx-auto w-full max-w-lg px-4 py-8">
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">
-            Pillars
-          </h2>
-
-          <form onSubmit={handleCreate} className="mb-8 flex gap-2">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="New pillar name"
-              className="block flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <button
-              type="submit"
-              disabled={creating || !newName.trim()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {creating ? <Spinner /> : <Plus className="size-4" />}
-              Add
-            </button>
-          </form>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Pillars
+            </h2>
+            <NewPillarModal onCreated={handleCreated} />
+          </div>
 
           {loading ? (
             <div className="flex justify-center py-12">
@@ -207,71 +126,26 @@ export default function SettingsPillarsPage() {
           ) : (
             <ul className="space-y-2">
               {pillars.map((pillar) => (
-                <li
+                <PillarCard
                   key={pillar.id}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3"
-                >
-                  {editingId === pillar.id ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="block flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveEdit(pillar.id);
-                          if (e.key === "Escape") cancelEdit();
-                        }}
-                      />
-                      <button
-                        onClick={() => saveEdit(pillar.id)}
-                        disabled={savingId === pillar.id || !editName.trim()}
-                        className="rounded-md p-1.5 text-foreground/65 hover:text-foreground disabled:opacity-50"
-                        aria-label="Save"
-                      >
-                        {savingId === pillar.id ? <Spinner /> : <Check className="size-4" />}
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="rounded-md p-1.5 text-foreground/65 hover:text-foreground"
-                        aria-label="Cancel"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="flex-1 text-sm text-foreground">
-                        {pillar.name}
-                      </span>
-                      <button
-                        onClick={() => startEdit(pillar)}
-                        className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
-                        aria-label={`Edit ${pillar.name}`}
-                      >
-                        <Pencil className="size-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(pillar.id)}
-                        disabled={deletingId === pillar.id}
-                        className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
-                        aria-label={`Delete ${pillar.name}`}
-                      >
-                        {deletingId === pillar.id ? (
-                          <Spinner />
-                        ) : (
-                          <Trash2 className="size-4" />
-                        )}
-                      </button>
-                    </>
-                  )}
-                </li>
+                  pillar={pillar}
+                  editingId={editingId}
+                  editName={editName}
+                  editColor={editColor}
+                  savingId={savingId}
+                  deletingId={deletingId}
+                  onEditName={setEditName}
+                  onEditColor={setEditColor}
+                  onStartEdit={startEdit}
+                  onCancelEdit={cancelEdit}
+                  onSaveEdit={saveEdit}
+                  onDelete={handleDelete}
+                />
               ))}
             </ul>
           )}
         </main>
-      </div>
+      </AppLayout>
     </ProtectedRoute>
   );
 }
