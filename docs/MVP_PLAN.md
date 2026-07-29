@@ -495,14 +495,14 @@ Relationships
 - The most frequent action in the app must be the fastest to perform.
 
 ### Tasks
-- [ ] Create the `/dashboard` page (or main route `/app`)
-- [ ] Implement "Today's Progress" calculation (% of habits completed today)
-- [ ] Implement habit listing grouped by pillar, with today's status
-- [ ] Implement inline completion toggle (no modal, no navigation)
-- [ ] Implement immediate visual feedback (optimistic or with minimal loading)
-- [ ] Handle empty states (no habits created yet)
-- [ ] Test basic responsiveness of the dashboard
-- [ ] Validate performance of the mark/unmark interaction (must feel instant)
+- [x] Create the `/dashboard` page (or main route `/app`)
+- [x] Implement "Today's Progress" calculation (% of habits completed today)
+- [x] Implement habit listing grouped by pillar, with today's status
+- [x] Implement inline completion toggle (no modal, no navigation)
+- [x] Implement immediate visual feedback (optimistic or with minimal loading)
+- [x] Handle empty states (no habits created yet)
+- [x] Test basic responsiveness of the dashboard
+- [x] Validate performance of the mark/unmark interaction (must feel instant)
 
 ### Completion criteria
 The dashboard correctly shows today's progress, grouped by pillar, and allows marking/unmarking habits with a single click and immediate feedback.
@@ -900,7 +900,7 @@ M2  — Authentication                [DONE]
 M3  — Pillars                       [DONE]
 M4  — Habits                        [DONE]    
 M5  — Habit Completions             [DONE]
-M6  — Dashboard
+M6  — Dashboard                     [DONE]
 M7  — Weekly Tracker
 M8  — Basic Analytics
 M9  — Security & Quality
