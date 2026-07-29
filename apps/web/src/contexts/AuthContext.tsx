@@ -25,8 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    document.cookie =
-      "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // Clear state even if the API call fails
+    }
     setUser(null);
   }, []);
 
