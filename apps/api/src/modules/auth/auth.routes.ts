@@ -1,5 +1,6 @@
+import { requireAuth } from '../../plugins/auth';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { registerBodySchema, loginBodySchema } from './auth.schemas';
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { createUser, authenticate, getUserById, AUTH_ERRORS } from './auth.service';
 
 const cookieOptions = {
@@ -16,14 +17,6 @@ async function setAuthCookie(
   const token = await reply.jwtSign(payload);
   reply.setCookie('token', token, cookieOptions);
   return token;
-}
-
-async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    await request.jwtVerify();
-  } catch {
-    reply.status(401).send({ error: 'Unauthorized' });
-  }
 }
 
 export async function authRoutes(fastify: FastifyInstance) {
