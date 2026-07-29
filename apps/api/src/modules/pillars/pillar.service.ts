@@ -15,6 +15,17 @@ function toResponse(pillar: {
   };
 }
 
+export async function createPillar(
+  userId: string,
+  name: string,
+): Promise<PillarResponse> {
+  const pillar = await prisma.pillar.create({
+    data: { userId, name },
+  });
+
+  return toResponse(pillar);
+}
+
 export async function listPillars(userId: string): Promise<PillarResponse[]> {
   const pillars = await prisma.pillar.findMany({
     where: { userId },
