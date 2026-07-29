@@ -1,6 +1,7 @@
 import AppPage from "./pages/app";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
+import SettingsPillarsPage from "./pages/settings-pillars";
 import { createRouter, RouterProvider, createRoute, createRootRoute } from "@tanstack/react-router";
 
 const rootRoute = createRootRoute();
@@ -23,7 +24,13 @@ const appRoute = createRoute({
   component: AppPage,
 });
 
-const routeTree = rootRoute.addChildren([registerRoute, loginRoute, appRoute]);
+const pillarsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings/pillars",
+  component: SettingsPillarsPage,
+});
+
+const routeTree = rootRoute.addChildren([registerRoute, loginRoute, appRoute, pillarsRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
