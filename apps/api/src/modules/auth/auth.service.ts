@@ -16,8 +16,14 @@ function toUserResponse(user: {
   id: string;
   email: string;
   name: string | null;
+  createdAt: Date;
 }): UserResponse {
-  return { id: user.id, email: user.email, name: user.name };
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    createdAt: user.createdAt,
+  };
 }
 
 export async function createUser(data: RegisterBody): Promise<UserResponse> {
