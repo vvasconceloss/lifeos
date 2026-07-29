@@ -45,7 +45,7 @@ model Habit {
   archivedAt  DateTime?
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Cascade)
+  pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)
   completions HabitCompletion[]
 
   @@index([userId])
