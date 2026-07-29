@@ -385,21 +385,21 @@ Health
 Focus: functional CRUD. No charts at this stage.
 
 ### Tasks
-- [ ] Create the `Habit` model in Prisma and run the migration
-- [ ] Implement `GET /habits` (filtered by user, with an option to hide archived ones)
-- [ ] Implement `POST /habits`
-- [ ] Implement `GET /habits/:id`
-- [ ] Implement `PATCH /habits/:id`
-- [ ] Implement `DELETE /habits/:id`
-- [ ] Implement `POST /habits/:id/archive`
-- [ ] Write backend tests for all endpoints
-- [ ] Create the `/habits` frontend page
-- [ ] Implement listing grouped by pillar
-- [ ] Implement habit creation (with pillar selection)
-- [ ] Implement habit editing
-- [ ] Implement habit archiving
-- [ ] Confirm archived habits do not appear in the active list
-- [ ] Test the full flow: create habit, associate with pillar, edit, archive
+- [x] Create the `Habit` model in Prisma and run the migration
+- [x] Implement `GET /habits` (filtered by user, with an option to hide archived ones)
+- [x] Implement `POST /habits`
+- [x] Implement `GET /habits/:id`
+- [x] Implement `PATCH /habits/:id`
+- [x] Implement `DELETE /habits/:id`
+- [x] Implement `POST /habits/:id/archive`
+- [x] Write backend tests for all endpoints
+- [x] Create the `/habits` frontend page
+- [x] Implement listing grouped by pillar
+- [x] Implement habit creation (with pillar selection)
+- [x] Implement habit editing
+- [x] Implement habit archiving
+- [x] Confirm archived habits do not appear in the active list
+- [x] Test the full flow: create habit, associate with pillar, edit, archive
 
 ### Completion criteria
 The user can create, edit, archive, and list habits organized by pillar, with all Phase 1 business rules respected.
@@ -898,7 +898,7 @@ These modules should only be considered after the core product proves its value 
 M1  — Foundation                    [DONE]
 M2  — Authentication                [DONE]
 M3  — Pillars                       [DONE]
-M4  — Habits
+M4  — Habits                        [DONE]    
 M5  — Habit Completions
 M6  — Dashboard
 M7  — Weekly Tracker
