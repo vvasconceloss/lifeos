@@ -2,9 +2,9 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Pencil, Trash2, X, Check, Plus } from "lucide-react";
+import { Pencil, Trash2, X, Check, Plus, Settings, LogOut } from "lucide-react";
 
 interface Pillar {
   id: string;
@@ -32,6 +32,18 @@ export default function SettingsPillarsPage() {
   const [editName, setEditName] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function fetchPillars() {
@@ -125,14 +137,39 @@ export default function SettingsPillarsPage() {
       <div className="flex min-h-screen flex-col bg-background">
         <header className="flex items-center justify-between border-b border-border px-6 py-4">
           <a href="/app" className="text-lg font-semibold text-foreground hover:text-primary">LifeOS</a>
-          <div className="flex items-center gap-4">
+          <div className="relative flex items-center gap-3" ref={menuRef}>
             <span className="text-sm text-foreground/65">{user?.email}</span>
             <button
-              onClick={logout}
-              className="text-sm text-foreground/65 underline underline-offset-4 hover:text-foreground"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+              aria-label="Settings"
             >
-              Sign out
+              <Settings className="size-5" />
             </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
+                <a
+                  href="/app"
+                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
+                >
+                  Dashboard
+                </a>
+                <a
+                  href="/settings/habits"
+                  className="block px-4 py-2 text-sm text-foreground hover:bg-accent"
+                >
+                  Habits
+                </a>
+                <hr className="my-1 border-border" />
+                <button
+                  onClick={logout}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
