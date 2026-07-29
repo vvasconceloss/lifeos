@@ -233,15 +233,15 @@ Authenticated     → access to /app
 ```
 
 ### Tasks
-- [ ] Create `/register` page with form and field validation
-- [ ] Create `/login` page with form and field validation
-- [ ] Implement `AuthProvider` (global session context)
-- [ ] Implement call to `GET /auth/me` on app startup
-- [ ] Implement `ProtectedRoute`
-- [ ] Implement automatic redirect to `/login` when not authenticated
-- [ ] Implement redirect to `/app` after successful login
-- [ ] Handle and display authentication errors (duplicate email, invalid credentials)
-- [ ] Manually test the full flow: register → login → page refresh → session persists
+- [x] Create `/register` page with form and field validation
+- [x] Create `/login` page with form and field validation
+- [x] Implement `AuthProvider` (global session context)
+- [x] Implement call to `GET /auth/me` on app startup
+- [x] Implement `ProtectedRoute`
+- [x] Implement automatic redirect to `/login` when not authenticated
+- [x] Implement redirect to `/app` after successful login
+- [x] Handle and display authentication errors (duplicate email, invalid credentials)
+- [x] Manually test the full flow: register → login → page refresh → session persists
 
 ### Completion criteria
 A user can register, log in, navigate to a protected route, refresh the page without losing the session, and is correctly redirected when not authenticated.
