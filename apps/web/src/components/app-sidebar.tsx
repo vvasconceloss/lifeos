@@ -14,8 +14,11 @@ import {
   Layers,
   ListChecks,
   LogOut,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 import { Link } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
@@ -26,6 +29,7 @@ const NAV_ITEMS = [
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Sidebar collapsible="icon">
@@ -65,6 +69,15 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={logout}
