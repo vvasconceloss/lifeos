@@ -2,10 +2,10 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/protected-route";
 import { AppLayout } from "@/components/app-layout";
-import { NewPillarModal } from "@/components/new-pillar-modal";
 import { PillarCard } from "@/components/pillar-card";
+import { ProtectedRoute } from "@/components/protected-route";
+import { NewPillarModal } from "@/components/new-pillar-modal";
 
 interface Pillar {
   id: string;
@@ -13,15 +13,6 @@ interface Pillar {
   color: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-function Spinner() {
-  return (
-    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
 }
 
 export default function SettingsPillarsPage() {
@@ -107,23 +98,18 @@ export default function SettingsPillarsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-lg px-4 py-8">
+        <main className="mx-auto w-full max-w-lg px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
               Pillars
             </h2>
             <NewPillarModal onCreated={handleCreated} />
           </div>
-
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
-            </div>
-          ) : pillars.length === 0 ? (
+          {pillars.length === 0 && !loading ? (
             <p className="text-center text-sm text-foreground/50">
               No pillars yet. Create one above.
             </p>
-          ) : (
+          ) : pillars.length > 0 ? (
             <ul className="space-y-2">
               {pillars.map((pillar) => (
                 <PillarCard
@@ -143,7 +129,7 @@ export default function SettingsPillarsPage() {
                 />
               ))}
             </ul>
-          )}
+          ) : null}
         </main>
       </AppLayout>
     </ProtectedRoute>

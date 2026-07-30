@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useState } from "react";
 import { AxiosError } from "axios";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,11 +71,10 @@ export function NewPillarModal({
         <Plus className="mr-1.5 size-4" />
         New Pillar
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-110.25">
         <DialogHeader>
           <DialogTitle>Create new pillar</DialogTitle>
         </DialogHeader>
-
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="np-name">Pillar name</Label>
@@ -88,7 +87,7 @@ export function NewPillarModal({
             />
           </div>
           <div className="grid gap-2">
-            <Label>Color (optional)</Label>
+            <Label>Colors (Optional)</Label>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => {
                 const active = selectedColor === c;
@@ -112,7 +111,6 @@ export function NewPillarModal({
             </div>
           </div>
         </div>
-
         <DialogFooter>
           <Button
             onClick={handleCreate}

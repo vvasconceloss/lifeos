@@ -69,7 +69,7 @@ export function HabitCard({
 }) {
   if (editingId === habit.id) {
     return (
-      <li className="rounded-lg border border-border bg-card px-4 py-4 shadow-xs">
+      <li className="rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm">
         <div className="flex flex-col gap-2">
           <input
             type="text"
@@ -121,7 +121,7 @@ export function HabitCard({
   }
 
   return (
-    <li className="rounded-lg border border-border bg-card px-4 py-4 shadow-xs transition-colors hover:bg-accent/30">
+    <li className="rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm transition-colors hover:bg-accent/30">
       <div className="flex items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-col">
           <span

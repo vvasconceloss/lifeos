@@ -8,7 +8,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -16,8 +15,8 @@ import {
   ListChecks,
   LogOut,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { Link } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard },
@@ -29,7 +28,7 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
 
   return (
-    <Sidebar collapsible="offcanvas">
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -47,9 +46,6 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-
-      <SidebarSeparator />
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

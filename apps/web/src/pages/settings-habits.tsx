@@ -1,11 +1,11 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { ProtectedRoute } from "@/components/protected-route";
-import { AppLayout } from "@/components/app-layout";
-import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { NewHabitModal } from "@/components/new-habit-modal";
+import { useEffect, useState } from "react";
+import { AppLayout } from "@/components/app-layout";
 import { HabitCard } from "@/components/habit-card";
+import { NewHabitModal } from "@/components/new-habit-modal";
+import { ProtectedRoute } from "@/components/protected-route";
 
 interface Pillar {
   id: string;
@@ -21,15 +21,6 @@ interface Habit {
   pillarName: string;
   isActive: boolean;
   archivedAt: string | null;
-}
-
-function Spinner() {
-  return (
-    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
 }
 
 export default function SettingsHabitsPage() {
@@ -147,7 +138,7 @@ export default function SettingsHabitsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-lg px-4 py-8">
+        <main className="mx-auto w-full max-w-lg px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
               Habits
@@ -167,17 +158,13 @@ export default function SettingsHabitsPage() {
             </button>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
-            </div>
-          ) : displayedHabits.length === 0 ? (
+          {displayedHabits.length === 0 && !loading ? (
             <p className="text-center text-sm text-foreground/50">
               {showArchived
                 ? "No habits yet."
                 : "No active habits. Create one above."}
             </p>
-          ) : (
+          ) : displayedHabits.length > 0 ? (
             <div className="space-y-5">
               {ungroupedHabits.length > 0 && (
                 <div>
@@ -246,7 +233,7 @@ export default function SettingsHabitsPage() {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </main>
       </AppLayout>
     </ProtectedRoute>
