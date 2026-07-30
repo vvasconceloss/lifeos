@@ -54,7 +54,7 @@ export function InsightsRow({
           <PieChart width={45} height={45}>
             <Pie data={[{ name: "Done", value: totalCompleted }, { name: "", value: Math.max(totalPossible - totalCompleted, 0) }]}
               cx={15} cy={20} innerRadius={14} outerRadius={20} dataKey="value" startAngle={90} endAngle={-270}>
-              <Cell fill="var(--primary)" /><Cell fill="var(--border)" />
+              <Cell fill="var(--border)" /><Cell fill="var(--primary)" />
             </Pie>
           </PieChart>
           <div>
