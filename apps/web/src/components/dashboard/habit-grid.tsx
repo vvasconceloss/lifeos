@@ -39,7 +39,7 @@ export function HabitGrid({
             const isToday = d === todayStr;
             const isFuture = d > todayStr;
             return (
-              <div key={d} className={`flex flex-1 items-center justify-center py-3 text-center font-mono text-[11px] leading-none ${isToday ? "font-bold text-foreground" : isFuture ? "text-foreground/15" : "text-foreground/50"}`}>
+              <div key={d} className={`flex flex-1 items-center justify-center py-3 text-center font-mono text-[11px] leading-none ${isToday ? "font-bold text-foreground" : isFuture ? "text-foreground/25" : "text-foreground/65"}`}>
                 {day}
               </div>
             );
@@ -83,13 +83,13 @@ export function HabitGrid({
                               aria-label={done ? "Unmark" : "Mark"}
                             >
                               {done ? (
-                                <div className="flex size-5 items-center justify-center rounded-[4px]" style={{ backgroundColor: habit.color }}>
+                                <div className="habit-checkbox flex size-5 items-center justify-center rounded-[4px]" style={{ backgroundColor: habit.color }}>
                                   <CheckSquare className="size-3.5 text-white" />
                                 </div>
                               ) : togglingId === cellKey ? (
                                 <Spinner />
                               ) : (
-                                <div className="size-5 rounded-[4px] border border-border" />
+                                <div className="size-5 rounded-[4px] border border-foreground/20" />
                               )}
                             </button>
                           )}

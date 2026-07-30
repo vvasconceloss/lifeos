@@ -65,7 +65,7 @@ export function InsightsRow({
         <div className="flex items-center gap-2 border-t border-border/40 pt-3">
           <div className="flex items-end gap-px" style={{ width: 40, height: 22 }}>
             {last7.map((d, i) => (
-              <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.max((d.completions / max7) * 22, 2)}px`, backgroundColor: "var(--primary)", opacity: 0.3 + (d.completions / max7) * 0.7 }} />
+              <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.max((d.completions / max7) * 22, 2)}px`, backgroundColor: "var(--chart-1)", opacity: 0.3 + (d.completions / max7) * 0.7 }} />
             ))}
           </div>
           <div>
