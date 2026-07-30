@@ -31,7 +31,7 @@ export function InsightsRow({
               <XAxis dataKey="day" tick={{ fontSize: 8, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} interval={3} />
               <YAxis allowDecimals={false} tick={{ fontSize: 8, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} width={18} />
               <ReTooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 11, padding: "4px 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }} />
-              <Line type="natural" dataKey="completions" stroke="var(--primary)" strokeWidth={3} dot={{ r: 2, fill: "var(--primary)" }} activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--background)" }} />
+              <Line type="natural" dataKey="completions" stroke="var(--chart-1)" strokeWidth={3} dot={{ r: 3, fill: "var(--chart-1)" }} activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--background)" }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

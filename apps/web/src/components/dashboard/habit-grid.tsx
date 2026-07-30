@@ -83,13 +83,13 @@ export function HabitGrid({
                               aria-label={done ? "Unmark" : "Mark"}
                             >
                               {done ? (
-                                <div className="flex size-5 items-center justify-center rounded-lg" style={{ backgroundColor: habit.color }}>
+                                <div className="flex size-5 items-center justify-center rounded-[4px]" style={{ backgroundColor: habit.color }}>
                                   <CheckSquare className="size-3.5 text-white" />
                                 </div>
                               ) : togglingId === cellKey ? (
                                 <Spinner />
                               ) : (
-                                <div className="size-5 rounded-lg border border-foreground/20" />
+                                <div className="size-5 rounded-[4px] border border-border" />
                               )}
                             </button>
                           )}
