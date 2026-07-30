@@ -8,6 +8,7 @@ function toResponse(habit: {
   description: string | null;
   pillarId: string;
   isActive: boolean;
+  monthlyGoal: number | null;
   archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ function toResponse(habit: {
     pillarId: habit.pillarId,
     pillarName: habit.pillar.name,
     isActive: habit.isActive,
+    monthlyGoal: habit.monthlyGoal,
     archivedAt: habit.archivedAt,
     createdAt: habit.createdAt,
     updatedAt: habit.updatedAt,
@@ -44,6 +46,7 @@ export async function createHabit(
       description: data.description ?? null,
       userId,
       pillarId: data.pillarId,
+      ...(data.monthlyGoal !== undefined ? { monthlyGoal: data.monthlyGoal } : {}),
     },
     include: { pillar: { select: { name: true } } },
   });
@@ -92,6 +95,7 @@ export async function updateHabit(
       ...(data.name !== undefined && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.pillarId !== undefined && { pillarId: data.pillarId }),
+      ...(data.monthlyGoal !== undefined ? { monthlyGoal: data.monthlyGoal } : {}),
     },
     include: { pillar: { select: { name: true } } },
   });

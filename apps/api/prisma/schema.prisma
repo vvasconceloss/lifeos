@@ -34,16 +34,17 @@ model Pillar {
 }
 
 model Habit {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  userId      String
-  pillarId    String
-  frequency   String    @default("DAILY")
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  archivedAt  DateTime?
+  id           String    @id @default(uuid())
+  name         String
+  description  String?
+  userId       String
+  pillarId     String
+  frequency    String    @default("DAILY")
+  monthlyGoal  Int?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  archivedAt   DateTime?
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
-import { listCompletions, markCompletion, unmarkCompletion } from './completion.service';
+import { getMonthlyStats, listCompletions, markCompletion, unmarkCompletion } from './completion.service';
 
 export async function completionRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -19,6 +19,26 @@ export async function completionRoutes(fastify: FastifyInstance) {
       );
 
       return { completions };
+    },
+  );
+
+  fastify.get(
+    '/stats/monthly',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const { year, month } = request.query as {
+        year?: string;
+        month?: string;
+      };
+
+      const now = new Date();
+      const stats = await getMonthlyStats(
+        request.user.sub,
+        year ? parseInt(year) : now.getUTCFullYear(),
+        month ? parseInt(month) : now.getUTCMonth() + 1,
+      );
+
+      return stats;
     },
   );
 
