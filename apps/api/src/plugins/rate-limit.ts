@@ -6,5 +6,12 @@ export const rateLimitPlugin = fp(async (fastify: FastifyInstance) => {
   await fastify.register(rateLimit, {
     max: Number(process.env.RATE_LIMIT_MAX ?? 300),
     timeWindow: process.env.RATE_LIMIT_WINDOW ?? '1 minute',
+    errorResponseBuilder: (_request, context) => {
+      const error = new Error(
+        `Rate limit exceeded, retry in ${context.after}`,
+      ) as Error & { statusCode: number };
+      error.statusCode = context.statusCode;
+      return error;
+    },
   });
 });

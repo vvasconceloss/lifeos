@@ -147,6 +147,7 @@ describe('POST /v1/auth/login', () => {
     });
 
     const statuses: number[] = [];
+    let limitedResponse: Awaited<ReturnType<typeof app.inject>> | null = null;
     for (let i = 0; i < 4; i++) {
       const res = await app.inject({
         method: 'POST',
@@ -154,10 +155,14 @@ describe('POST /v1/auth/login', () => {
         payload: { email, password: 'wrongpassword' },
       });
       statuses.push(res.statusCode);
+      if (res.statusCode === 429) limitedResponse = res;
     }
 
     expect(statuses.slice(0, 3)).toEqual([401, 401, 401]);
     expect(statuses[3]).toBe(429);
+    expect(limitedResponse!.json()).toMatchObject({
+      error: expect.stringContaining('Rate limit exceeded'),
+    });
 
     await app.close();
 
