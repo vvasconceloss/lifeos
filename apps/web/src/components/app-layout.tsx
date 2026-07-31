@@ -1,18 +1,34 @@
 import type { ReactNode } from "react";
+import { useLocation } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
+const PAGE_TITLES: Record<string, string> = {
+  "/app": "Dashboard",
+  "/statistics": "Statistics",
+  "/settings/pillars": "Pillars",
+  "/settings/habits": "Habits",
+};
+
 export function AppLayout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  const pageTitle = PAGE_TITLES[pathname] ?? "LifeOS";
+
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
       <AppSidebar />
       <SidebarInset className="flex h-full max-h-full flex-1 flex-col overflow-hidden">
-        <header className="flex shrink-0 items-center gap-3 border-b border-border px-6 py-3">
-          <SidebarTrigger />
+        <header className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger />
+            <h1 className="text-sm font-semibold text-foreground uppercase">{pageTitle}</h1>
+          </div>
+          <ThemeToggle />
         </header>
         <div className="flex flex-1 flex-col overflow-hidden">
           {children}
