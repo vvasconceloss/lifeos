@@ -702,8 +702,8 @@ prisma.habit.findFirst({
 Isolation between users must be treated as a fundamental security rule, not an implementation detail.
 
 ### Tasks
-- [ ] Review all endpoints and ensure Zod validation on every input
-- [ ] Implement rate limiting on the login endpoint
+- [x] Review all endpoints and ensure Zod validation on every input
+- [x] Implement rate limiting on the login endpoint
 - [ ] Configure production CORS (specific origins, not wildcard)
 - [ ] Configure security headers (Helmet or equivalent)
 - [ ] Standardize the error response format across the entire API
