@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { getApiErrorMessage } from "@/lib/errors";
 import { registerBodySchema } from "@lifeos/shared";
 import { validateForm } from "@/lib/validation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -76,17 +77,8 @@ export default function RegisterPage() {
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
         toast.error("This email is already registered");
-      } else if (
-        error instanceof AxiosError &&
-        error.response?.status === 400
-      ) {
-        const detail = error.response.data as {
-          details?: Array<{ message: string }>;
-        };
-        toast.error(
-          detail.details?.[0]?.message ??
-            "Invalid input. Please check your data.",
-        );
+      } else if (error instanceof AxiosError && error.response?.status === 400) {
+        toast.error(getApiErrorMessage(error, "Invalid input. Please check your data."));
       } else {
         toast.error("Something went wrong. Please try again.");
       }

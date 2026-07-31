@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { AxiosError } from "axios";
+import { getApiErrorMessage } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { PillarCard } from "@/components/pillar-card";
@@ -66,11 +66,7 @@ export default function SettingsPillarsPage() {
       );
       setEditingId(null);
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        toast.error("Pillar not found");
-      } else {
-        toast.error("Failed to update pillar");
-      }
+      toast.error(getApiErrorMessage(error, "Failed to update pillar"));
     } finally {
       setSavingId(null);
     }
@@ -83,13 +79,7 @@ export default function SettingsPillarsPage() {
       setPillars((prev) => prev.filter((p) => p.id !== id));
       toast.success("Pillar deleted");
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 409) {
-        toast.error("Cannot delete pillar with active habits. Archive or delete them first.");
-      } else if (error instanceof AxiosError && error.response?.status === 404) {
-        toast.error("Pillar not found");
-      } else {
-        toast.error("Failed to delete pillar");
-      }
+      toast.error(getApiErrorMessage(error, "Failed to delete pillar"));
     } finally {
       setDeletingId(null);
     }
