@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/v1/:path*",
-      "destination": "https://lifeos-api.onrender.com/v1/:path*"
+      "destination": "https://lifeos-i59v.onrender.com/v1/:path*"
     },
     {
       "source": "/(.*)",

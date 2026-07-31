@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping API health endpoint
-        run: curl -fsS --max-time 120 https://lifeos-api.onrender.com/v1/health || true
+        run: curl -fsS --max-time 120 https://lifeos-i59v.onrender.com/v1/health || true

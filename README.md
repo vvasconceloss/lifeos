@@ -153,7 +153,7 @@ The frontend calls the API through a **same-origin `/v1` rewrite** on the static
    npm install -g pnpm@11.3.0 && pnpm install --frozen-lockfile
    ```
 4. The `vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for client-side routes.
-5. Update the API domain in `apps/web/vercel.json` (currently `https://lifeos-api.onrender.com`) if it differs.
+5. Update the API domain in `apps/web/vercel.json` (currently `https://lifeos-i59v.onrender.com`) if it differs.
 
 ### Production verification checklist
 
