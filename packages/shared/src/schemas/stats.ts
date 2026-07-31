@@ -53,3 +53,20 @@ export const statsOverviewSchema = z.object({
 });
 
 export type StatsOverview = z.infer<typeof statsOverviewSchema>;
+
+export const heatmapDaySchema = z.object({
+  date: z.string(),
+  count: z.number(),
+  level: z.number(),
+});
+
+export type HeatmapDay = z.infer<typeof heatmapDaySchema>;
+
+export const heatmapResponseSchema = z.object({
+  year: z.number(),
+  month: z.number().nullable(),
+  maxCount: z.number(),
+  days: z.array(heatmapDaySchema),
+});
+
+export type HeatmapResponse = z.infer<typeof heatmapResponseSchema>;
