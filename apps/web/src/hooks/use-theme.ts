@@ -1,5 +1,9 @@
 import { useCallback, useSyncExternalStore } from "react";
 
+function systemTheme(): "dark" | "light" {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function getSnapshot(): string {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
@@ -7,25 +11,42 @@ function getSnapshot(): string {
 function subscribe(callback: () => void): () => void {
   const observer = new MutationObserver(callback);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-  return () => observer.disconnect();
+
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const onSystemChange = () => {
+    if (!localStorage.getItem("theme")) {
+      setTheme(systemTheme());
+      callback();
+    }
+  };
+  media.addEventListener("change", onSystemChange);
+
+  return () => {
+    observer.disconnect();
+    media.removeEventListener("change", onSystemChange);
+  };
+}
+
+function setTheme(t: "dark" | "light") {
+  const root = document.documentElement;
+  if (t === "dark") {
+    root.classList.add("dark");
+  } else {
+    root.classList.remove("dark");
+  }
 }
 
 export function useTheme() {
   const theme = useSyncExternalStore(subscribe, getSnapshot);
 
-  const setTheme = useCallback((t: "dark" | "light") => {
-    const root = document.documentElement;
-    if (t === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+  const saveTheme = useCallback((t: "dark" | "light") => {
     localStorage.setItem("theme", t);
+    setTheme(t);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [theme, setTheme]);
+    saveTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, saveTheme]);
 
-  return { theme, setTheme, toggleTheme };
+  return { theme, setTheme: saveTheme, toggleTheme };
 }
