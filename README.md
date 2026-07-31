@@ -9,14 +9,13 @@ This project is intentionally scoped as an MVP. Its purpose is not to build a fu
 
 ## Features
 
-- User accounts with authentication (JWT in an httpOnly cookie)
-- Pillars to organize life areas, with a color per pillar
+- User accounts with authentication
+- Pillars to organize life areas
 - Habit CRUD with monthly goals and archiving
 - Mark/unmark habits as completed per day (idempotent, unique per day)
 - Monthly dashboard grid with inline completion toggling and progress
 - Statistics: completion rate, streaks and pillar aggregation
 - Annual activity heatmap (GitHub-style)
-- Security hardening: Zod validation on every input, rate-limited login, CORS allowlist, Helmet, consistent error format, user isolation
 
 ---
 
