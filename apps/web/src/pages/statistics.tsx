@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/app-layout";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
 import { ProtectedRoute } from "@/components/protected-route";
 import { HabitStatsTable } from "@/components/statistics/habit-stats-table";
+import { HeatmapCard } from "@/components/statistics/heatmap-card";
 import { PillarStats } from "@/components/statistics/pillar-stats";
 import { SummaryCards } from "@/components/statistics/summary-cards";
 import { TopHabits } from "@/components/statistics/top-habits";
@@ -39,6 +40,7 @@ export default function StatisticsPage() {
                   <TopHabits habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
                 </div>
                 <HabitStatsTable habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
+                <HeatmapCard year={s.overview.year} />
               </>
             ) : null}
           </div>
