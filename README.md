@@ -142,14 +142,18 @@ The frontend calls the API through a **same-origin `/v1` rewrite** on the static
    | `NODE_ENV` | `production` |
    | `PORT` | auto-injected by Render |
 4. The container applies migrations (`prisma migrate deploy`) on start.
-5. Keep the free instance awake (it sleeps after ~15 min of inactivity) with `.github/workflows/keep-alive.yml`, which pings `/health` every 10 minutes.
+5. Keep the free instance awake (it sleeps after ~15 min of inactivity) with `.github/workflows/keep-alive.yml`, which pings `/v1/health` every 10 minutes.
 
 ### 3. Frontend — Vercel (free)
 
 1. Import the repository; set **Root Directory** to `apps/web` (framework preset: Vite).
-2. Build outputs to `apps/web/dist`.
-3. The `vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for client-side routes.
-4. Update the API domain in `apps/web/vercel.json` (currently `https://lifeos-api.onrender.com`) if it differs.
+2. Build command: `pnpm build`; Output directory: `dist`.
+3. **Install command** — the repo is a pnpm 11 workspace, and Vercel's default pnpm is older and cannot parse the pnpm-11 lockfile. Set it explicitly:
+   ```
+   npm install -g pnpm@11.3.0 && pnpm install --frozen-lockfile
+   ```
+4. The `vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for client-side routes.
+5. Update the API domain in `apps/web/vercel.json` (currently `https://lifeos-api.onrender.com`) if it differs.
 
 ### Production verification checklist
 
