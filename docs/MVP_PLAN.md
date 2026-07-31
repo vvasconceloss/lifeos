@@ -618,12 +618,12 @@ Mar   ░██████░░░░
 Data is **derived** from `HabitCompletion`. Do not create a `DailyProgress` table just to store a calculation — tables represent domain entities, not derived calculations.
 
 ### Tasks
-- [ ] Implement an endpoint that aggregates completions per day (e.g., `GET /stats/heatmap?year=2026`)
-- [ ] Implement intensity classification logic (0/low/medium/high)
-- [ ] Create the heatmap component in the frontend (monthly and/or yearly)
-- [ ] Implement tooltip/detail on hover for a given day
-- [ ] Test with sparse data and months with no completions at all
-- [ ] Validate the performance of the aggregation query with a larger history
+- [x] Implement an endpoint that aggregates completions per day (e.g., `GET /stats/heatmap?year=2026`)
+- [x] Implement intensity classification logic (0/low/medium/high)
+- [x] Create the heatmap component in the frontend (monthly and/or yearly)
+- [x] Implement tooltip/detail on hover for a given day
+- [x] Test with sparse data and months with no completions at all
+- [x] Validate the performance of the aggregation query with a larger history
 
 ### Completion criteria
 The heatmap correctly reflects the intensity of completed habits per day, calculated from existing data, without new derived-storage tables.
