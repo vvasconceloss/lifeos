@@ -38,12 +38,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link to="/app" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
-                L
-              </div>
+            <SidebarMenuButton size="lg" render={<Link to="/app" />} className="bg-transparent hover:bg-transparent">
+              <img
+                src={theme === "dark" ? "/lifeos-black-icon.png" : "/lifeos-white-icon.png"}
+                alt="LifeOS logo"
+                className="size-8 rounded-lg"
+              />
               <div className="flex flex-col leading-tight">
-                <span className="font-semibold">LifeOS</span>
+                <span className="font-semibold upper">LifeOS</span>
                 <span className="text-xs text-muted-foreground">
                   {user?.email}
                 </span>
