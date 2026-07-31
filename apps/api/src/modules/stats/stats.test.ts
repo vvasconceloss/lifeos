@@ -1,0 +1,393 @@
+import { buildApp } from '../../app';
+import { prisma } from '../../db/client';
+import {
+  buildDailyKeySet,
+  calculateCompletionRate,
+  getBestStreak,
+  getCurrentStreak,
+  getMonthReference,
+  toDateKey,
+} from './stats.utils';
+import { describe, expect, it, afterAll } from 'vitest';
+
+const createdEmails: string[] = [];
+
+function uniqueEmail(): string {
+  const suffix = Math.random().toString(36).slice(2, 10);
+  const email = `test-${suffix}@lifeos.com`;
+  createdEmails.push(email);
+  return email;
+}
+
+afterAll(async () => {
+  if (createdEmails.length > 0) {
+    await prisma.user.deleteMany({
+      where: { email: { in: createdEmails } },
+    });
+  }
+});
+
+async function registerAndGetCookie(
+  app: Awaited<ReturnType<typeof buildApp>>,
+  email: string,
+) {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/v1/auth/register',
+    payload: { email, password: 'test1234' },
+  });
+  const tokenCookie = res.cookies.find((c) => c.name === 'token');
+  return `token=${tokenCookie!.value}`;
+}
+
+async function createPillar(
+  app: Awaited<ReturnType<typeof buildApp>>,
+  cookie: string,
+  name: string,
+) {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/v1/pillars',
+    headers: { cookie },
+    payload: { name },
+  });
+  return res.json().pillar.id;
+}
+
+async function createHabit(
+  app: Awaited<ReturnType<typeof buildApp>>,
+  cookie: string,
+  name: string,
+  pillarId: string,
+) {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/v1/habits',
+    headers: { cookie },
+    payload: { name, pillarId },
+  });
+  return res.json().habit.id;
+}
+
+async function markCompletion(
+  app: Awaited<ReturnType<typeof buildApp>>,
+  cookie: string,
+  habitId: string,
+  date: string,
+) {
+  const res = await app.inject({
+    method: 'PUT',
+    url: `/v1/habits/${habitId}/completions/${date}`,
+    headers: { cookie },
+  });
+  return res.statusCode;
+}
+
+function utcDateKey(date: Date): string {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+}
+
+const TODAY = utcDateKey(new Date());
+const YESTERDAY = utcDateKey(new Date(Date.now() - 86400000));
+
+describe('stats.utils', () => {
+  describe('getCurrentStreak', () => {
+    it('returns 0 when there is no history', () => {
+      const keys = new Set<string>();
+      expect(getCurrentStreak(keys, new Date(TODAY + 'T00:00:00.000Z'))).toBe(0);
+    });
+
+    it('counts consecutive days ending today', () => {
+      const keys = new Set([YESTERDAY, TODAY]);
+      expect(getCurrentStreak(keys, new Date(TODAY + 'T00:00:00.000Z'))).toBe(2);
+    });
+
+    it('counts up to yesterday when today is not completed', () => {
+      const keys = new Set([YESTERDAY]);
+      expect(getCurrentStreak(keys, new Date(TODAY + 'T00:00:00.000Z'))).toBe(1);
+    });
+
+    it('returns 0 when the streak is broken', () => {
+      const keys = new Set([YESTERDAY, toDateKey(new Date(Date.now() - 3 * 86400000))]);
+      expect(getCurrentStreak(keys, new Date(TODAY + 'T00:00:00.000Z'))).toBe(1);
+    });
+  });
+
+  describe('getBestStreak', () => {
+    it('returns 0 when there is no history', () => {
+      expect(getBestStreak(new Set())).toBe(0);
+    });
+
+    it('returns 1 for a single completion', () => {
+      const keys = new Set([TODAY]);
+      expect(getBestStreak(keys)).toBe(1);
+    });
+
+    it('returns the longest historical run even when broken', () => {
+      const keys = new Set([
+        '2026-06-01',
+        '2026-06-02',
+        '2026-06-03',
+        '2026-06-10',
+        '2026-06-11',
+      ]);
+      expect(getBestStreak(keys)).toBe(3);
+    });
+  });
+
+  describe('getMonthReference', () => {
+    it('returns today for the current month', () => {
+      const now = new Date();
+      const ref = getMonthReference(now.getUTCFullYear(), now.getUTCMonth() + 1);
+      expect(toDateKey(ref)).toBe(toDateKey(now));
+    });
+
+    it('returns the last day of the month for past months', () => {
+      expect(toDateKey(getMonthReference(2026, 6))).toBe('2026-06-30');
+    });
+  });
+
+  describe('calculateCompletionRate', () => {
+    it('returns 0 when expected is zero', () => {
+      expect(calculateCompletionRate(5, null, 0)).toBe(0);
+    });
+
+    it('computes the ratio rounded to a percentage', () => {
+      expect(calculateCompletionRate(5, null, 7)).toBe(71);
+    });
+
+    it('caps at 100 when exceeding the goal', () => {
+      expect(calculateCompletionRate(10, 7, 31)).toBe(100);
+    });
+
+    it('uses the monthly goal when defined', () => {
+      expect(calculateCompletionRate(3, 4, 31)).toBe(75);
+    });
+  });
+
+  describe('buildDailyKeySet', () => {
+    it('filters out future dates beyond the reference', () => {
+      const maxDate = new Date(TODAY + 'T00:00:00.000Z');
+      const future = new Date('2099-12-31T00:00:00.000Z');
+      const keys = buildDailyKeySet([maxDate, future], maxDate);
+
+      expect(keys.size).toBe(1);
+      expect(keys.has(TODAY)).toBe(true);
+      expect(keys.has('2099-12-31')).toBe(false);
+    });
+  });
+});
+
+describe('GET /v1/stats/monthly', () => {
+  it('returns monthly stats with no habits', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/monthly',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      dailyCounts: [],
+      habitProgress: [],
+      totalCompletions: 0,
+      successRate: 0,
+    });
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/monthly',
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});
+
+describe('GET /v1/stats/overview', () => {
+  it('returns habit and pillar stats', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    await markCompletion(app, cookie, habitId, TODAY);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.totalCompletions).toBe(1);
+    expect(body.habitStats).toHaveLength(1);
+    expect(body.habitStats[0]).toMatchObject({
+      habitId,
+      habitName: 'Run',
+      currentStreak: 1,
+      bestStreak: 1,
+    });
+    expect(body.pillarStats).toHaveLength(1);
+    expect(body.pillarStats[0]).toMatchObject({
+      pillarId,
+      pillarName: 'Health',
+      activeHabitCount: 1,
+      completed: 1,
+    });
+
+    await app.close();
+  });
+
+  it('scopes streaks to the selected month', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    const now = new Date();
+    const prevMonthLast = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0));
+    const prevDay3 = utcDateKey(prevMonthLast);
+    const prevDay2 = utcDateKey(new Date(prevMonthLast.getTime() - 86400000));
+    const prevDay1 = utcDateKey(new Date(prevMonthLast.getTime() - 2 * 86400000));
+
+    await markCompletion(app, cookie, habitId, prevDay1);
+    await markCompletion(app, cookie, habitId, prevDay2);
+    await markCompletion(app, cookie, habitId, prevDay3);
+    await markCompletion(app, cookie, habitId, TODAY);
+
+    const currentMonthIdx = now.getUTCMonth();
+    const prevMonthIdx = (currentMonthIdx + 11) % 12;
+    const prevYear = currentMonthIdx === 0 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
+
+    const past = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/overview?year=${prevYear}&month=${prevMonthIdx + 1}`,
+      headers: { cookie },
+    });
+    expect(past.statusCode).toBe(200);
+    expect(past.json().habitStats[0]).toMatchObject({
+      habitId,
+      currentStreak: 3,
+      bestStreak: 3,
+    });
+
+    const current = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview',
+      headers: { cookie },
+    });
+    expect(current.statusCode).toBe(200);
+    expect(current.json().habitStats[0].bestStreak).toBe(1);
+
+    await app.close();
+  });
+
+  it('respects user isolation', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Run', pillarA);
+    await markCompletion(app, cookieA, habitA, TODAY);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview',
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      totalCompletions: 0,
+      habitStats: [],
+      pillarStats: [],
+    });
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview',
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});
+
+describe('GET /v1/stats/habits/:id', () => {
+  it('returns stats for a habit owned by the user', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    await markCompletion(app, cookie, habitId, YESTERDAY);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/habits/${habitId}`,
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().stats).toMatchObject({
+      habitId,
+      habitName: 'Run',
+      currentStreak: 1,
+      bestStreak: 1,
+    });
+
+    await app.close();
+  });
+
+  it('returns 404 for a habit owned by another user', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Run', pillarA);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/habits/${habitA}`,
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(404);
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/habits/00000000-0000-0000-0000-000000000000',
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});

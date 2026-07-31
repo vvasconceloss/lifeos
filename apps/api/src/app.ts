@@ -8,6 +8,7 @@ import { authRoutes } from './modules/auth/auth.routes';
 import { pillarRoutes } from './modules/pillars/pillar.routes';
 import { habitRoutes } from './modules/habits/habit.routes';
 import { completionRoutes } from './modules/completions/completion.routes';
+import { statsRoutes } from './modules/stats/stats.routes';
 
 import Fastify, { type FastifyInstance } from 'fastify';
 
@@ -30,6 +31,7 @@ export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstan
   await fastify.register(pillarRoutes, { prefix: '/v1/pillars' });
   await fastify.register(habitRoutes, { prefix: '/v1/habits' });
   await fastify.register(completionRoutes, { prefix: '/v1' });
+  await fastify.register(statsRoutes, { prefix: '/v1' });
 
   return fastify;
 }
