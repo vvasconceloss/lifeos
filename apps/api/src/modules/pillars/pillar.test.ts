@@ -350,6 +350,32 @@ describe('DELETE /v1/pillars/:id', () => {
 
     await app.close();
   });
+
+  it('returns 404 when deleting another user\'s pillar', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const createRes = await app.inject({
+      method: 'POST',
+      url: '/v1/pillars',
+      headers: { cookie: cookieA },
+      payload: { name: 'Health' },
+    });
+
+    const pillarId = createRes.json().pillar.id;
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/v1/pillars/${pillarId}`,
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(404);
+
+    await app.close();
+  });
 });
 
 describe('input validation', () => {

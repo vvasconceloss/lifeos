@@ -585,3 +585,59 @@ describe('input validation', () => {
     await app.close();
   });
 });
+
+describe('user isolation', () => {
+  it('prevents another user from reading or mutating a habit', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const pillarA = await createPillar(app, cookieA, 'Health');
+
+    const createRes = await app.inject({
+      method: 'POST',
+      url: '/v1/habits',
+      headers: { cookie: cookieA },
+      payload: { name: 'Secret', pillarId: pillarA },
+    });
+    const habitId = createRes.json().habit.id;
+
+    const get = await app.inject({
+      method: 'GET',
+      url: `/v1/habits/${habitId}`,
+      headers: { cookie: cookieB },
+    });
+    expect(get.statusCode).toBe(404);
+
+    const patch = await app.inject({
+      method: 'PATCH',
+      url: `/v1/habits/${habitId}`,
+      headers: { cookie: cookieB },
+      payload: { name: 'Hacked' },
+    });
+    expect(patch.statusCode).toBe(404);
+
+    const archive = await app.inject({
+      method: 'POST',
+      url: `/v1/habits/${habitId}/archive`,
+      headers: { cookie: cookieB },
+    });
+    expect(archive.statusCode).toBe(404);
+
+    const del = await app.inject({
+      method: 'DELETE',
+      url: `/v1/habits/${habitId}`,
+      headers: { cookie: cookieB },
+    });
+    expect(del.statusCode).toBe(404);
+
+    const stillThere = await app.inject({
+      method: 'GET',
+      url: `/v1/habits/${habitId}`,
+      headers: { cookie: cookieA },
+    });
+    expect(stillThere.statusCode).toBe(200);
+    expect(stillThere.json().habit.name).toBe('Secret');
+
+    await app.close();
+  });
+});

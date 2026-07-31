@@ -158,6 +158,25 @@ describe('PUT /v1/habits/:id/completions/:date', () => {
 
     await app.close();
   });
+
+  it('rejects marking another user\'s habit', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Run', pillarA);
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/v1/habits/${habitA}/completions/${TODAY}`,
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(404);
+
+    await app.close();
+  });
 });
 
 describe('DELETE /v1/habits/:id/completions/:date', () => {
@@ -228,6 +247,25 @@ describe('DELETE /v1/habits/:id/completions/:date', () => {
     });
 
     expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+
+  it('rejects unmarking another user\'s habit', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Run', pillarA);
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/v1/habits/${habitA}/completions/${TODAY}`,
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(404);
 
     await app.close();
   });

@@ -106,6 +106,7 @@ describe('POST /v1/auth/login', () => {
 
     const body = response.json();
     expect(body.user).toMatchObject({ email });
+    expect(body.user).not.toHaveProperty('passwordHash');
     expect(body.token).toBeTruthy();
     expect(response.cookies).toEqual(
       expect.arrayContaining([
@@ -199,9 +200,10 @@ describe('GET /v1/auth/me', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({
-      user: { email },
-    });
+
+    const body = response.json();
+    expect(body.user).toMatchObject({ email });
+    expect(body.user).not.toHaveProperty('passwordHash');
 
     await app.close();
   });
