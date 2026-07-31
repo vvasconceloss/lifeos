@@ -705,7 +705,7 @@ Isolation between users must be treated as a fundamental security rule, not an i
 - [x] Review all endpoints and ensure Zod validation on every input
 - [x] Implement rate limiting on the login endpoint
 - [x] Configure production CORS (specific origins, not wildcard)
-- [ ] Configure security headers (Helmet or equivalent)
+- [x] Configure security headers (Helmet or equivalent)
 - [ ] Standardize the error response format across the entire API
 - [ ] Audit all API responses to ensure `passwordHash` is never exposed
 - [ ] Audit **all** Prisma queries to confirm filtering by authenticated `userId` (Pillars, Habits, Completions)
