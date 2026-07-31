@@ -706,7 +706,7 @@ Isolation between users must be treated as a fundamental security rule, not an i
 - [x] Implement rate limiting on the login endpoint
 - [x] Configure production CORS (specific origins, not wildcard)
 - [x] Configure security headers (Helmet or equivalent)
-- [ ] Standardize the error response format across the entire API
+- [x] Standardize the error response format across the entire API
 - [ ] Audit all API responses to ensure `passwordHash` is never exposed
 - [ ] Audit **all** Prisma queries to confirm filtering by authenticated `userId` (Pillars, Habits, Completions)
 - [ ] Write specific user isolation tests (user A cannot access user B's data)
