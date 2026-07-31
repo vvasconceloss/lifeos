@@ -710,7 +710,7 @@ Isolation between users must be treated as a fundamental security rule, not an i
 - [x] Audit all API responses to ensure `passwordHash` is never exposed
 - [x] Audit **all** Prisma queries to confirm filtering by authenticated `userId` (Pillars, Habits, Completions)
 - [x] Write specific user isolation tests (user A cannot access user B's data)
-- [ ] Review error handling on the frontend (clear messages, no internal detail leakage)
+- [x] Review error handling on the frontend (clear messages, no internal detail leakage)
 
 ### Completion criteria
 Security audit completed, with automated tests confirming user isolation and no exposure of sensitive data.
