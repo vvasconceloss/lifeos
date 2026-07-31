@@ -778,6 +778,8 @@ No code reaches `main` without passing through automated lint, tests, and build.
 
 ## Phase 14 — Deployment
 
+**Status:** ✅ Completed
+
 ### Objective
 Put the application into production, with frontend, backend, and database correctly separated and configured.
 
@@ -819,17 +821,17 @@ Put the application into production, with frontend, backend, and database correc
 - [x] Choose a hosting platform for the backend (Node.js server) — Render (free, Docker)
 - [x] Choose a managed PostgreSQL provider — Neon (free)
 - [x] Configure environment variables for each environment (staging/production) — `.env.example` + runbook
-- [ ] Configure production `DATABASE_URL`
-- [ ] Configure the API domain/subdomain
+- [x] Configure production `DATABASE_URL`
+- [x] Configure the API domain/subdomain — `lifeos-i59v.onrender.com`
 - [x] Configure production CORS (exact origin, no wildcard)
-- [ ] Run migrations in production
-- [ ] Configure HTTPS/certificates
-- [ ] Validate authentication cookies in the production environment (Secure, SameSite=Strict/Lax, correct domain)
+- [x] Run migrations in production
+- [x] Configure HTTPS/certificates — platform-managed
+- [x] Validate authentication cookies in the production environment (Secure, SameSite=Strict/Lax, correct domain)
 - [x] Configure basic logging (errors and access)
-- [ ] Deploy the backend
-- [ ] Deploy the frontend
-- [ ] Test the full flow in production: register → login → create pillar → create habit → mark completion → view dashboard
-- [ ] Configure database backups (even if basic)
+- [x] Deploy the backend
+- [x] Deploy the frontend
+- [x] Test the full flow in production: register → login → create pillar → create habit → mark completion → view dashboard
+- [x] Configure database backups (even if basic)
 
 ### Completion criteria
 The application is publicly accessible via HTTPS, with all main flows validated in production and minimal database backups configured.
@@ -905,6 +907,6 @@ M7  — Weekly Tracker                [DONE]
 M8  — Basic Analytics               [DONE]
 M9  — Security & Quality            [DONE]
 M10 — CI                            [DONE]
-M11 — Deployment
-M12 — MVP Release
+M11 — Deployment                     [DONE]
+M12 — MVP Release                    [DONE]
 ```
