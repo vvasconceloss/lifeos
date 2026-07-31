@@ -762,12 +762,12 @@ jobs:
 ```
 
 ### Tasks
-- [ ] Create the workflow file at `.github/workflows/ci.yml`
-- [ ] Configure trigger on pull requests and push to `main`
-- [ ] Configure pnpm cache to speed up builds
-- [ ] Ensure `pnpm lint` covers `apps/api`, `apps/web`, and `packages/shared`
-- [ ] Ensure `pnpm test` runs all tests (backend and frontend)
-- [ ] Ensure `pnpm build` fails the pipeline on error
+- [x] Create the workflow file at `.github/workflows/ci.yml`
+- [x] Configure trigger on pull requests and push to `main`
+- [x] Configure pnpm cache to speed up builds
+- [x] Ensure `pnpm lint` covers `apps/api`, `apps/web`, and `packages/shared`
+- [x] Ensure `pnpm test` runs all tests (backend and frontend)
+- [x] Ensure `pnpm build` fails the pipeline on error
 - [ ] Configure branch protection on `main` to require a green CI before merge
 - [ ] Validate the pipeline with a test PR
 
