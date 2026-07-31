@@ -575,16 +575,16 @@ Relationships   78%
 ```
 
 ### Tasks
-- [ ] Implement statistics endpoint(s) (e.g., `GET /stats/habits/:id`, `GET /stats/pillars`, `GET /stats/overview`)
-- [ ] Implement completion rate calculation per habit
-- [ ] Implement current streak calculation
-- [ ] Implement best streak calculation
-- [ ] Implement weekly comparison (current week vs. previous week)
-- [ ] Implement statistics aggregation by pillar
-- [ ] Write unit tests for each calculation (edge cases: no history, broken streak, etc.)
-- [ ] Create a statistics section/page in the frontend
-- [ ] Display completion rate, streaks, and weekly comparison per habit
-- [ ] Display aggregated statistics per pillar
+- [x] Implement statistics endpoint(s) (e.g., `GET /stats/habits/:id`, `GET /stats/pillars`, `GET /stats/overview`)
+- [x] Implement completion rate calculation per habit
+- [x] Implement current streak calculation
+- [x] Implement best streak calculation
+- [x] Implement weekly comparison (current week vs. previous week)
+- [x] Implement statistics aggregation by pillar
+- [x] Write unit tests for each calculation (edge cases: no history, broken streak, etc.)
+- [x] Create a statistics section/page in the frontend
+- [x] Display completion rate, streaks, and weekly comparison per habit
+- [x] Display aggregated statistics per pillar
 
 ### Completion criteria
 Statistics are calculated correctly from `HabitCompletion` data (with no additional tables for derived values) and are visible in the interface.
