@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { AuthLayout } from "@/components/auth-layout";
+import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/errors";
 import { registerBodySchema } from "@lifeos/shared";
 import { validateForm } from "@/lib/validation";
@@ -13,12 +15,61 @@ interface FieldErrors {
   name?: string;
 }
 
+const PASSWORD_REQUIREMENTS = [
+  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { id: "number", label: "Includes a number", test: (p: string) => /\d/.test(p) },
+  { id: "letter", label: "Includes a letter", test: (p: string) => /[a-zA-Z]/.test(p) },
+];
+
 function Spinner() {
   return (
     <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
+  );
+}
+
+function PasswordRequirements({ password }: { password: string }) {
+  const hasValue = password.length > 0;
+
+  return (
+    <div className="mt-2">
+      <div className="flex gap-1.5" aria-hidden>
+        {PASSWORD_REQUIREMENTS.map((req) => {
+          const met = req.test(password);
+          return (
+            <span
+              key={req.id}
+              className={cn(
+                "h-1 flex-1 rounded-full transition-colors duration-200",
+                !hasValue ? "bg-border" : met ? "bg-green-500" : "bg-destructive/70",
+              )}
+            />
+          );
+        })}
+      </div>
+      <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5" aria-live="polite">
+        {PASSWORD_REQUIREMENTS.map((req) => {
+          const met = req.test(password);
+          return (
+            <li
+              key={req.id}
+              className={cn(
+                "text-xs transition-colors duration-200",
+                !hasValue
+                  ? "text-foreground/45"
+                  : met
+                    ? "text-green-600 dark:text-green-500"
+                    : "text-destructive",
+              )}
+            >
+              {req.label}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -93,8 +144,8 @@ export default function RegisterPage() {
     return [
       "mt-1 block w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2",
       hasError
-        ? "border-destructive focus:ring-destructive/30"
-        : "border-input focus:ring-ring",
+        ? "border-destructive focus:border-destructive focus:ring-destructive/30"
+        : "border-input focus:border-foreground/70 focus:ring-foreground/10",
       isPassword ? "pr-14" : "pr-10",
     ].join(" ");
   }
@@ -104,14 +155,11 @@ export default function RegisterPage() {
   const passwordInputId = "password-input";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm">
-        <h1 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
+    <AuthLayout>
+      <div>
+        <h1 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">
           Create your account
         </h1>
-        <p className="mb-6 text-sm text-foreground/65">
-          Start tracking your habits and building a better you.
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -210,6 +258,7 @@ export default function RegisterPage() {
                 />
               )}
             </div>
+            <PasswordRequirements password={password} />
             {hasSubmitted && errors.password && (
               <p className="mt-1 text-xs text-destructive" id={errorId("password")} role="alert">
                 {errors.password}
@@ -237,6 +286,6 @@ export default function RegisterPage() {
           </a>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
