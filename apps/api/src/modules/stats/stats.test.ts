@@ -2,9 +2,12 @@ import { buildApp } from '../../app';
 import { prisma } from '../../db/client';
 import {
   buildDailyKeySet,
+  buildHeatmapDays,
   calculateCompletionRate,
+  classifyIntensity,
   getBestStreak,
   getCurrentStreak,
+  getDaysInYear,
   getMonthReference,
   toDateKey,
 } from './stats.utils';
@@ -144,6 +147,72 @@ describe('stats.utils', () => {
 
     it('returns the last day of the month for past months', () => {
       expect(toDateKey(getMonthReference(2026, 6))).toBe('2026-06-30');
+    });
+  });
+
+  describe('classifyIntensity', () => {
+    it('returns 0 for no completions', () => {
+      expect(classifyIntensity(0)).toBe(0);
+    });
+
+    it('returns 1 for a single completion', () => {
+      expect(classifyIntensity(1)).toBe(1);
+    });
+
+    it('returns 2 for two completions', () => {
+      expect(classifyIntensity(2)).toBe(2);
+    });
+
+    it('returns 3 for three or more completions', () => {
+      expect(classifyIntensity(3)).toBe(3);
+      expect(classifyIntensity(8)).toBe(3);
+    });
+  });
+
+  describe('buildHeatmapDays', () => {
+    it('returns an entry for every day of the month', () => {
+      expect(buildHeatmapDays([], 2026, 6).days).toHaveLength(30);
+    });
+
+    it('returns zero counts for a month with no completions', () => {
+      const result = buildHeatmapDays([], 2026, 6);
+      expect(result.maxCount).toBe(0);
+      expect(result.days.every((d) => d.count === 0 && d.level === 0)).toBe(true);
+    });
+
+    it('counts completions per day and classifies intensity', () => {
+      const result = buildHeatmapDays(
+        [
+          new Date('2026-06-01T00:00:00.000Z'),
+          new Date('2026-06-01T00:00:00.000Z'),
+          new Date('2026-06-02T00:00:00.000Z'),
+        ],
+        2026,
+        6,
+      );
+
+      expect(result.days[0]).toMatchObject({ date: '2026-06-01', count: 2, level: 2 });
+      expect(result.days[1]).toMatchObject({ date: '2026-06-02', count: 1, level: 1 });
+      expect(result.days[2]).toMatchObject({ date: '2026-06-03', count: 0, level: 0 });
+      expect(result.maxCount).toBe(2);
+    });
+
+    it('ignores completions outside the selected month', () => {
+      const result = buildHeatmapDays(
+        [
+          new Date('2026-05-31T00:00:00.000Z'),
+          new Date('2026-07-01T00:00:00.000Z'),
+        ],
+        2026,
+        6,
+      );
+
+      expect(result.days.every((d) => d.count === 0)).toBe(true);
+    });
+
+    it('builds the full year when month is null', () => {
+      expect(buildHeatmapDays([], 2026, null).days).toHaveLength(getDaysInYear(2026));
+      expect(buildHeatmapDays([], 2024, null).days).toHaveLength(getDaysInYear(2024));
     });
   });
 
@@ -384,6 +453,108 @@ describe('GET /v1/stats/habits/:id', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/v1/stats/habits/00000000-0000-0000-0000-000000000000',
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});
+
+describe('GET /v1/stats/heatmap', () => {
+  it('returns daily counts with intensity levels for a month', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitA = await createHabit(app, cookie, 'Run', pillarId);
+    const habitB = await createHabit(app, cookie, 'Read', pillarId);
+
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+    const todayKey = utcDateKey(now);
+
+    await markCompletion(app, cookie, habitA, todayKey);
+    await markCompletion(app, cookie, habitB, todayKey);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/heatmap?year=${year}&month=${month}`,
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.month).toBe(month);
+    expect(body.days).toHaveLength(
+      new Date(Date.UTC(year, month, 0)).getUTCDate(),
+    );
+
+    const today = body.days.find((d: { date: string }) => d.date === todayKey);
+    expect(today).toMatchObject({ count: 2, level: 2 });
+
+    await app.close();
+  });
+
+  it('aggregates the full year when month is omitted', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitA = await createHabit(app, cookie, 'Run', pillarId);
+
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const daysInYear = getDaysInYear(year);
+
+    let marks = 0;
+    for (let day = 1; day <= now.getUTCDate(); day++) {
+      const key = `${year}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      await markCompletion(app, cookie, habitA, key);
+      marks++;
+    }
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/heatmap?year=${year}`,
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.month).toBeNull();
+    expect(body.days).toHaveLength(daysInYear);
+    expect(body.days.reduce((sum: number, d: { count: number }) => sum + d.count, 0)).toBe(marks);
+
+    await app.close();
+  });
+
+  it('respects user isolation', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Run', pillarA);
+    await markCompletion(app, cookieA, habitA, TODAY);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/stats/heatmap?year=${new Date().getUTCFullYear()}&month=${new Date().getUTCMonth() + 1}`,
+      headers: { cookie: cookieB },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().days.every((d: { count: number }) => d.count === 0)).toBe(true);
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/heatmap',
     });
 
     expect(response.statusCode).toBe(401);

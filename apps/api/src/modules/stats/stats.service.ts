@@ -1,13 +1,15 @@
 import { prisma } from "../../db/client";
-import type { HabitStats, MonthlyStats, PillarStats, StatsOverview } from "./stats.schemas";
+import type { HabitStats, HeatmapResponse, MonthlyStats, PillarStats, StatsOverview } from "./stats.schemas";
 import {
   buildDailyKeySet,
+  buildHeatmapDays,
   calculateCompletionRate,
   getBestStreak,
   getCurrentStreak,
   getDaysInMonth,
   getMonthRange,
   getMonthReference,
+  getYearRange,
 } from "./stats.utils";
 
 function computeHabitStats(
@@ -220,4 +222,37 @@ export async function getMonthlyStats(
   const successRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
 
   return { dailyCounts, habitProgress, totalCompletions, successRate };
+}
+
+export async function getHeatmap(
+  userId: string,
+  year: number,
+  month: number | null,
+): Promise<HeatmapResponse> {
+  const { from, to } = month ? getMonthRange(year, month) : getYearRange(year);
+
+  const habits = await prisma.habit.findMany({
+    where: { userId, isActive: true },
+    select: { id: true },
+  });
+
+  const habitIds = habits.map((h) => h.id);
+  const completions =
+    habitIds.length > 0
+      ? await prisma.habitCompletion.findMany({
+          where: {
+            habitId: { in: habitIds },
+            date: { gte: from, lte: to },
+          },
+          select: { date: true },
+        })
+      : [];
+
+  const { days, maxCount } = buildHeatmapDays(
+    completions.map((c) => c.date),
+    year,
+    month,
+  );
+
+  return { year, month, maxCount, days };
 }

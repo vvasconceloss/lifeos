@@ -23,8 +23,21 @@ export function getMonthRange(year: number, month: number): { from: Date; to: Da
   };
 }
 
+export function getYearRange(year: number): { from: Date; to: Date } {
+  return {
+    from: new Date(Date.UTC(year, 0, 1)),
+    to: new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)),
+  };
+}
+
 export function getDaysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+export function getDaysInYear(year: number): number {
+  const start = new Date(Date.UTC(year, 0, 1)).getTime();
+  const end = new Date(Date.UTC(year, 11, 31)).getTime();
+  return Math.round((end - start) / 86400000) + 1;
 }
 
 export function getMonthReference(year: number, month: number): Date {
@@ -101,4 +114,49 @@ export function calculateCompletionRate(
   const expected = goal ?? daysInPeriod;
   if (expected <= 0) return 0;
   return Math.min(100, Math.round((completed / expected) * 100));
+}
+
+export function classifyIntensity(count: number): number {
+  if (count <= 0) return 0;
+  if (count === 1) return 1;
+  if (count === 2) return 2;
+  return 3;
+}
+
+export function buildHeatmapDays(
+  completions: Date[],
+  year: number,
+  month: number | null,
+): { days: { date: string; count: number; level: number }[]; maxCount: number } {
+  const { from, to } = month ? getMonthRange(year, month) : getYearRange(year);
+  const daysInPeriod = month ? getDaysInMonth(year, month) : getDaysInYear(year);
+
+  const counts = new Map<string, number>();
+
+  for (const completion of completions) {
+    if (completion < from || completion > to) continue;
+    const key = toDateKey(completion);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const days: { date: string; count: number; level: number }[] = [];
+  let maxCount = 0;
+
+  if (month) {
+    for (let day = 1; day <= daysInPeriod; day++) {
+      const key = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const count = counts.get(key) ?? 0;
+      if (count > maxCount) maxCount = count;
+      days.push({ date: key, count, level: classifyIntensity(count) });
+    }
+  } else {
+    for (let dayOfYear = 1; dayOfYear <= daysInPeriod; dayOfYear++) {
+      const key = toDateKey(new Date(Date.UTC(year, 0, dayOfYear)));
+      const count = counts.get(key) ?? 0;
+      if (count > maxCount) maxCount = count;
+      days.push({ date: key, count, level: classifyIntensity(count) });
+    }
+  }
+
+  return { days, maxCount };
 }

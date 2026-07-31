@@ -1,8 +1,28 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
-import { getHabitStats, getMonthlyStats, getOverview, getPillarStats } from './stats.service';
+import { getHabitStats, getHeatmap, getMonthlyStats, getOverview, getPillarStats } from './stats.service';
 
 export async function statsRoutes(fastify: FastifyInstance) {
+  fastify.get(
+    '/stats/heatmap',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const { year, month } = request.query as {
+        year?: string;
+        month?: string;
+      };
+
+      const now = new Date();
+      const stats = await getHeatmap(
+        request.user.sub,
+        year ? parseInt(year) : now.getUTCFullYear(),
+        month ? parseInt(month) : null,
+      );
+
+      return stats;
+    },
+  );
+
   fastify.get(
     '/stats/monthly',
     { preHandler: requireAuth },
