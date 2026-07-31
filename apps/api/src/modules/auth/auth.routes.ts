@@ -61,29 +61,40 @@ export async function authRoutes(fastify: FastifyInstance) {
     return { ok: true };
   });
 
-  fastify.post('/login', async (request, reply) => {
-    const parsed = loginBodySchema.safeParse(request.body);
+  fastify.post(
+    '/login',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.LOGIN_RATE_LIMIT_MAX ?? 5),
+          timeWindow: process.env.LOGIN_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
+      const parsed = loginBodySchema.safeParse(request.body);
 
-    if (!parsed.success) {
-      return reply.status(400).send({
-        error: 'Validation failed',
-        details: parsed.error.issues,
-      });
-    }
-
-    try {
-      const user = await authenticate(parsed.data.email, parsed.data.password);
-      const token = await setAuthCookie(reply, {
-        sub: user.id,
-        email: user.email,
-      });
-
-      return { user, token };
-    } catch (error) {
-      if (error instanceof Error && error.message === AUTH_ERRORS.INVALID_CREDENTIALS) {
-        return reply.status(401).send({ error: error.message });
+      if (!parsed.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: parsed.error.issues,
+        });
       }
-      throw error;
-    }
-  });
+
+      try {
+        const user = await authenticate(parsed.data.email, parsed.data.password);
+        const token = await setAuthCookie(reply, {
+          sub: user.id,
+          email: user.email,
+        });
+
+        return { user, token };
+      } catch (error) {
+        if (error instanceof Error && error.message === AUTH_ERRORS.INVALID_CREDENTIALS) {
+          return reply.status(401).send({ error: error.message });
+        }
+        throw error;
+      }
+    },
+  );
 }

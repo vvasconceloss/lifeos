@@ -132,6 +132,41 @@ describe('POST /v1/auth/login', () => {
 
     await app.close();
   });
+
+  it('returns 429 after exceeding the login rate limit', async () => {
+    const previousMax = process.env.LOGIN_RATE_LIMIT_MAX;
+    process.env.LOGIN_RATE_LIMIT_MAX = '3';
+
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/auth/login',
+        payload: { email, password: 'wrongpassword' },
+      });
+      statuses.push(res.statusCode);
+    }
+
+    expect(statuses.slice(0, 3)).toEqual([401, 401, 401]);
+    expect(statuses[3]).toBe(429);
+
+    await app.close();
+
+    if (previousMax === undefined) {
+      delete process.env.LOGIN_RATE_LIMIT_MAX;
+    } else {
+      process.env.LOGIN_RATE_LIMIT_MAX = previousMax;
+    }
+  });
 });
 
 describe('GET /v1/auth/me', () => {
