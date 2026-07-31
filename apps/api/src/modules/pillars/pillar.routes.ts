@@ -11,7 +11,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
     { preHandler: requireAuth },
-    async (request, reply) => {
+    async (request) => {
       const pillars = await listPillars(request.user.sub);
       return { pillars };
     },

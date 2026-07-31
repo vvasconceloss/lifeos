@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { idParamSchema, statsQuerySchema } from './stats.schemas';
-import { getHabitStats, getHeatmap, getMonthlyStats, getOverview, getPillarStats } from './stats.service';
+import { getHabitStats, getHeatmap, getMonthlyStats, getOverview } from './stats.service';
 
 function parseQuery(request: { query: unknown }) {
   return statsQuerySchema.safeParse(request.query);

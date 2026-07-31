@@ -45,7 +45,7 @@ export function useDashboard() {
     fetchAll();
   }, [from, to, year, month]);
 
-  const activeHabits = habits.filter((h) => h.isActive);
+  const activeHabits = useMemo(() => habits.filter((h) => h.isActive), [habits]);
 
   const pillarMap = useMemo(() => {
     const m: Record<string, string> = {};
@@ -53,10 +53,13 @@ export function useDashboard() {
     return m;
   }, [pillars]);
 
-  const habitsWithColor = activeHabits.map((h) => ({
-    ...h,
-    color: pillarMap[h.pillarId] ?? "#6b7280",
-  }));
+  const habitsWithColor = useMemo(
+    () => activeHabits.map((h) => ({
+      ...h,
+      color: pillarMap[h.pillarId] ?? "#6b7280",
+    })),
+    [activeHabits, pillarMap],
+  );
 
   const grouped = useMemo(() => {
     const g: HabitsGrouped = {};

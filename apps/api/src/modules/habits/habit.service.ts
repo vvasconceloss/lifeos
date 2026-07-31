@@ -1,5 +1,4 @@
 import { prisma } from "../../db/client";
-import { PILLAR_ERRORS } from "../pillars/pillar.service";
 import type { CreateHabitBody, HabitResponse, UpdateHabitBody } from "./habit.schemas";
 
 function toResponse(habit: {
