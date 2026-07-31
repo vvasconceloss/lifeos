@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthLayout } from "@/components/auth-layout";
 import { validateForm } from "@/lib/validation";
@@ -23,6 +24,7 @@ function Spinner() {
 
 export default function LoginPage() {
   const { user, loading, login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,9 +35,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      window.location.href = "/app";
+      navigate({ to: "/app" });
     }
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
   function clearFieldError(field: keyof FieldErrors) {
     if (hasSubmitted && errors[field]) {
@@ -66,7 +68,7 @@ export default function LoginPage() {
 
     try {
       await login({ email: email.trim(), password });
-      window.location.href = "/app";
+      navigate({ to: "/app" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         toast.error("Invalid email or password");
@@ -193,12 +195,12 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-foreground/65">
           Don&apos;t have an account?{" "}
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
             Create one
-          </a>
+          </Link>
         </p>
       </div>
     </AuthLayout>

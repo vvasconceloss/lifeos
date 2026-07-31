@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -75,6 +76,7 @@ function PasswordRequirements({ password }: { password: string }) {
 
 export default function RegisterPage() {
   const { user, loading, register } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -86,9 +88,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      window.location.href = "/app";
+      navigate({ to: "/app" });
     }
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
   function clearFieldError(field: keyof FieldErrors) {
     if (hasSubmitted && errors[field]) {
@@ -124,7 +126,7 @@ export default function RegisterPage() {
         password,
         ...(name.trim() ? { name: name.trim() } : {}),
       });
-      window.location.href = "/app";
+      navigate({ to: "/app" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
         toast.error("This email is already registered");
@@ -278,12 +280,12 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-foreground/65">
           Already have an account?{" "}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </AuthLayout>
