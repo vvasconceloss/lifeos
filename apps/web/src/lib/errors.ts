@@ -23,3 +23,7 @@ export function getApiErrorMessage(
   }
   return fallback;
 }
+
+export function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof AxiosError && error.response?.status === 401;
+}

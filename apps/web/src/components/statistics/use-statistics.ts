@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import type { StatsOverview } from "./types";
 
@@ -20,8 +21,8 @@ export function useStatistics() {
       try {
         const res = await api.get<StatsOverview>(`/stats/overview?year=${year}&month=${month}`);
         if (!cancelled) setOverview(res.data);
-      } catch {
-        if (!cancelled) toast.error("Failed to load statistics");
+      } catch (error) {
+        if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load statistics");
       } finally {
         if (!cancelled) setLoading(false);
       }

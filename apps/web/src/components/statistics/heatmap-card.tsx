@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 
 interface HeatmapDay {
@@ -91,8 +92,8 @@ export function HeatmapCard({ year }: { year: number }) {
       try {
         const res = await api.get<HeatmapResponse>(`/stats/heatmap?year=${year}`);
         if (!cancelled) setData(res.data);
-      } catch {
-        if (!cancelled) toast.error("Failed to load heatmap");
+      } catch (error) {
+        if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load heatmap");
       }
     }
 

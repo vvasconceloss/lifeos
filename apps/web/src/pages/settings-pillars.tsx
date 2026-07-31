@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { getApiErrorMessage } from "@/lib/errors";
+import { getApiErrorMessage, isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { PillarCard } from "@/components/pillar-card";
@@ -29,8 +29,8 @@ export default function SettingsPillarsPage() {
       try {
         const res = await api.get<{ pillars: Pillar[] }>("/pillars");
         setPillars(res.data.pillars);
-      } catch {
-        toast.error("Failed to load pillars");
+      } catch (error) {
+        if (!isUnauthorizedError(error)) toast.error("Failed to load pillars");
       } finally {
         setLoading(false);
       }

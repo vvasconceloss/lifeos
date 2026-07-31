@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { isUnauthorizedError } from "@/lib/errors";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
@@ -47,8 +48,8 @@ export default function SettingsHabitsPage() {
         ]);
         setHabits(habitsRes.data.habits);
         setPillars(pillarsRes.data.pillars);
-      } catch {
-        toast.error("Failed to load data");
+      } catch (error) {
+        if (!isUnauthorizedError(error)) toast.error("Failed to load data");
       } finally {
         setLoading(false);
       }

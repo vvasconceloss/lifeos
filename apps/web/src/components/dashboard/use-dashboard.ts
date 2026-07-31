@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useMemo, useState } from "react";
 import type { Completion, Habit, HabitProgress, Pillar, HabitsGrouped } from "./types";
 
@@ -39,8 +40,9 @@ export function useDashboard() {
         setHabits(hRes.data.habits);
         setPillars(pRes.data.pillars);
         setCompletions(cRes.data.completions);
-      } catch { toast.error("Failed to load"); }
-      finally { setInitialLoading(false); }
+      } catch (error) {
+        if (!isUnauthorizedError(error)) toast.error("Failed to load");
+      } finally { setInitialLoading(false); }
     }
     fetchAll();
   }, [from, to, year, month]);
