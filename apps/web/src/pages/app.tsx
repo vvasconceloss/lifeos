@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app-layout";
 import { HabitGrid } from "@/components/dashboard/habit-grid";
 import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/hooks/use-auth";
 import { InsightsRow } from "@/components/dashboard/insights-row";
 import { useDashboard } from "@/components/dashboard/use-dashboard";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
@@ -10,8 +11,21 @@ function Spinner() {
   return <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return "Good morning";
+  if (hour >= 12 && hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function getDisplayName(user: { name: string | null; email: string }): string {
+  if (user.name) return user.name;
+  return user.email.split("@")[0] || user.email;
+}
+
 export default function DashboardPage() {
   const d = useDashboard();
+  const { user } = useAuth();
 
   return (
     <ProtectedRoute>
@@ -27,13 +41,23 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
-              <MonthNavigation
-                monthOffset={d.monthOffset}
-                label={d.targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-                onPrev={() => d.setMonthOffset(d.monthOffset - 1)}
-                onNext={() => d.setMonthOffset(d.monthOffset + 1)}
-                onToday={() => d.setMonthOffset(0)}
-              />
+              <div className="flex items-baseline justify-between gap-4">
+                <div>
+                  <p className="text-sm text-foreground/65">
+                    {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                    {getGreeting()}, {user ? getDisplayName(user) : ""}
+                  </h2>
+                </div>
+                <MonthNavigation
+                  monthOffset={d.monthOffset}
+                  label={d.targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  onPrev={() => d.setMonthOffset(d.monthOffset - 1)}
+                  onNext={() => d.setMonthOffset(d.monthOffset + 1)}
+                  onToday={() => d.setMonthOffset(0)}
+                />
+              </div>
               <InsightsRow
                 chartData={d.chartData}
                 habitProgress={d.habitProgress}
