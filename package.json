@@ -2,6 +2,10 @@
   "name": "lifeos",
   "private": true,
   "version": "0.1.0",
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=22"
+  },
   "description": "A personal life management system for tracking habits, goals, projects, and long-term personal growth.",
   "type": "module",
   "main": "index.js",
@@ -24,13 +28,6 @@
     "url": "https://github.com/vvasconceloss"
   },
   "license": "MIT",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.3.0",
-      "onFail": "download"
-    }
-  },
   "devDependencies": {
     "typescript": "~6.0.3",
     "@types/node": "^24.13.3"
