@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
+import { completionParamsSchema, listCompletionsQuerySchema } from './completion.schemas';
 import { listCompletions, markCompletion, unmarkCompletion } from './completion.service';
 
 export async function completionRoutes(fastify: FastifyInstance) {
@@ -7,15 +8,19 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/completions',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const { from, to } = request.query as {
-        from?: string;
-        to?: string;
-      };
+      const query = listCompletionsQuerySchema.safeParse(request.query);
+
+      if (!query.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: query.error.issues,
+        });
+      }
 
       const completions = await listCompletions(
         request.user.sub,
-        from,
-        to,
+        query.data.from,
+        query.data.to,
       );
 
       return { completions };
@@ -26,12 +31,20 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/habits/:id/completions/:date',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const { id, date } = request.params as {
-        id: string;
-        date: string;
-      };
+      const params = completionParamsSchema.safeParse(request.params);
 
-      const result = await markCompletion(id, request.user.sub, date);
+      if (!params.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: params.error.issues,
+        });
+      }
+
+      const result = await markCompletion(
+        params.data.id,
+        request.user.sub,
+        params.data.date,
+      );
 
       if ('error' in result) {
         return reply.status(result.status).send({ error: result.error });
@@ -45,12 +58,20 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/habits/:id/completions/:date',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const { id, date } = request.params as {
-        id: string;
-        date: string;
-      };
+      const params = completionParamsSchema.safeParse(request.params);
 
-      const result = await unmarkCompletion(id, request.user.sub, date);
+      if (!params.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: params.error.issues,
+        });
+      }
+
+      const result = await unmarkCompletion(
+        params.data.id,
+        request.user.sub,
+        params.data.date,
+      );
 
       if (result !== true) {
         return reply.status(result.status).send({ error: result.error });

@@ -5,6 +5,8 @@ export {
   statsOverviewSchema,
   heatmapDaySchema,
   heatmapResponseSchema,
+  statsQuerySchema,
+  idParamSchema,
 } from "@lifeos/shared";
 
 export type {
@@ -14,4 +16,6 @@ export type {
   StatsOverview,
   HeatmapDay,
   HeatmapResponse,
+  StatsQuery,
+  IdParam,
 } from "@lifeos/shared";

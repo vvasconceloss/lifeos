@@ -1,7 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
-import { createPillarBodySchema, updatePillarBodySchema } from './pillar.schemas';
+import { createPillarBodySchema, updatePillarBodySchema, idParamSchema } from './pillar.schemas';
 import { createPillar, deletePillar, listPillars, updatePillar, PILLAR_ERRORS } from './pillar.service';
+
+function parseId(request: { params: unknown }) {
+  return idParamSchema.safeParse(request.params);
+}
 
 export async function pillarRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -39,7 +43,14 @@ export async function pillarRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const { id } = request.params as { id: string };
+      const params = parseId(request);
+
+      if (!params.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: params.error.issues,
+        });
+      }
 
       const parsed = updatePillarBodySchema.safeParse(request.body);
 
@@ -51,7 +62,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
       }
 
       const pillar = await updatePillar(
-        id,
+        params.data.id,
         request.user.sub,
         parsed.data,
       );
@@ -68,9 +79,16 @@ export async function pillarRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const { id } = request.params as { id: string };
+      const params = parseId(request);
 
-      const result = await deletePillar(id, request.user.sub);
+      if (!params.success) {
+        return reply.status(400).send({
+          error: 'Validation failed',
+          details: params.error.issues,
+        });
+      }
+
+      const result = await deletePillar(params.data.id, request.user.sub);
 
       if (!result.success) {
         if (result.reason === PILLAR_ERRORS.NOT_FOUND) {
