@@ -148,7 +148,7 @@ The frontend calls the API through a **same-origin `/v1` rewrite** on the static
 
 1. Import the repository; set **Root Directory** to `apps/web` (framework preset: Vite).
 2. Build command: `pnpm build`; Output directory: `dist`.
-3. **Install command** — the repo is a pnpm 11 workspace, and Vercel's default pnpm is older and cannot parse the pnpm-11 lockfile. Set it explicitly:
+3. **Install command** — pin the pnpm version for consistency:
    ```
    npm install -g pnpm@11.3.0 && pnpm install --frozen-lockfile
    ```
