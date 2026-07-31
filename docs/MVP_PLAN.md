@@ -815,17 +815,17 @@ Put the application into production, with frontend, backend, and database correc
 - Logs configured (minimum level of observability).
 
 ### Tasks
-- [ ] Choose a hosting platform for the frontend (static hosting)
-- [ ] Choose a hosting platform for the backend (Node.js server)
-- [ ] Choose a managed PostgreSQL provider
-- [ ] Configure environment variables for each environment (staging/production)
+- [x] Choose a hosting platform for the frontend (static hosting) — Vercel (free)
+- [x] Choose a hosting platform for the backend (Node.js server) — Render (free, Docker)
+- [x] Choose a managed PostgreSQL provider — Neon (free)
+- [x] Configure environment variables for each environment (staging/production) — `.env.example` + runbook
 - [ ] Configure production `DATABASE_URL`
 - [ ] Configure the API domain/subdomain
-- [ ] Configure production CORS (exact origin, no wildcard)
+- [x] Configure production CORS (exact origin, no wildcard)
 - [ ] Run migrations in production
 - [ ] Configure HTTPS/certificates
 - [ ] Validate authentication cookies in the production environment (Secure, SameSite=Strict/Lax, correct domain)
-- [ ] Configure basic logging (errors and access)
+- [x] Configure basic logging (errors and access)
 - [ ] Deploy the backend
 - [ ] Deploy the frontend
 - [ ] Test the full flow in production: register → login → create pillar → create habit → mark completion → view dashboard
@@ -901,10 +901,10 @@ M3  — Pillars                       [DONE]
 M4  — Habits                        [DONE]    
 M5  — Habit Completions             [DONE]
 M6  — Dashboard                     [DONE]
-M7  — Weekly Tracker
-M8  — Basic Analytics
-M9  — Security & Quality
-M10 — CI
+M7  — Weekly Tracker                [DONE]
+M8  — Basic Analytics               [DONE]
+M9  — Security & Quality            [DONE]
+M10 — CI                            [DONE]
 M11 — Deployment
 M12 — MVP Release
 ```
