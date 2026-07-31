@@ -4,6 +4,7 @@ import { corsPlugin } from './plugins/cors';
 import { csrfPlugin } from './plugins/csrf';
 import { cookiesPlugin } from './plugins/cookie';
 import { rateLimitPlugin } from './plugins/rate-limit';
+import { helmetPlugin } from './plugins/helmet';
 import { systemRoutes } from './routes/system.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { pillarRoutes } from './modules/pillars/pillar.routes';
@@ -27,6 +28,7 @@ export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstan
   await fastify.register(jwtPlugin);
   await fastify.register(corsPlugin);
   await fastify.register(rateLimitPlugin);
+  await fastify.register(helmetPlugin);
 
   await fastify.register(systemRoutes, { prefix: '/v1' });
   await fastify.register(authRoutes, { prefix: '/v1/auth' });
