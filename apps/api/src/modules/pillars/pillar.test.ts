@@ -351,3 +351,38 @@ describe('DELETE /v1/pillars/:id', () => {
     await app.close();
   });
 });
+
+describe('input validation', () => {
+  it('rejects a non-uuid id on PATCH', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/v1/pillars/not-a-uuid',
+      headers: { cookie },
+      payload: { name: 'Renamed' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+
+  it('rejects a non-uuid id on DELETE', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/v1/pillars/not-a-uuid',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+});

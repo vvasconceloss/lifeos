@@ -317,3 +317,71 @@ describe('GET /v1/completions', () => {
     await app.close();
   });
 });
+
+describe('input validation', () => {
+  it('rejects an invalid completion date', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/v1/habits/${habitId}/completions/2026-06-99`,
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+
+  it('rejects an impossible calendar date', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/v1/habits/${habitId}/completions/2026-02-30`,
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+
+    await app.close();
+  });
+
+  it('rejects a non-uuid habit id on mark', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/v1/habits/not-a-uuid/completions/2026-06-15',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+
+  it('rejects an invalid from query', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/completions?from=2026-06-32',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+
+    await app.close();
+  });
+});

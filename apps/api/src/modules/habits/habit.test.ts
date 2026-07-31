@@ -551,3 +551,37 @@ describe('POST /v1/habits/:id/archive', () => {
     await app.close();
   });
 });
+
+describe('input validation', () => {
+  it('rejects a non-uuid habit id', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/habits/not-a-uuid',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+
+  it('rejects an invalid includeArchived query', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/habits?includeArchived=maybe',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+});

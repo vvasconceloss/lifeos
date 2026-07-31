@@ -562,3 +562,51 @@ describe('GET /v1/stats/heatmap', () => {
     await app.close();
   });
 });
+
+describe('input validation', () => {
+  it('rejects an invalid year in the overview query', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview?year=not-a-year',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+
+    await app.close();
+  });
+
+  it('rejects an invalid month in the heatmap query', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/heatmap?year=2026&month=13',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+
+    await app.close();
+  });
+
+  it('rejects a non-uuid habit id in the stats detail', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/habits/not-a-uuid',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(400);
+
+    await app.close();
+  });
+});
