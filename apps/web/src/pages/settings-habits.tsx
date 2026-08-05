@@ -1,13 +1,15 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ListChecks } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { HabitCard } from "@/components/habit-card";
 import { NewHabitModal } from "@/components/new-habit-modal";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
 
 interface Pillar {
   id: string;
@@ -29,6 +31,8 @@ export default function SettingsHabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [showArchived, setShowArchived] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,6 +46,7 @@ export default function SettingsHabitsPage() {
 
   useEffect(() => {
     async function fetchData() {
+      setError(false);
       try {
         const [habitsRes, pillarsRes] = await Promise.all([
           api.get<{ habits: Habit[] }>("/habits?includeArchived=true"),
@@ -50,14 +55,19 @@ export default function SettingsHabitsPage() {
         setHabits(habitsRes.data.habits);
         setPillars(pillarsRes.data.pillars);
       } catch (error) {
-        if (!isUnauthorizedError(error)) toast.error("Failed to load data");
+        if (!isUnauthorizedError(error)) setError(true);
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, []);
+  }, [reloadKey]);
+
+  function reload() {
+    setLoading(true);
+    setReloadKey((k) => k + 1);
+  }
 
   const displayedHabits = showArchived
     ? habits
@@ -164,12 +174,19 @@ export default function SettingsHabitsPage() {
             <div className="flex justify-center py-16 text-foreground/50">
               <Spinner className="size-5" />
             </div>
+          ) : error ? (
+            <ErrorState onRetry={reload} />
           ) : displayedHabits.length === 0 ? (
-            <p className="text-center text-sm text-foreground/50">
-              {showArchived
-                ? "No habits yet."
-                : "No active habits. Create one above."}
-            </p>
+            <EmptyState
+              icon={<ListChecks className="size-8" />}
+              title={showArchived ? "No habits yet" : "No active habits"}
+              description={
+                showArchived
+                  ? "Habits you archive will appear here."
+                  : "Create your first habit and associate it with a pillar."
+              }
+              action={<NewHabitModal pillars={pillars} onCreated={handleCreated} />}
+            />
           ) : (
             <div className="space-y-5">
               {ungroupedHabits.length > 0 && (

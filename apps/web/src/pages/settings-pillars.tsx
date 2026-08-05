@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { Layers } from "lucide-react";
 import { getApiErrorMessage, isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
@@ -7,6 +8,8 @@ import { PillarCard } from "@/components/pillar-card";
 import { ProtectedRoute } from "@/components/protected-route";
 import { NewPillarModal } from "@/components/new-pillar-modal";
 import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
 
 interface Pillar {
   id: string;
@@ -19,6 +22,8 @@ interface Pillar {
 export default function SettingsPillarsPage() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
@@ -27,18 +32,24 @@ export default function SettingsPillarsPage() {
 
   useEffect(() => {
     async function fetchPillars() {
+      setError(false);
       try {
         const res = await api.get<{ pillars: Pillar[] }>("/pillars");
         setPillars(res.data.pillars);
       } catch (error) {
-        if (!isUnauthorizedError(error)) toast.error("Failed to load pillars");
+        if (!isUnauthorizedError(error)) setError(true);
       } finally {
         setLoading(false);
       }
     }
 
     fetchPillars();
-  }, []);
+  }, [reloadKey]);
+
+  function reload() {
+    setLoading(true);
+    setReloadKey((k) => k + 1);
+  }
 
   function handleCreated(pillar: Pillar) {
     setPillars((prev) => [...prev, pillar]);
@@ -100,10 +111,15 @@ export default function SettingsPillarsPage() {
             <div className="flex justify-center py-16 text-foreground/50">
               <Spinner className="size-5" />
             </div>
+          ) : error ? (
+            <ErrorState onRetry={reload} />
           ) : pillars.length === 0 ? (
-            <p className="text-center text-sm text-foreground/50">
-              No pillars yet. Create one above.
-            </p>
+            <EmptyState
+              icon={<Layers className="size-8" />}
+              title="No pillars yet"
+              description="Create your first pillar to start organizing your life."
+              action={<NewPillarModal onCreated={handleCreated} />}
+            />
           ) : (
             <ul className="space-y-2">
               {pillars.map((pillar) => (

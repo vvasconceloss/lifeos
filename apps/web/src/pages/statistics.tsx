@@ -7,7 +7,8 @@ import { PillarStats } from "@/components/statistics/pillar-stats";
 import { SummaryCards } from "@/components/statistics/summary-cards";
 import { TopHabits } from "@/components/statistics/top-habits";
 import { useStatistics } from "@/components/statistics/use-statistics";
-import { Spinner } from "@/components/ui/spinner";
+import { StatisticsSkeleton } from "@/components/statistics/statistics-skeleton";
+import { ErrorState } from "@/components/error-state";
 
 export default function StatisticsPage() {
   const s = useStatistics();
@@ -25,7 +26,9 @@ export default function StatisticsPage() {
               onToday={() => s.setMonthOffset(0)}
             />
             {s.loading && !s.overview ? (
-              <div className="flex flex-1 items-center justify-center"><Spinner /></div>
+              <StatisticsSkeleton />
+            ) : s.error ? (
+              <ErrorState onRetry={s.retry} />
             ) : s.overview ? (
               <>
                 <SummaryCards overview={s.overview} />
@@ -37,7 +40,7 @@ export default function StatisticsPage() {
                   <TopHabits habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
                 </div>
                 <HabitStatsTable habits={s.overview.habitStats} />
-                <HeatmapCard year={s.overview.year} />
+                <HeatmapCard year={s.overview.year} month={s.overview.month} />
               </>
             ) : null}
           </div>

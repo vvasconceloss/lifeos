@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Completion, Habit, HabitProgress, Pillar, HabitsGrouped } from "./types";
 
 const EMPTY: never[] = [];
@@ -11,6 +11,8 @@ export function useDashboard() {
   const [pillars, setPillars] = useState<Pillar[]>(EMPTY as never);
   const [completions, setCompletions] = useState<Completion[]>(EMPTY as never);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [monthOffset, setMonthOffset] = useState(0);
 
@@ -31,6 +33,7 @@ export function useDashboard() {
 
   useEffect(() => {
     async function fetchAll() {
+      setError(false);
       try {
         const [hRes, pRes, cRes] = await Promise.all([
           api.get<{ habits: Habit[] }>("/habits"),
@@ -41,11 +44,19 @@ export function useDashboard() {
         setPillars(pRes.data.pillars);
         setCompletions(cRes.data.completions);
       } catch (error) {
-        if (!isUnauthorizedError(error)) toast.error("Failed to load");
+        if (!isUnauthorizedError(error)) {
+          setError(true);
+          toast.error("Failed to load");
+        }
       } finally { setInitialLoading(false); }
     }
     fetchAll();
-  }, [from, to, year, month]);
+  }, [from, to, year, month, reloadKey]);
+
+  const reload = useCallback(() => {
+    setInitialLoading(true);
+    setReloadKey((k) => k + 1);
+  }, []);
 
   const activeHabits = useMemo(() => habits.filter((h) => h.isActive), [habits]);
 
@@ -118,7 +129,7 @@ export function useDashboard() {
   const max7 = Math.max(...last7.map((x) => x.completions), 1);
 
   return {
-    habits, pillars, completions, initialLoading, togglingId, monthOffset,
+    habits, pillars, completions, initialLoading, error, reload, togglingId, monthOffset,
     targetDate, year, month, daysInMonth, todayStr, monthDays, activeHabits,
     habitsWithColor, grouped, isCompleted, toggleCell, chartData, totalCompleted,
     totalPossible, successRate, habitProgress, last7, momentumAvg, max7,

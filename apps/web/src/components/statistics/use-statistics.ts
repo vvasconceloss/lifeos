@@ -1,12 +1,14 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { StatsOverview } from "./types";
 
 export function useStatistics() {
   const [overview, setOverview] = useState<StatsOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
 
   const now = new Date();
@@ -18,11 +20,15 @@ export function useStatistics() {
     let cancelled = false;
 
     async function fetchStats() {
+      setError(false);
       try {
         const res = await api.get<{ stats: StatsOverview }>(`/stats/overview?year=${year}&month=${month}`);
         if (!cancelled) setOverview(res.data.stats);
       } catch (error) {
-        if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load statistics");
+        if (!cancelled && !isUnauthorizedError(error)) {
+          setError(true);
+          toast.error("Failed to load statistics");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -32,7 +38,12 @@ export function useStatistics() {
     return () => {
       cancelled = true;
     };
-  }, [year, month]);
+  }, [year, month, reloadKey]);
 
-  return { overview, loading, monthOffset, setMonthOffset, targetDate };
+  const retry = useCallback(() => {
+    setLoading(true);
+    setReloadKey((k) => k + 1);
+  }, []);
+
+  return { overview, loading, error, retry, monthOffset, setMonthOffset, targetDate };
 }

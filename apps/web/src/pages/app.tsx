@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { HabitGrid } from "@/components/dashboard/habit-grid";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -6,7 +7,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { InsightsRow } from "@/components/dashboard/insights-row";
 import { useDashboard } from "@/components/dashboard/use-dashboard";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
-import { Spinner } from "@/components/ui/spinner";
+import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -29,24 +32,28 @@ export default function DashboardPage() {
       <AppLayout>
         <div className="mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden px-6 py-6">
           {d.initialLoading ? (
-            <div className="flex flex-1 items-center justify-center"><Spinner /></div>
+            <DashboardSkeleton />
+          ) : d.error ? (
+            <ErrorState onRetry={d.reload} />
           ) : d.activeHabits.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center text-center">
-              <h2 className="mb-2 text-xl font-semibold text-foreground">Welcome to LifeOS</h2>
-              {d.pillars.length === 0 ? (
-                <>
-                  <p className="mb-6 text-sm text-foreground/65">
-                    Start by creating your first pillar — habits need a pillar to live in.
-                  </p>
-                  <Link to="/settings/pillars" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create pillar</Link>
-                </>
-              ) : (
-                <>
-                  <p className="mb-6 text-sm text-foreground/65">Start by creating your first habit.</p>
-                  <Link to="/settings/habits" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create habit</Link>
-                </>
-              )}
-            </div>
+            <EmptyState
+              className="flex-1"
+              icon={<Sparkles className="size-8" />}
+              title="Welcome to LifeOS"
+              description={
+                d.pillars.length === 0
+                  ? "Start by creating your first pillar — habits need a pillar to live in."
+                  : "Start by creating your first habit."
+              }
+              action={
+                <Link
+                  to={d.pillars.length === 0 ? "/settings/pillars" : "/settings/habits"}
+                  className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  {d.pillars.length === 0 ? "Create pillar" : "Create habit"}
+                </Link>
+              }
+            />
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
               <div className="flex items-baseline justify-between gap-4">
