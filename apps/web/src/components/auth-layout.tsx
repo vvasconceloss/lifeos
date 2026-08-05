@@ -12,7 +12,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     <div className="flex min-h-screen bg-background text-foreground">
       <main className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         <img
-          src={theme === "dark" ? "/lifeos-black-icon.png" : "/lifeos-white-icon.png"}
+          src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
           alt="LifeOS logo"
           className="mb-6 max-h-12 w-auto"
         />

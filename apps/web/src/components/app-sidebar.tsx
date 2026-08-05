@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard },
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
 export function AppSidebar() {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
+  const { pathname } = useLocation();
 
   return (
     <Sidebar collapsible="icon">
@@ -38,12 +39,12 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link to="/app" />} className="bg-transparent hover:bg-transparent">
               <img
-                src={theme === "dark" ? "/lifeos-black-icon.png" : "/lifeos-white-icon.png"}
+                src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
                 alt="LifeOS logo"
                 className="size-8 rounded-lg"
               />
               <div className="flex flex-col leading-tight">
-                <span className="font-semibold upper">LifeOS</span>
+                <span className="font-semibold uppercase">LifeOS</span>
                 <span className="text-xs text-muted-foreground">
                   {user?.email}
                 </span>
@@ -58,7 +59,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {NAV_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton render={<Link to={item.to} />}>
+                  <SidebarMenuButton
+                    isActive={pathname === item.to}
+                    render={<Link to={item.to} />}
+                  >
                     <item.icon />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
