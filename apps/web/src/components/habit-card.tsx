@@ -1,4 +1,16 @@
+import { useState } from "react";
 import { Archive, Check, Pencil, Trash2, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -67,6 +79,8 @@ export function HabitCard({
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const [alertOpen, setAlertOpen] = useState(false);
+
   if (editingId === habit.id) {
     return (
       <li className="rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm">
@@ -162,17 +176,36 @@ export function HabitCard({
             </Tooltip>
           </>
         )}
-        <Tooltip>
-          <TooltipTrigger
+        <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+          <AlertDialogTrigger
             render={<button />}
-            onClick={() => onDelete(habit.id)}
             disabled={deletingId === habit.id}
             className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
+            aria-label={`Delete ${habit.name}`}
           >
             {deletingId === habit.id ? <Spinner /> : <Trash2 className="size-4" />}
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
-        </Tooltip>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete habit?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove <strong>{habit.name}</strong> and all its completion history.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={() => {
+                  setAlertOpen(false);
+                  onDelete(habit.id);
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </li>
   );

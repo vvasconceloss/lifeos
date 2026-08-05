@@ -154,7 +154,7 @@ export function PillarCard({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete pillar?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently remove <strong>{pillar.name}</strong> and all habits associated with it.
+                  This will permanently remove <strong>{pillar.name}</strong>. Pillars that still contain habits cannot be deleted — archive or delete the habits first.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
