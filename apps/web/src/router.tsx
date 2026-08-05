@@ -2,6 +2,7 @@ import AppPage from "./pages/app";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
 import StatisticsPage from "./pages/statistics";
+import HabitDetailPage from "./pages/habit-detail";
 import SettingsHabitsPage from "./pages/settings-habits";
 import SettingsPillarsPage from "./pages/settings-pillars";
 import { createRouter, RouterProvider, createRoute, createRootRoute, redirect } from "@tanstack/react-router";
@@ -55,7 +56,13 @@ const statisticsRoute = createRoute({
   component: StatisticsPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute]);
+const habitDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/habits/$id",
+  component: HabitDetailPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, habitDetailRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
