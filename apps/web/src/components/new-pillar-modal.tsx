@@ -38,10 +38,14 @@ export function NewPillarModal({
   const [name, setName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [creating, setCreating] = useState(false);
+  const [nameTouched, setNameTouched] = useState(false);
+
+  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
 
   function reset() {
     setName("");
     setSelectedColor("");
+    setNameTouched(false);
   }
 
   async function handleCreate() {
@@ -82,10 +86,25 @@ export function NewPillarModal({
             <input
               id="np-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameTouched(true);
+              }}
+              onBlur={() => setNameTouched(true)}
               placeholder="e.g. Health"
-              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-invalid={nameError ? "true" : undefined}
+              aria-describedby={nameError ? "np-name-error" : undefined}
+              className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 ${
+                nameError
+                  ? "border-destructive focus:border-destructive focus:ring-destructive/30"
+                  : "border-input focus:ring-ring"
+              }`}
             />
+            {nameError && (
+              <p id="np-name-error" role="alert" className="text-xs text-destructive">
+                {nameError}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Colors (Optional)</Label>

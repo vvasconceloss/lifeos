@@ -51,11 +51,18 @@ export function NewHabitModal({
   const [description, setDescription] = useState("");
   const [pillarId, setPillarId] = useState("");
   const [creating, setCreating] = useState(false);
+  const [nameTouched, setNameTouched] = useState(false);
+  const [pillarTouched, setPillarTouched] = useState(false);
+
+  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
+  const pillarError = pillarTouched && !pillarId ? "Select a pillar" : undefined;
 
   function reset() {
     setName("");
     setDescription("");
     setPillarId("");
+    setNameTouched(false);
+    setPillarTouched(false);
   }
 
   async function handleCreate() {
@@ -104,10 +111,25 @@ export function NewHabitModal({
             <input
               id="nh-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameTouched(true);
+              }}
+              onBlur={() => setNameTouched(true)}
               placeholder="e.g. Morning run"
-              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-invalid={nameError ? "true" : undefined}
+              aria-describedby={nameError ? "nh-name-error" : undefined}
+              className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 ${
+                nameError
+                  ? "border-destructive focus:border-destructive focus:ring-destructive/30"
+                  : "border-input focus:ring-ring"
+              }`}
             />
+            {nameError && (
+              <p id="nh-name-error" role="alert" className="text-xs text-destructive">
+                {nameError}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="nh-desc">Description (optional)</Label>
@@ -121,8 +143,20 @@ export function NewHabitModal({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="nh-pillar">Pillar</Label>
-            <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
-              <SelectTrigger id="nh-pillar" className="w-full">
+            <Select
+              value={pillarId}
+              onValueChange={(v) => {
+                setPillarId(v ?? "");
+                setPillarTouched(true);
+              }}
+              onOpenChange={() => setPillarTouched(true)}
+            >
+              <SelectTrigger
+                id="nh-pillar"
+                className={`w-full ${pillarError ? "border-destructive" : ""}`}
+                aria-invalid={pillarError ? "true" : undefined}
+                aria-describedby={pillarError ? "nh-pillar-error" : undefined}
+              >
                 <SelectValue placeholder="Select a pillar">
                   {selectedPillar ? (
                     <span className="inline-flex items-center gap-2">
@@ -153,6 +187,11 @@ export function NewHabitModal({
                 ))}
               </SelectContent>
             </Select>
+            {pillarError && (
+              <p id="nh-pillar-error" role="alert" className="text-xs text-destructive">
+                {pillarError}
+              </p>
+            )}
           </div>
         </div>
 
