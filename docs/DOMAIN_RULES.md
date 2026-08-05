@@ -45,6 +45,7 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 |-----------|----------|--------------------------------------|
 | id        | String   | UUID, primary key                    |
 | name      | String   | 1–100 characters, required           |
+| color     | String?  | Optional, hex color (`#rrggbb`)      |
 | userId    | String   | Foreign key to User, required        |
 | createdAt | DateTime | Auto-generated                       |
 | updatedAt | DateTime | Auto-updated                         |
@@ -53,9 +54,10 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 
 1. **User ownership** — A pillar always belongs to exactly one user. The `userId` is set at creation and is immutable.
 2. **User isolation** — A user can only see, edit, or delete their own pillars. All queries must include `userId` in the filter.
-3. **Block deletion with habits** — A pillar cannot be deleted while it still has active habits. The user must archive or delete the habits first. This prevents accidental data loss and forces explicit intent.
+3. **Block deletion with habits** — A pillar cannot be deleted while it still has habits (active or archived). The user must archive or delete the habits first. This prevents accidental data loss and forces explicit intent.
 4. **Name** — Required and must be between 1 and 100 characters.
 5. **Pillar deletion scope** — Deleting a pillar is only allowed when it has no associated habits.
+6. **Color** — Optional hex color (`#rrggbb`) used for visual identification in the UI.
 
 ---
 
@@ -69,6 +71,7 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 | userId      | String    | Foreign key to User, required        |
 | pillarId    | String    | Foreign key to Pillar, required      |
 | frequency   | String    | Always `"DAILY"` in the MVP          |
+| monthlyGoal | Int?      | Optional monthly completion target (1–93) |
 | isActive    | Boolean   | Default `true`                       |
 | archivedAt  | DateTime? | `null` when active, set on archive   |
 | createdAt   | DateTime  | Auto-generated                       |
@@ -80,15 +83,17 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 2. **Pillar association** — A habit always belongs to exactly one pillar. Required at creation.
 3. **User isolation** — All queries must be scoped to the authenticated user.
 4. **Frequency** — In the MVP, all habits are daily (`frequency: "DAILY"`). No support for weekly or custom schedules.
-5. **Archive (not delete)** — Habits are never physically or logically deleted. They are **archived**:
+5. **Archive** — Habits are archived instead of deleted in normal use:
    - Archiving sets `isActive = false` and `archivedAt = now()`.
-   - Unarchiving sets `isActive = true` and `archivedAt = null`.
-   - Archived habits do not appear in the active list (dashboard, tracker default view).
-   - Archived habits are not shown in a separate section in the MVP (they are only accessible via direct ID lookup).
-6. **Name** — Required, 1–200 characters.
-7. **Description** — Optional, free text, max 1000 characters.
-8. **Pillar integrity** — If the associated pillar is deleted (cascade), the habit is also deleted.
-9. **Completions** — Archived habits retain their completion history.
+   - Archived habits do not appear in the active list (dashboard default view).
+   - Archived habits are shown in the Habits settings page under the "Show archived" toggle.
+   - Archived habits retain their completion history.
+6. **Hard delete** — The API also exposes `DELETE /habits/:id`, which permanently removes the habit and all its completions (cascade). This is an explicit destructive action.
+7. **Name** — Required, 1–200 characters.
+8. **Description** — Optional, free text, max 1000 characters.
+9. **Monthly goal** — Optional integer (1–93). When set, it is the expected number of completions per month and overrides the default (days in month) in completion-rate calculations.
+10. **Pillar integrity** — The foreign key from `Habit.pillarId` to `Pillar` is `Restrict`: a pillar cannot be deleted while it still has habits (see Pillar rule 3).
+11. **Completions** — Archived habits retain their completion history.
 
 ---
 
@@ -109,7 +114,7 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 4. **No future dates** — Completions with a date in the future are rejected. Maximum allowed date is the current date (server time, UTC).
 5. **Physical delete on unmark** — `DELETE /habits/:id/completions/:date` permanently removes the completion record. No time restriction applies (past or present can be unmarked).
 6. **Cascade on habit archive** — Completions are preserved when a habit is archived.
-7. **Cascade on habit deletion** — If the habit is cascade-deleted (via pillar deletion), all its completions are removed.
+7. **Cascade on habit deletion** — If the habit is deleted (`DELETE /habits/:id`), all its completions are removed (cascade).
 8. **Date-only semantics** — The `date` field is treated as a calendar date. The time component is ignored at the application layer (stored as UTC midnight or date-only).
 
 ---
@@ -122,8 +127,10 @@ User (1) ──── (N) Pillar (1) ──── (N) Habit (1) ──── (N)
 | User             | password     | 8–72 chars (bcrypt limit)                 |
 | User             | name         | Optional; if provided, 1–100 chars        |
 | Pillar           | name         | 1–100 chars, required                     |
+| Pillar           | color        | Optional; valid hex color (`#rrggbb`)     |
 | Habit            | name         | 1–200 chars, required                     |
 | Habit            | description  | Optional; if provided, max 1000 chars     |
+| Habit            | monthlyGoal  | Optional; integer 1–93                    |
 | Habit            | pillarId     | Must reference an existing pillar owned by the user |
 | HabitCompletion  | date         | Must not be in the future                 |
 | HabitCompletion  | habitId+date | Must be unique (no duplicate completions) |

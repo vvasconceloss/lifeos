@@ -3,7 +3,8 @@
 > LifeOS is a system for observing and intentionally improving your life.
 
 A habit-tracking web app built with **Node.js**, **TypeScript**, **React** and **PostgreSQL**.
-This project is intentionally scoped as an MVP. Its purpose is not to build a full life-management platform, but to establish a solid full-stack foundation — auth, data modeling, testing discipline — before increasing complexity.
+
+The v1.0 MVP is complete and deployed. Development continues toward **v1.5 (Public Beta / intermediate product)** — see [`docs/1.5_PLAN.md`](docs/1.5_PLAN.md) for the roadmap and [`docs/DOMAIN_RULES.md`](docs/DOMAIN_RULES.md) for the data model and business rules.
 
 ---
 
