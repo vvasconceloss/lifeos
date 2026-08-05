@@ -18,4 +18,5 @@ export type {
   HeatmapResponse,
   StatsQuery,
   IdParam,
+  HabitFrequency,
 } from "@lifeos/shared";
