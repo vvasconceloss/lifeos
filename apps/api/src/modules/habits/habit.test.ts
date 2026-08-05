@@ -1,50 +1,8 @@
 import { buildApp } from '../../app';
-import { prisma } from '../../db/client';
+import { cleanupTestUsers, createPillar, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
-const createdEmails: string[] = [];
-
-function uniqueEmail(): string {
-  const suffix = Math.random().toString(36).slice(2, 10);
-  const email = `test-${suffix}@lifeos.com`;
-  createdEmails.push(email);
-  return email;
-}
-
-afterAll(async () => {
-  if (createdEmails.length > 0) {
-    await prisma.user.deleteMany({
-      where: { email: { in: createdEmails } },
-    });
-  }
-});
-
-async function registerAndGetCookie(
-  app: Awaited<ReturnType<typeof buildApp>>,
-  email: string,
-) {
-  const res = await app.inject({
-    method: 'POST',
-    url: '/v1/auth/register',
-    payload: { email, password: 'test1234' },
-  });
-  const tokenCookie = res.cookies.find((c) => c.name === 'token');
-  return `token=${tokenCookie!.value}`;
-}
-
-async function createPillar(
-  app: Awaited<ReturnType<typeof buildApp>>,
-  cookie: string,
-  name: string,
-) {
-  const res = await app.inject({
-    method: 'POST',
-    url: '/v1/pillars',
-    headers: { cookie },
-    payload: { name },
-  });
-  return res.json().pillar.id;
-}
+afterAll(cleanupTestUsers);
 
 describe('POST /v1/habits', () => {
   it('creates a habit successfully', async () => {
