@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createHabitBodySchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
-  pillarId: z.string(),
+  pillarId: z.uuid(),
   monthlyGoal: z.number().int().min(1).max(93).optional(),
 });
 
@@ -12,7 +12,7 @@ export type CreateHabitBody = z.infer<typeof createHabitBodySchema>;
 export const updateHabitBodySchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(1000).optional(),
-  pillarId: z.string().optional(),
+  pillarId: z.uuid().optional(),
   monthlyGoal: z.number().int().min(1).max(93).optional().nullable(),
 });
 

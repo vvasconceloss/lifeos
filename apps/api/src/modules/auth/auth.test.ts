@@ -30,7 +30,7 @@ describe('POST /v1/auth/register', () => {
       payload: { email, password: 'test1234' },
     });
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(201);
 
     const body = response.json();
     expect(body.user).toMatchObject({ email, name: null });

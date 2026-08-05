@@ -90,8 +90,8 @@ export function HeatmapCard({ year }: { year: number }) {
 
     async function load() {
       try {
-        const res = await api.get<HeatmapResponse>(`/stats/heatmap?year=${year}`);
-        if (!cancelled) setData(res.data);
+        const res = await api.get<{ stats: HeatmapResponse }>(`/stats/heatmap?year=${year}`);
+        if (!cancelled) setData(res.data.stats);
       } catch (error) {
         if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load heatmap");
       }

@@ -1,11 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
+import { validateInput } from '../../lib/validation';
 import { createPillarBodySchema, updatePillarBodySchema, idParamSchema } from './pillar.schemas';
-import { createPillar, deletePillar, listPillars, updatePillar, PILLAR_ERRORS } from './pillar.service';
-
-function parseId(request: { params: unknown }) {
-  return idParamSchema.safeParse(request.params);
-}
+import { createPillar, deletePillar, listPillars, updatePillar } from './pillar.service';
 
 export async function pillarRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -21,18 +18,12 @@ export async function pillarRoutes(fastify: FastifyInstance) {
     '/',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const parsed = createPillarBodySchema.safeParse(request.body);
-
-      if (!parsed.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parsed.error.issues,
-        });
-      }
+      const data = validateInput(createPillarBodySchema, request.body, reply);
+      if (!data) return;
 
       const pillar = await createPillar(
         request.user.sub,
-        parsed.data,
+        data,
       );
 
       return reply.status(201).send({ pillar });
@@ -43,35 +34,23 @@ export async function pillarRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
+      const data = validateInput(updatePillarBodySchema, request.body, reply);
+      if (!data) return;
 
-      const parsed = updatePillarBodySchema.safeParse(request.body);
-
-      if (!parsed.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parsed.error.issues,
-        });
-      }
-
-      const pillar = await updatePillar(
-        params.data.id,
+      const result = await updatePillar(
+        params.id,
         request.user.sub,
-        parsed.data,
+        data,
       );
 
-      if (!pillar) {
-        return reply.status(404).send({ error: 'Pillar not found' });
+      if ('error' in result) {
+        return reply.status(result.status).send({ error: result.error });
       }
 
-      return { pillar };
+      return { pillar: result.pillar };
     },
   );
 
@@ -79,22 +58,13 @@ export async function pillarRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
+      const result = await deletePillar(params.id, request.user.sub);
 
-      const result = await deletePillar(params.data.id, request.user.sub);
-
-      if (!result.success) {
-        if (result.reason === PILLAR_ERRORS.NOT_FOUND) {
-          return reply.status(404).send({ error: result.reason });
-        }
-        return reply.status(409).send({ error: result.reason });
+      if (result !== true) {
+        return reply.status(result.status).send({ error: result.error });
       }
 
       return reply.status(204).send();

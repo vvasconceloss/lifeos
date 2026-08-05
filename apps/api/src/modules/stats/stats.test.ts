@@ -259,7 +259,7 @@ describe('GET /v1/stats/monthly', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({
+    expect(response.json().stats).toMatchObject({
       dailyCounts: [],
       habitProgress: [],
       totalCompletions: 0,
@@ -299,17 +299,17 @@ describe('GET /v1/stats/overview', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = response.json();
-    expect(body.totalCompletions).toBe(1);
-    expect(body.habitStats).toHaveLength(1);
-    expect(body.habitStats[0]).toMatchObject({
+    const { stats } = response.json();
+    expect(stats.totalCompletions).toBe(1);
+    expect(stats.habitStats).toHaveLength(1);
+    expect(stats.habitStats[0]).toMatchObject({
       habitId,
       habitName: 'Run',
       currentStreak: 1,
       bestStreak: 1,
     });
-    expect(body.pillarStats).toHaveLength(1);
-    expect(body.pillarStats[0]).toMatchObject({
+    expect(stats.pillarStats).toHaveLength(1);
+    expect(stats.pillarStats[0]).toMatchObject({
       pillarId,
       pillarName: 'Health',
       activeHabitCount: 1,
@@ -346,7 +346,7 @@ describe('GET /v1/stats/overview', () => {
       headers: { cookie },
     });
     expect(past.statusCode).toBe(200);
-    expect(past.json().habitStats[0]).toMatchObject({
+    expect(past.json().stats.habitStats[0]).toMatchObject({
       habitId,
       currentStreak: 3,
       bestStreak: 3,
@@ -358,7 +358,7 @@ describe('GET /v1/stats/overview', () => {
       headers: { cookie },
     });
     expect(current.statusCode).toBe(200);
-    expect(current.json().habitStats[0].bestStreak).toBe(1);
+    expect(current.json().stats.habitStats[0].bestStreak).toBe(1);
 
     await app.close();
   });
@@ -379,7 +379,7 @@ describe('GET /v1/stats/overview', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({
+    expect(response.json().stats).toMatchObject({
       totalCompletions: 0,
       habitStats: [],
       pillarStats: [],
@@ -484,13 +484,13 @@ describe('GET /v1/stats/heatmap', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = response.json();
-    expect(body.month).toBe(month);
-    expect(body.days).toHaveLength(
+    const { stats } = response.json();
+    expect(stats.month).toBe(month);
+    expect(stats.days).toHaveLength(
       new Date(Date.UTC(year, month, 0)).getUTCDate(),
     );
 
-    const today = body.days.find((d: { date: string }) => d.date === todayKey);
+    const today = stats.days.find((d: { date: string }) => d.date === todayKey);
     expect(today).toMatchObject({ count: 2, level: 2 });
 
     await app.close();
@@ -520,10 +520,10 @@ describe('GET /v1/stats/heatmap', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = response.json();
-    expect(body.month).toBeNull();
-    expect(body.days).toHaveLength(daysInYear);
-    expect(body.days.reduce((sum: number, d: { count: number }) => sum + d.count, 0)).toBe(marks);
+    const { stats } = response.json();
+    expect(stats.month).toBeNull();
+    expect(stats.days).toHaveLength(daysInYear);
+    expect(stats.days.reduce((sum: number, d: { count: number }) => sum + d.count, 0)).toBe(marks);
 
     await app.close();
   });
@@ -544,7 +544,7 @@ describe('GET /v1/stats/heatmap', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json().days.every((d: { count: number }) => d.count === 0)).toBe(true);
+    expect(response.json().stats.days.every((d: { count: number }) => d.count === 0)).toBe(true);
 
     await app.close();
   });

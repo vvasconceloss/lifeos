@@ -19,8 +19,8 @@ export function useStatistics() {
 
     async function fetchStats() {
       try {
-        const res = await api.get<StatsOverview>(`/stats/overview?year=${year}&month=${month}`);
-        if (!cancelled) setOverview(res.data);
+        const res = await api.get<{ stats: StatsOverview }>(`/stats/overview?year=${year}&month=${month}`);
+        if (!cancelled) setOverview(res.data.stats);
       } catch (error) {
         if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load statistics");
       } finally {

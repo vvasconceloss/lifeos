@@ -36,12 +36,14 @@ export async function updatePillar(
   id: string,
   userId: string,
   data: UpdatePillarBody,
-): Promise<PillarResponse | null> {
+): Promise<{ pillar: PillarResponse } | { error: string; status: number }> {
   const pillar = await prisma.pillar.findFirst({
     where: { id, userId },
   });
 
-  if (!pillar) return null;
+  if (!pillar) {
+    return { error: PILLAR_ERRORS.NOT_FOUND, status: 404 };
+  }
 
   const updated = await prisma.pillar.update({
     where: { id },
@@ -51,7 +53,7 @@ export async function updatePillar(
     },
   });
 
-  return toResponse(updated);
+  return { pillar: toResponse(updated) };
 }
 
 export const PILLAR_ERRORS = {
@@ -62,13 +64,13 @@ export const PILLAR_ERRORS = {
 export async function deletePillar(
   id: string,
   userId: string,
-): Promise<{ success: true } | { success: false; reason: string }> {
+): Promise<true | { error: string; status: number }> {
   const pillar = await prisma.pillar.findFirst({
     where: { id, userId },
   });
 
   if (!pillar) {
-    return { success: false, reason: PILLAR_ERRORS.NOT_FOUND };
+    return { error: PILLAR_ERRORS.NOT_FOUND, status: 404 };
   }
 
   const habitCount = await prisma.habit.count({
@@ -76,11 +78,11 @@ export async function deletePillar(
   });
 
   if (habitCount > 0) {
-    return { success: false, reason: PILLAR_ERRORS.HAS_HABITS };
+    return { error: PILLAR_ERRORS.HAS_HABITS, status: 409 };
   }
 
   await prisma.pillar.delete({ where: { id } });
-  return { success: true };
+  return true;
 }
 
 export async function listPillars(userId: string): Promise<PillarResponse[]> {

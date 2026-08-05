@@ -1,5 +1,6 @@
 import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
+import { validateInput } from '../../lib/validation';
 import { registerBodySchema, loginBodySchema } from './auth.schemas';
 import { createUser, authenticate, getUserById, AUTH_ERRORS } from './auth.service';
 
@@ -31,23 +32,17 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post('/register', async (request, reply) => {
-    const parsed = registerBodySchema.safeParse(request.body);
-
-    if (!parsed.success) {
-      return reply.status(400).send({
-        error: 'Validation failed',
-        details: parsed.error.issues,
-      });
-    }
+    const data = validateInput(registerBodySchema, request.body, reply);
+    if (!data) return;
 
     try {
-      const user = await createUser(parsed.data);
+      const user = await createUser(data);
       const token = await setAuthCookie(reply, {
         sub: user.id,
         email: user.email,
       });
 
-      return { user, token };
+      return reply.status(201).send({ user, token });
     } catch (error) {
       if (error instanceof Error && error.message === AUTH_ERRORS.EMAIL_ALREADY_EXISTS) {
         return reply.status(409).send({ error: error.message });
@@ -72,17 +67,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const parsed = loginBodySchema.safeParse(request.body);
-
-      if (!parsed.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parsed.error.issues,
-        });
-      }
+      const data = validateInput(loginBodySchema, request.body, reply);
+      if (!data) return;
 
       try {
-        const user = await authenticate(parsed.data.email, parsed.data.password);
+        const user = await authenticate(data.email, data.password);
         const token = await setAuthCookie(reply, {
           sub: user.id,
           email: user.email,

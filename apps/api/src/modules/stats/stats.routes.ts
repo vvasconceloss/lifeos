@@ -1,34 +1,25 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
+import { validateInput } from '../../lib/validation';
 import { idParamSchema, statsQuerySchema } from './stats.schemas';
 import { getHabitStats, getHeatmap, getMonthlyStats, getOverview } from './stats.service';
-
-function parseQuery(request: { query: unknown }) {
-  return statsQuerySchema.safeParse(request.query);
-}
 
 export async function statsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/stats/heatmap',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const query = parseQuery(request);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(statsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const now = new Date();
       const stats = await getHeatmap(
         request.user.sub,
-        query.data.year ?? now.getUTCFullYear(),
-        query.data.month ?? null,
+        query.year ?? now.getUTCFullYear(),
+        query.month ?? null,
       );
 
-      return stats;
+      return { stats };
     },
   );
 
@@ -36,23 +27,17 @@ export async function statsRoutes(fastify: FastifyInstance) {
     '/stats/monthly',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const query = parseQuery(request);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(statsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const now = new Date();
       const stats = await getMonthlyStats(
         request.user.sub,
-        query.data.year ?? now.getUTCFullYear(),
-        query.data.month ?? now.getUTCMonth() + 1,
+        query.year ?? now.getUTCFullYear(),
+        query.month ?? now.getUTCMonth() + 1,
       );
 
-      return stats;
+      return { stats };
     },
   );
 
@@ -60,23 +45,17 @@ export async function statsRoutes(fastify: FastifyInstance) {
     '/stats/overview',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const query = parseQuery(request);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(statsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const now = new Date();
       const stats = await getOverview(
         request.user.sub,
-        query.data.year ?? now.getUTCFullYear(),
-        query.data.month ?? now.getUTCMonth() + 1,
+        query.year ?? now.getUTCFullYear(),
+        query.month ?? now.getUTCMonth() + 1,
       );
 
-      return stats;
+      return { stats };
     },
   );
 
@@ -84,30 +63,18 @@ export async function statsRoutes(fastify: FastifyInstance) {
     '/stats/habits/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = idParamSchema.safeParse(request.params);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
-
-      const query = parseQuery(request);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(statsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const now = new Date();
       const stats = await getHabitStats(
-        params.data.id,
+        params.id,
         request.user.sub,
-        query.data.year ?? now.getUTCFullYear(),
-        query.data.month ?? now.getUTCMonth() + 1,
+        query.year ?? now.getUTCFullYear(),
+        query.month ?? now.getUTCMonth() + 1,
       );
 
       if (!stats) {

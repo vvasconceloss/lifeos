@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
+import { validateInput } from '../../lib/validation';
 import { completionParamsSchema, listCompletionsQuerySchema } from './completion.schemas';
 import { listCompletions, markCompletion, unmarkCompletion } from './completion.service';
 
@@ -8,19 +9,13 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/completions',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const query = listCompletionsQuerySchema.safeParse(request.query);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(listCompletionsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const completions = await listCompletions(
         request.user.sub,
-        query.data.from,
-        query.data.to,
+        query.from,
+        query.to,
       );
 
       return { completions };
@@ -31,19 +26,13 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/habits/:id/completions/:date',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = completionParamsSchema.safeParse(request.params);
-
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
+      const params = validateInput(completionParamsSchema, request.params, reply);
+      if (!params) return;
 
       const result = await markCompletion(
-        params.data.id,
+        params.id,
         request.user.sub,
-        params.data.date,
+        params.date,
       );
 
       if ('error' in result) {
@@ -58,19 +47,13 @@ export async function completionRoutes(fastify: FastifyInstance) {
     '/habits/:id/completions/:date',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = completionParamsSchema.safeParse(request.params);
-
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
+      const params = validateInput(completionParamsSchema, request.params, reply);
+      if (!params) return;
 
       const result = await unmarkCompletion(
-        params.data.id,
+        params.id,
         request.user.sub,
-        params.data.date,
+        params.date,
       );
 
       if (result !== true) {

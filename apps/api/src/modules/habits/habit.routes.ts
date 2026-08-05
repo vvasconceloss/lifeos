@@ -1,29 +1,20 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
+import { validateInput } from '../../lib/validation';
 import { createHabitBodySchema, updateHabitBodySchema, idParamSchema, listHabitsQuerySchema } from './habit.schemas';
 import { archiveHabit, createHabit, deleteHabit, getHabit, listHabits, updateHabit } from './habit.service';
-
-function parseId(request: { params: unknown }) {
-  return idParamSchema.safeParse(request.params);
-}
 
 export async function habitRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const query = listHabitsQuerySchema.safeParse(request.query);
-
-      if (!query.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: query.error.issues,
-        });
-      }
+      const query = validateInput(listHabitsQuerySchema, request.query, reply);
+      if (!query) return;
 
       const habits = await listHabits(
         request.user.sub,
-        query.data.includeArchived === 'true',
+        query.includeArchived === 'true',
       );
 
       return { habits };
@@ -34,16 +25,10 @@ export async function habitRoutes(fastify: FastifyInstance) {
     '/',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const parsed = createHabitBodySchema.safeParse(request.body);
+      const data = validateInput(createHabitBodySchema, request.body, reply);
+      if (!data) return;
 
-      if (!parsed.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parsed.error.issues,
-        });
-      }
-
-      const result = await createHabit(request.user.sub, parsed.data);
+      const result = await createHabit(request.user.sub, data);
 
       if ('error' in result) {
         return reply.status(result.status).send({ error: result.error });
@@ -57,16 +42,10 @@ export async function habitRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
-
-      const habit = await getHabit(params.data.id, request.user.sub);
+      const habit = await getHabit(params.id, request.user.sub);
 
       if (!habit) {
         return reply.status(404).send({ error: 'Habit not found' });
@@ -80,25 +59,13 @@ export async function habitRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
+      const data = validateInput(updateHabitBodySchema, request.body, reply);
+      if (!data) return;
 
-      const parsed = updateHabitBodySchema.safeParse(request.body);
-
-      if (!parsed.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parsed.error.issues,
-        });
-      }
-
-      const result = await updateHabit(params.data.id, request.user.sub, parsed.data);
+      const result = await updateHabit(params.id, request.user.sub, data);
 
       if ('error' in result) {
         return reply.status(result.status).send({ error: result.error });
@@ -112,16 +79,10 @@ export async function habitRoutes(fastify: FastifyInstance) {
     '/:id/archive',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
-
-      const result = await archiveHabit(params.data.id, request.user.sub);
+      const result = await archiveHabit(params.id, request.user.sub);
 
       if ('error' in result) {
         return reply.status(result.status).send({ error: result.error });
@@ -135,16 +96,10 @@ export async function habitRoutes(fastify: FastifyInstance) {
     '/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const params = parseId(request);
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
 
-      if (!params.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: params.error.issues,
-        });
-      }
-
-      const result = await deleteHabit(params.data.id, request.user.sub);
+      const result = await deleteHabit(params.id, request.user.sub);
 
       if (result !== true) {
         return reply.status(result.status).send({ error: result.error });
