@@ -22,7 +22,7 @@ export function InsightsRow({
   max7: number;
 }) {
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
         <span className="mb-2 text-xs font-medium text-foreground/60">Daily completions</span>
         <div className="flex-1" style={{ minHeight: 64 }}>
@@ -36,7 +36,7 @@ export function InsightsRow({
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="flex w-56 shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+      <div className="flex w-full shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:w-56">
         <span className="mb-2 text-xs font-medium text-foreground/60">Per habit</span>
         <div className="flex flex-1 flex-col justify-center gap-1.5">
           {habitProgress.slice(0, 5).map((hp) => (
@@ -49,7 +49,7 @@ export function InsightsRow({
           ))}
         </div>
       </div>
-      <div className="flex w-48 shrink-0 flex-col justify-center gap-3 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+      <div className="flex w-full shrink-0 flex-col justify-center gap-3 rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:w-48">
         <div className="flex items-center gap-3">
           <PieChart width={45} height={45}>
             <Pie data={[{ name: "Done", value: totalCompleted }, { name: "", value: Math.max(totalPossible - totalCompleted, 0) }]}

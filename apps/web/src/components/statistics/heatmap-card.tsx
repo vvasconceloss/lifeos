@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { Spinner } from "@/components/ui/spinner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
 
 interface HeatmapDay {
@@ -83,15 +84,35 @@ function buildYearGrid(days: HeatmapDay[], year: number) {
   return { columns, monthLabels };
 }
 
-export function HeatmapCard({ year }: { year: number }) {
+function buildMonthGrid(days: HeatmapDay[], year: number, month: number) {
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const offset = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+  const cells: (HeatmapDay | null)[] = [];
+
+  for (let i = 0; i < offset; i++) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    cells.push(byDate.get(key) ?? { date: key, count: 0, level: 0 });
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  return { cells };
+}
+
+export function HeatmapCard({ year, month }: { year: number; month: number }) {
   const [data, setData] = useState<HeatmapResponse | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const res = await api.get<{ stats: HeatmapResponse }>(`/stats/heatmap?year=${year}`);
+        const url = isMobile
+          ? `/stats/heatmap?year=${year}&month=${month}`
+          : `/stats/heatmap?year=${year}`;
+        const res = await api.get<{ stats: HeatmapResponse }>(url);
         if (!cancelled) setData(res.data.stats);
       } catch (error) {
         if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load heatmap");
@@ -102,18 +123,27 @@ export function HeatmapCard({ year }: { year: number }) {
     return () => {
       cancelled = true;
     };
-  }, [year]);
+  }, [year, month, isMobile]);
 
-  const { columns, monthLabels } = data
-    ? buildYearGrid(data.days, data.year)
-    : { columns: [], monthLabels: [] };
+  const monthLabel = MONTH_LABELS[month - 1];
+  const emptyText = isMobile
+    ? `No completions recorded in ${monthLabel} ${year}.`
+    : `No completions recorded in ${year}.`;
+
+  const { columns, monthLabels } =
+    !isMobile && data
+      ? buildYearGrid(data.days, data.year)
+      : { columns: [], monthLabels: [] };
+  const cells = isMobile && data ? buildMonthGrid(data.days, data.year, data.month ?? month).cells : [];
   const isEmpty = data !== null && data.days.every((d) => d.count === 0);
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="text-xs font-medium text-foreground/60">Activity</span>
-        <span className="text-[10px] text-foreground/50">{year}</span>
+        <span className="text-[10px] text-foreground/50">
+          {isMobile ? `${monthLabel} ${year}` : year}
+        </span>
       </div>
 
       {!data ? (
@@ -122,8 +152,37 @@ export function HeatmapCard({ year }: { year: number }) {
         </div>
       ) : isEmpty ? (
         <p className="py-3 text-center text-xs text-foreground/45">
-          No completions recorded in {year}.
+          {emptyText}
         </p>
+      ) : isMobile ? (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-7 gap-1.5">
+            {WEEKDAY_LABELS.map((label, r) => (
+              <div key={r} className="text-center text-[10px] leading-4 text-foreground/40">
+                {label}
+              </div>
+            ))}
+            {cells.map((cell, i) =>
+              cell ? (
+                <div
+                  key={cell.date}
+                  className={`size-full rounded-[4px] ${LEVEL_CLASSES[cell.level]}`}
+                  role="img"
+                  aria-label={`${formatFullDate(cell.date)} — ${cell.count} completion${cell.count === 1 ? "" : "s"}`}
+                />
+              ) : (
+                <div key={`empty-${i}`} className="aspect-square" />
+              ),
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-1">
+            <span className="text-[9px] text-foreground/40">Less</span>
+            {LEVEL_CLASSES.map((cls, level) => (
+              <div key={level} className={`h-[10px] w-[10px] rounded-[2px] ${cls}`} />
+            ))}
+            <span className="text-[9px] text-foreground/40">More</span>
+          </div>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-[3px]">
