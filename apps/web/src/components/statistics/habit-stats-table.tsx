@@ -5,8 +5,6 @@ export function HabitStatsTable({
   habits,
 }: {
   habits: HabitStats[];
-  year: number;
-  month: number;
 }) {
   if (habits.length === 0) {
     return null;

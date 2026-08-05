@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
+import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 
 interface HeatmapDay {
@@ -117,7 +118,7 @@ export function HeatmapCard({ year }: { year: number }) {
 
       {!data ? (
         <div className="flex h-24 items-center justify-center">
-          <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+          <Spinner />
         </div>
       ) : isEmpty ? (
         <p className="py-3 text-center text-xs text-foreground/45">

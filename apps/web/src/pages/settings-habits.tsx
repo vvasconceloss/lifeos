@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/app-layout";
 import { HabitCard } from "@/components/habit-card";
 import { NewHabitModal } from "@/components/new-habit-modal";
 import { ProtectedRoute } from "@/components/protected-route";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Pillar {
   id: string;
@@ -22,15 +23,6 @@ interface Habit {
   pillarName: string;
   isActive: boolean;
   archivedAt: string | null;
-}
-
-function Spinner() {
-  return (
-    <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
 }
 
 export default function SettingsHabitsPage() {
@@ -170,7 +162,7 @@ export default function SettingsHabitsPage() {
 
           {loading ? (
             <div className="flex justify-center py-16 text-foreground/50">
-              <Spinner />
+              <Spinner className="size-5" />
             </div>
           ) : displayedHabits.length === 0 ? (
             <p className="text-center text-sm text-foreground/50">

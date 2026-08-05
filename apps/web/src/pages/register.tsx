@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/errors";
 import { registerBodySchema } from "@lifeos/shared";
 import { validateForm } from "@/lib/validation";
+import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 interface FieldErrors {
@@ -21,15 +22,6 @@ const PASSWORD_REQUIREMENTS = [
   { id: "number", label: "Includes a number", test: (p: string) => /\d/.test(p) },
   { id: "letter", label: "Includes a letter", test: (p: string) => /[a-zA-Z]/.test(p) },
 ];
-
-function Spinner() {
-  return (
-    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
-}
 
 function PasswordRequirements({ password }: { password: string }) {
   const hasValue = password.length > 0;

@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/app-layout";
 import { PillarCard } from "@/components/pillar-card";
 import { ProtectedRoute } from "@/components/protected-route";
 import { NewPillarModal } from "@/components/new-pillar-modal";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Pillar {
   id: string;
@@ -13,15 +14,6 @@ interface Pillar {
   color: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-function Spinner() {
-  return (
-    <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
 }
 
 export default function SettingsPillarsPage() {
@@ -106,7 +98,7 @@ export default function SettingsPillarsPage() {
           </div>
           {loading ? (
             <div className="flex justify-center py-16 text-foreground/50">
-              <Spinner />
+              <Spinner className="size-5" />
             </div>
           ) : pillars.length === 0 ? (
             <p className="text-center text-sm text-foreground/50">

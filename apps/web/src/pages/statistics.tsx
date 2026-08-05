@@ -7,10 +7,7 @@ import { PillarStats } from "@/components/statistics/pillar-stats";
 import { SummaryCards } from "@/components/statistics/summary-cards";
 import { TopHabits } from "@/components/statistics/top-habits";
 import { useStatistics } from "@/components/statistics/use-statistics";
-
-function Spinner() {
-  return <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
-}
+import { Spinner } from "@/components/ui/spinner";
 
 export default function StatisticsPage() {
   const s = useStatistics();
@@ -39,7 +36,7 @@ export default function StatisticsPage() {
                   />
                   <TopHabits habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
                 </div>
-                <HabitStatsTable habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
+                <HabitStatsTable habits={s.overview.habitStats} />
                 <HeatmapCard year={s.overview.year} />
               </>
             ) : null}
