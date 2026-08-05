@@ -1,8 +1,7 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { AxiosError } from "axios";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { FrequencyFields } from "@/components/frequency-fields";
@@ -48,12 +47,14 @@ interface Habit {
 const inputClass =
   "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring";
 
-export function NewHabitModal({
+export function EditHabitDialog({
+  habit,
   pillars,
-  onCreated,
+  onUpdated,
 }: {
+  habit: Habit;
   pillars: Pillar[];
-  onCreated: (habit: Habit) => void;
+  onUpdated: (habit: Habit) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -63,13 +64,23 @@ export function NewHabitModal({
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
   const [timesPerWeek, setTimesPerWeek] = useState("");
   const [timesPerMonth, setTimesPerMonth] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
-  const [pillarTouched, setPillarTouched] = useState(false);
   const [freqTouched, setFreqTouched] = useState(false);
 
+  function syncFromHabit() {
+    setName(habit.name);
+    setDescription(habit.description ?? "");
+    setPillarId(habit.pillarId);
+    setFrequency(habit.frequency);
+    setDaysOfWeek(habit.daysOfWeek);
+    setTimesPerWeek(habit.timesPerWeek ? String(habit.timesPerWeek) : "");
+    setTimesPerMonth(habit.timesPerMonth ? String(habit.timesPerMonth) : "");
+    setNameTouched(false);
+    setFreqTouched(false);
+  }
+
   const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
-  const pillarError = pillarTouched && !pillarId ? "Select a pillar" : undefined;
   const freqError = !freqTouched
     ? undefined
     : frequency === "WEEKLY_DAYS" && daysOfWeek.length === 0
@@ -82,75 +93,67 @@ export function NewHabitModal({
 
   const canSubmit =
     name.trim().length > 0 &&
-    !!pillarId &&
     !(frequency === "WEEKLY_DAYS" && daysOfWeek.length === 0) &&
     !(frequency === "TIMES_PER_WEEK" && !timesPerWeek) &&
     !(frequency === "TIMES_PER_MONTH" && !timesPerMonth);
 
-  function reset() {
-    setName("");
-    setDescription("");
-    setPillarId("");
-    setFrequency("DAILY");
-    setDaysOfWeek([]);
-    setTimesPerWeek("");
-    setTimesPerMonth("");
-    setNameTouched(false);
-    setPillarTouched(false);
-    setFreqTouched(false);
-  }
-
-  async function handleCreate() {
+  async function handleSave() {
     if (!canSubmit) return;
-
-    setCreating(true);
+    setSaving(true);
     try {
       const payload: Record<string, unknown> = {
         name: name.trim(),
-        pillarId,
+        description: description.trim() || undefined,
+        ...(pillarId ? { pillarId } : {}),
         frequency,
       };
-      if (description.trim()) payload.description = description.trim();
       if (frequency === "WEEKLY_DAYS") payload.daysOfWeek = daysOfWeek;
       if (frequency === "TIMES_PER_WEEK") payload.timesPerWeek = Number(timesPerWeek);
       if (frequency === "TIMES_PER_MONTH") payload.timesPerMonth = Number(timesPerMonth);
 
-      const res = await api.post<{ habit: Habit }>("/habits", payload);
-      onCreated(res.data.habit);
-      reset();
+      const res = await api.patch<{ habit: Habit }>(`/habits/${habit.id}`, payload);
+      onUpdated(res.data.habit);
+      toast.success("Habit updated");
       setOpen(false);
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error("Check the habit details and try again.");
-      } else {
-        toast.error("Failed to create habit");
-      }
+    } catch {
+      toast.error("Failed to update habit");
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   }
 
   const selectedPillar = pillars.find((p) => p.id === pillarId);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button />}>
-        <Plus className="mr-1.5 size-4" />
-        New Habit
-      </DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) syncFromHabit();
+      }}
+    >
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+            aria-label={`Edit ${habit.name}`}
+          >
+            <Pencil className="size-4" />
+          </button>
+        }
+      />
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Create new habit</DialogTitle>
-          <DialogDescription>
-            Add a habit to your routine and associate it with a pillar.
-          </DialogDescription>
+          <DialogTitle>Edit habit</DialogTitle>
+          <DialogDescription>Update the habit details and schedule.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="nh-name">Habit name</Label>
+            <Label htmlFor="eh-name">Habit name</Label>
             <input
-              id="nh-name"
+              id="eh-name"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
@@ -159,7 +162,7 @@ export function NewHabitModal({
               onBlur={() => setNameTouched(true)}
               placeholder="e.g. Morning run"
               aria-invalid={nameError ? "true" : undefined}
-              aria-describedby={nameError ? "nh-name-error" : undefined}
+              aria-describedby={nameError ? "eh-name-error" : undefined}
               className={`${inputClass} ${
                 nameError
                   ? "border-destructive focus:border-destructive focus:ring-destructive/30"
@@ -167,15 +170,15 @@ export function NewHabitModal({
               }`}
             />
             {nameError && (
-              <p id="nh-name-error" role="alert" className="text-xs text-destructive">
+              <p id="eh-name-error" role="alert" className="text-xs text-destructive">
                 {nameError}
               </p>
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="nh-desc">Description (optional)</Label>
+            <Label htmlFor="eh-desc">Description (optional)</Label>
             <input
-              id="nh-desc"
+              id="eh-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. Run 5km"
@@ -183,22 +186,10 @@ export function NewHabitModal({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="nh-pillar">Pillar</Label>
-            <Select
-              value={pillarId}
-              onValueChange={(v) => {
-                setPillarId(v ?? "");
-                setPillarTouched(true);
-              }}
-              onOpenChange={() => setPillarTouched(true)}
-            >
-              <SelectTrigger
-                id="nh-pillar"
-                className={`w-full ${pillarError ? "border-destructive" : ""}`}
-                aria-invalid={pillarError ? "true" : undefined}
-                aria-describedby={pillarError ? "nh-pillar-error" : undefined}
-              >
-                <SelectValue placeholder="Select a pillar">
+            <Label htmlFor="eh-pillar">Pillar</Label>
+            <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
+              <SelectTrigger id="eh-pillar" className="w-full">
+                <SelectValue>
                   {selectedPillar ? (
                     <span className="inline-flex items-center gap-2">
                       {selectedPillar.color && (
@@ -228,11 +219,6 @@ export function NewHabitModal({
                 ))}
               </SelectContent>
             </Select>
-            {pillarError && (
-              <p id="nh-pillar-error" role="alert" className="text-xs text-destructive">
-                {pillarError}
-              </p>
-            )}
           </div>
 
           <FrequencyFields
@@ -241,7 +227,7 @@ export function NewHabitModal({
             timesPerWeek={timesPerWeek}
             timesPerMonth={timesPerMonth}
             error={freqError}
-            idPrefix="nh"
+            idPrefix="eh"
             onFrequency={setFrequency}
             onDaysOfWeek={setDaysOfWeek}
             onTimesPerWeek={setTimesPerWeek}
@@ -251,13 +237,9 @@ export function NewHabitModal({
         </div>
 
         <DialogFooter>
-          <Button
-            onClick={handleCreate}
-            disabled={creating || !canSubmit}
-            className="w-full sm:w-auto"
-          >
-            {creating ? <Spinner className="mr-2" /> : null}
-            {creating ? "Saving..." : "Save Habit"}
+          <Button onClick={handleSave} disabled={saving || !canSubmit} className="w-full sm:w-auto">
+            {saving ? <Spinner className="mr-2" /> : null}
+            {saving ? "Saving..." : "Save changes"}
           </Button>
         </DialogFooter>
       </DialogContent>

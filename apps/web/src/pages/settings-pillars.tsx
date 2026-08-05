@@ -24,10 +24,6 @@ export default function SettingsPillarsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editColor, setEditColor] = useState("");
-  const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,33 +51,8 @@ export default function SettingsPillarsPage() {
     setPillars((prev) => [...prev, pillar]);
   }
 
-  function startEdit(pillar: Pillar) {
-    setEditingId(pillar.id);
-    setEditName(pillar.name);
-    setEditColor(pillar.color ?? "");
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-  }
-
-  async function saveEdit(id: string) {
-    if (!editName.trim()) return;
-    setSavingId(id);
-    try {
-      const body: Record<string, string> = { name: editName.trim() };
-      if (editColor) body.color = editColor;
-      else body.color = "";
-      const res = await api.patch<{ pillar: Pillar }>(`/pillars/${id}`, body);
-      setPillars((prev) =>
-        prev.map((p) => (p.id === id ? res.data.pillar : p)),
-      );
-      setEditingId(null);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to update pillar"));
-    } finally {
-      setSavingId(null);
-    }
+  function handleUpdated(updated: Pillar) {
+    setPillars((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   }
 
   async function handleDelete(id: string) {
@@ -126,17 +97,9 @@ export default function SettingsPillarsPage() {
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
-                  editingId={editingId}
-                  editName={editName}
-                  editColor={editColor}
-                  savingId={savingId}
                   deletingId={deletingId}
-                  onEditName={setEditName}
-                  onEditColor={setEditColor}
-                  onStartEdit={startEdit}
-                  onCancelEdit={cancelEdit}
-                  onSaveEdit={saveEdit}
                   onDelete={handleDelete}
+                  onUpdated={handleUpdated}
                 />
               ))}
             </ul>

@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { ChevronDown, ListChecks } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { HabitFrequency } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { HabitCard } from "@/components/habit-card";
 import { NewHabitModal } from "@/components/new-habit-modal";
@@ -24,6 +25,10 @@ interface Habit {
   pillarId: string;
   pillarName: string;
   isActive: boolean;
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
   archivedAt: string | null;
 }
 
@@ -34,12 +39,6 @@ export default function SettingsHabitsPage() {
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [showArchived, setShowArchived] = useState(false);
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editPillarId, setEditPillarId] = useState("");
-  const [savingId, setSavingId] = useState<string | null>(null);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
@@ -88,35 +87,8 @@ export default function SettingsHabitsPage() {
     setHabits((prev) => [...prev, habit]);
   }
 
-  function startEdit(habit: Habit) {
-    setEditingId(habit.id);
-    setEditName(habit.name);
-    setEditDescription(habit.description ?? "");
-    setEditPillarId(habit.pillarId);
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-  }
-
-  async function saveEdit(id: string) {
-    if (!editName.trim()) return;
-    setSavingId(id);
-    try {
-      const res = await api.patch<{ habit: Habit }>(`/habits/${id}`, {
-        name: editName.trim(),
-        description: editDescription.trim() || undefined,
-        ...(editPillarId ? { pillarId: editPillarId } : {}),
-      });
-      setHabits((prev) =>
-        prev.map((h) => (h.id === id ? res.data.habit : h)),
-      );
-      setEditingId(null);
-    } catch {
-      toast.error("Failed to update habit");
-    } finally {
-      setSavingId(null);
-    }
+  function handleUpdated(updated: Habit) {
+    setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
   }
 
   async function handleArchive(id: string) {
@@ -196,22 +168,12 @@ export default function SettingsHabitsPage() {
                       <HabitCard
                         key={habit.id}
                         habit={habit}
-                        editingId={editingId}
-                        editName={editName}
-                        editDescription={editDescription}
-                        editPillarId={editPillarId}
                         pillars={pillars}
-                        savingId={savingId}
                         deletingId={deletingId}
                         archivingId={archivingId}
-                        onEditName={setEditName}
-                        onEditDescription={setEditDescription}
-                        onEditPillarId={setEditPillarId}
-                        onStartEdit={startEdit}
-                        onCancelEdit={cancelEdit}
-                        onSaveEdit={saveEdit}
                         onArchive={handleArchive}
                         onDelete={handleDelete}
+                        onUpdated={handleUpdated}
                       />
                     ))}
                   </ul>
@@ -234,22 +196,12 @@ export default function SettingsHabitsPage() {
                       <HabitCard
                         key={habit.id}
                         habit={habit}
-                        editingId={editingId}
-                        editName={editName}
-                        editDescription={editDescription}
-                        editPillarId={editPillarId}
                         pillars={pillars}
-                        savingId={savingId}
                         deletingId={deletingId}
                         archivingId={archivingId}
-                        onEditName={setEditName}
-                        onEditDescription={setEditDescription}
-                        onEditPillarId={setEditPillarId}
-                        onStartEdit={startEdit}
-                        onCancelEdit={cancelEdit}
-                        onSaveEdit={saveEdit}
                         onArchive={handleArchive}
                         onDelete={handleDelete}
+                        onUpdated={handleUpdated}
                       />
                     ))}
                   </ul>
