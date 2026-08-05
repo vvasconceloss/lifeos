@@ -15,6 +15,15 @@ interface Pillar {
   updatedAt: string;
 }
 
+function Spinner() {
+  return (
+    <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
+
 export default function SettingsPillarsPage() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,11 +104,15 @@ export default function SettingsPillarsPage() {
             </h2>
             <NewPillarModal onCreated={handleCreated} />
           </div>
-          {pillars.length === 0 && !loading ? (
+          {loading ? (
+            <div className="flex justify-center py-16 text-foreground/50">
+              <Spinner />
+            </div>
+          ) : pillars.length === 0 ? (
             <p className="text-center text-sm text-foreground/50">
               No pillars yet. Create one above.
             </p>
-          ) : pillars.length > 0 ? (
+          ) : (
             <ul className="space-y-2">
               {pillars.map((pillar) => (
                 <PillarCard
@@ -119,7 +132,7 @@ export default function SettingsPillarsPage() {
                 />
               ))}
             </ul>
-          ) : null}
+          )}
         </main>
       </AppLayout>
     </ProtectedRoute>

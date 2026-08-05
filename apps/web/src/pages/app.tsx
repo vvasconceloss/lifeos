@@ -36,8 +36,19 @@ export default function DashboardPage() {
           ) : d.activeHabits.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <h2 className="mb-2 text-xl font-semibold text-foreground">Welcome to LifeOS</h2>
-              <p className="mb-6 text-sm text-foreground/65">Start by creating your first habit.</p>
-              <Link to="/settings/habits" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create habit</Link>
+              {d.pillars.length === 0 ? (
+                <>
+                  <p className="mb-6 text-sm text-foreground/65">
+                    Start by creating your first pillar — habits need a pillar to live in.
+                  </p>
+                  <Link to="/settings/pillars" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create pillar</Link>
+                </>
+              ) : (
+                <>
+                  <p className="mb-6 text-sm text-foreground/65">Start by creating your first habit.</p>
+                  <Link to="/settings/habits" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create habit</Link>
+                </>
+              )}
             </div>
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
