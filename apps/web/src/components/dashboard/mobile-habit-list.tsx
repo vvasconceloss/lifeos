@@ -1,5 +1,7 @@
 import { CheckSquare } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Spinner } from "@/components/ui/spinner";
+import { expectedForMonth } from "@/lib/frequency";
 import type { Completion, HabitsGrouped } from "./types";
 
 export function MobileHabitList({
@@ -27,6 +29,19 @@ export function MobileHabitList({
     day: "numeric",
   });
 
+  const [listYear, listMonth] = (monthDays[0] ?? "2000-01").split("-").map(Number);
+
+  function goalFor(habit: (typeof grouped)[string][number]): number {
+    return expectedForMonth(
+      habit.frequency,
+      habit.daysOfWeek,
+      habit.timesPerWeek,
+      habit.timesPerMonth,
+      listYear,
+      listMonth,
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto scroll-subtle md:hidden">
       <div className="flex items-baseline justify-between px-1">
@@ -44,7 +59,7 @@ export function MobileHabitList({
           <div className="flex flex-col gap-2">
             {habits.map((habit) => {
               const completed = monthDays.filter((d) => isCompleted(habit.id, d)).length;
-              const goal = habit.monthlyGoal ?? monthDays.length;
+              const goal = goalFor(habit);
               const pct = Math.round((completed / goal) * 100);
               const doneToday = isCompleted(habit.id, todayStr);
               const cellKey = `${habit.id}-${todayStr}`;
@@ -59,7 +74,13 @@ export function MobileHabitList({
                     style={{ backgroundColor: habit.color }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">{habit.name}</p>
+                    <Link
+                      to="/habits/$id"
+                      params={{ id: habit.id }}
+                      className="block truncate text-sm font-medium text-foreground hover:underline"
+                    >
+                      {habit.name}
+                    </Link>
                     <p className="text-xs text-foreground/50">
                       {completed}/{goal} this month · {pct}%
                     </p>

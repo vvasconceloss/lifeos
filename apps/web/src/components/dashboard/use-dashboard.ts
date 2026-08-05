@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { expectedForMonth } from "@/lib/frequency";
 import { isUnauthorizedError } from "@/lib/errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Completion, Habit, HabitProgress, Pillar, HabitsGrouped } from "./types";
@@ -114,14 +115,17 @@ export function useDashboard() {
   }));
 
   const totalCompleted = completions.length;
-  const totalPossible = activeHabits.reduce((s, h) => s + (h.monthlyGoal ?? daysInMonth), 0);
+  const totalPossible = activeHabits.reduce(
+    (s, h) => s + expectedForMonth(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month),
+    0,
+  );
   const successRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
 
   const habitProgress: HabitProgress[] = activeHabits.map((h) => ({
     habitId: h.id,
     habitName: h.name,
     completed: completions.filter((c) => c.habitId === h.id).length,
-    goal: h.monthlyGoal ?? daysInMonth,
+    goal: expectedForMonth(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month),
   }));
 
   const last7 = chartData.slice(-7);

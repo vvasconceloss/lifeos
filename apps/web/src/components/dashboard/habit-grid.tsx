@@ -1,6 +1,7 @@
 import { CheckSquare } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { MobileHabitList } from "@/components/dashboard/mobile-habit-list";
+import { expectedForMonth } from "@/lib/frequency";
 import type { Completion, HabitsGrouped } from "./types";
 
 export function HabitGrid({
@@ -24,6 +25,19 @@ export function HabitGrid({
 }) {
   function isCompleted(habitId: string, date: string) {
     return completions.some((c) => c.habitId === habitId && c.date.startsWith(date));
+  }
+
+  const [gridYear, gridMonth] = (monthDays[0] ?? "2000-01").split("-").map(Number);
+
+  function goalFor(habit: (typeof grouped)[string][number]): number {
+    return expectedForMonth(
+      habit.frequency,
+      habit.daysOfWeek,
+      habit.timesPerWeek,
+      habit.timesPerMonth,
+      gridYear,
+      gridMonth,
+    );
   }
 
   function formatCellDate(date: string): string {
@@ -62,16 +76,16 @@ export function HabitGrid({
               </div>
               {hbts.map((habit) => {
                 const actualCompleted = monthDays.filter((d) => isCompleted(habit.id, d)).length;
-                const goal = habit.monthlyGoal ?? monthDays.length;
+                const goal = goalFor(habit);
                 const pct = Math.round((actualCompleted / goal) * 100);
                 return (
                   <div key={habit.id} className="flex border-b border-border/20 last:border-0 hover:bg-accent/20">
                     <div className="sticky left-0 z-[5] flex w-27.5 shrink-0 items-center gap-2 border-l-[3px] bg-card pl-3 pr-1.5 py-3 text-foreground" style={{ borderLeftColor: habit.color }}>
                       <span className="truncate text-xs">{habit.name}</span>
                     </div>
-                    <div className="flex w-11 shrink-0 items-center justify-center font-mono text-xs tabular-nums text-foreground/60">
-                      {actualCompleted}/{habit.monthlyGoal ?? monthDays.length}
-                    </div>
+                  <div className="flex w-11 shrink-0 items-center justify-center font-mono text-xs tabular-nums text-foreground/60">
+                    {actualCompleted}/{goal}
+                  </div>
                     <div className="flex flex-1 items-center">
                       {monthDays.map((date) => {
                         const done = isCompleted(habit.id, date);
