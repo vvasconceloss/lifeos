@@ -63,5 +63,4 @@ model HabitCompletion {
   habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
   @@unique([habitId, date])
-  @@index([habitId, date])
 }
