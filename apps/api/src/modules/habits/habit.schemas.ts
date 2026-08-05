@@ -4,6 +4,8 @@ export {
   habitResponseSchema,
   idParamSchema,
   listHabitsQuerySchema,
+  habitHistoryDaySchema,
+  habitHistorySchema,
 } from "@lifeos/shared";
 
 export type {
@@ -12,4 +14,7 @@ export type {
   HabitResponse,
   IdParam,
   ListHabitsQuery,
+  HabitFrequency,
+  HabitHistory,
+  HabitHistoryDay,
 } from "@lifeos/shared";

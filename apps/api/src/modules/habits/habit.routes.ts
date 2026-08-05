@@ -2,7 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { createHabitBodySchema, updateHabitBodySchema, idParamSchema, listHabitsQuerySchema } from './habit.schemas';
-import { archiveHabit, createHabit, deleteHabit, getHabit, listHabits, updateHabit } from './habit.service';
+import { listCompletionsQuerySchema } from '../completions/completion.schemas';
+import { archiveHabit, createHabit, deleteHabit, getHabit, getHabitHistory, listHabits, updateHabit } from './habit.service';
 
 export async function habitRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -18,6 +19,31 @@ export async function habitRoutes(fastify: FastifyInstance) {
       );
 
       return { habits };
+    },
+  );
+
+  fastify.get(
+    '/:id/history',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const params = validateInput(idParamSchema, request.params, reply);
+      if (!params) return;
+
+      const query = validateInput(listCompletionsQuerySchema, request.query, reply);
+      if (!query) return;
+
+      const history = await getHabitHistory(
+        params.id,
+        request.user.sub,
+        query.from,
+        query.to,
+      );
+
+      if (!history) {
+        return reply.status(404).send({ error: 'Habit not found' });
+      }
+
+      return { history };
     },
   );
 

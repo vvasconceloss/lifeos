@@ -1,13 +1,71 @@
 import { prisma } from "../../db/client";
-import type { CreateHabitBody, HabitResponse, UpdateHabitBody } from "./habit.schemas";
+import type {
+  CreateHabitBody,
+  HabitFrequency,
+  HabitHistory,
+  HabitResponse,
+  UpdateHabitBody,
+} from "./habit.schemas";
+import {
+  buildHistoryDays,
+  completionRate,
+  expectedCompletions,
+  getBestStreakForFrequency,
+  getCurrentStreakForFrequency,
+  type FrequencyParams,
+} from "../../lib/frequency";
+import { addDays, toDateKey } from "../stats/stats.utils";
+
+const MS_PER_DAY = 86400000;
+
+type HabitFrequencyData = {
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
+};
+
+function frequencyData(
+  data: {
+    frequency?: HabitFrequency | undefined;
+    daysOfWeek?: number[] | undefined;
+    timesPerWeek?: number | undefined;
+    timesPerMonth?: number | undefined;
+  },
+  fallback: "create" | "none",
+): HabitFrequencyData | null {
+  const frequency = data.frequency ?? (fallback === "create" ? "DAILY" : undefined);
+  if (!frequency) return null;
+
+  const base: HabitFrequencyData = {
+    frequency,
+    daysOfWeek: [],
+    timesPerWeek: null,
+    timesPerMonth: null,
+  };
+
+  switch (frequency) {
+    case "WEEKLY_DAYS":
+      return { ...base, daysOfWeek: data.daysOfWeek ?? [] };
+    case "TIMES_PER_WEEK":
+      return { ...base, timesPerWeek: data.timesPerWeek ?? null };
+    case "TIMES_PER_MONTH":
+      return { ...base, timesPerMonth: data.timesPerMonth ?? null };
+    default:
+      return base;
+  }
+}
 
 function toResponse(habit: {
   id: string;
   name: string;
   description: string | null;
   pillarId: string;
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
   isActive: boolean;
-  monthlyGoal: number | null;
   archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -19,8 +77,11 @@ function toResponse(habit: {
     description: habit.description,
     pillarId: habit.pillarId,
     pillarName: habit.pillar.name,
+    frequency: habit.frequency,
+    daysOfWeek: habit.daysOfWeek,
+    timesPerWeek: habit.timesPerWeek,
+    timesPerMonth: habit.timesPerMonth,
     isActive: habit.isActive,
-    monthlyGoal: habit.monthlyGoal,
     archivedAt: habit.archivedAt,
     createdAt: habit.createdAt,
     updatedAt: habit.updatedAt,
@@ -39,13 +100,18 @@ export async function createHabit(
     return { error: "Pillar not found", status: 404 };
   }
 
+  const frequency = frequencyData(data, "create")!;
+
   const habit = await prisma.habit.create({
     data: {
       name: data.name,
       description: data.description ?? null,
       userId,
       pillarId: data.pillarId,
-      ...(data.monthlyGoal !== undefined ? { monthlyGoal: data.monthlyGoal } : {}),
+      frequency: frequency.frequency,
+      daysOfWeek: frequency.daysOfWeek,
+      timesPerWeek: frequency.timesPerWeek,
+      timesPerMonth: frequency.timesPerMonth,
     },
     include: { pillar: { select: { name: true } } },
   });
@@ -88,13 +154,22 @@ export async function updateHabit(
     }
   }
 
+  const frequency = frequencyData(data, "none");
+
   const habit = await prisma.habit.update({
     where: { id },
     data: {
       ...(data.name !== undefined && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.pillarId !== undefined && { pillarId: data.pillarId }),
-      ...(data.monthlyGoal !== undefined ? { monthlyGoal: data.monthlyGoal } : {}),
+      ...(frequency
+        ? {
+            frequency: frequency.frequency,
+            daysOfWeek: frequency.daysOfWeek,
+            timesPerWeek: frequency.timesPerWeek,
+            timesPerMonth: frequency.timesPerMonth,
+          }
+        : {}),
     },
     include: { pillar: { select: { name: true } } },
   });
@@ -158,4 +233,82 @@ export async function listHabits(
   });
 
   return habits.map(toResponse);
+}
+
+function dayKeyRange(from?: string, to?: string): { from: Date; to: Date } {
+  const today = new Date();
+  const end = to
+    ? new Date(`${to}T00:00:00.000Z`)
+    : new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const start = from ? new Date(`${from}T00:00:00.000Z`) : addDays(end, -29);
+  return { from: start, to: end };
+}
+
+function countKeys(keys: Set<string>, from: Date, to: Date): number {
+  let count = 0;
+  for (let d = from; d <= to; d = addDays(d, 1)) {
+    if (keys.has(toDateKey(d))) count++;
+  }
+  return count;
+}
+
+export async function getHabitHistory(
+  habitId: string,
+  userId: string,
+  from?: string,
+  to?: string,
+): Promise<HabitHistory | null> {
+  const habit = await prisma.habit.findFirst({
+    where: { id: habitId, userId },
+  });
+
+  if (!habit) return null;
+
+  const { from: start, to: end } = dayKeyRange(from, to);
+  const windowLen = Math.round((end.getTime() - start.getTime()) / MS_PER_DAY) + 1;
+  const prevEnd = addDays(start, -1);
+  const prevStart = addDays(prevEnd, -(windowLen - 1));
+
+  const completions = await prisma.habitCompletion.findMany({
+    where: { habitId },
+    select: { date: true },
+  });
+  const keys = new Set(completions.map((c) => toDateKey(c.date)));
+
+  const freq: FrequencyParams = {
+    frequency: habit.frequency as HabitFrequency,
+    daysOfWeek: habit.daysOfWeek,
+    timesPerWeek: habit.timesPerWeek,
+    timesPerMonth: habit.timesPerMonth,
+  };
+
+  const expected = expectedCompletions(freq, start, end);
+  const actual = countKeys(keys, start, end);
+  const currentRate = completionRate(actual, expected);
+  const previousRate = completionRate(
+    countKeys(keys, prevStart, prevEnd),
+    expectedCompletions(freq, prevStart, prevEnd),
+  );
+
+  return {
+    habitId: habit.id,
+    habitName: habit.name,
+    frequency: habit.frequency as HabitFrequency,
+    daysOfWeek: habit.daysOfWeek,
+    timesPerWeek: habit.timesPerWeek,
+    timesPerMonth: habit.timesPerMonth,
+    from: toDateKey(start),
+    to: toDateKey(end),
+    days: buildHistoryDays(freq, start, end, keys),
+    expected,
+    actual,
+    completionRate: currentRate,
+    currentStreak: getCurrentStreakForFrequency(freq, keys, end),
+    bestStreak: getBestStreakForFrequency(freq, keys),
+    comparison: {
+      current: currentRate,
+      previous: previousRate,
+      delta: currentRate - previousRate,
+    },
+  };
 }
