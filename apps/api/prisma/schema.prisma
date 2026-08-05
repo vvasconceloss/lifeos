@@ -34,17 +34,19 @@ model Pillar {
 }
 
 model Habit {
-  id           String    @id @default(uuid())
-  name         String
-  description  String?
-  userId       String
-  pillarId     String
-  frequency    String    @default("DAILY")
-  monthlyGoal  Int?
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  archivedAt   DateTime?
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  userId        String
+  pillarId      String
+  frequency     HabitFrequency @default(DAILY)
+  daysOfWeek    Int[]          @default([])
+  timesPerWeek  Int?
+  timesPerMonth Int?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  archivedAt    DateTime?
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)
@@ -52,6 +54,13 @@ model Habit {
 
   @@index([userId])
   @@index([pillarId])
+}
+
+enum HabitFrequency {
+  DAILY
+  WEEKLY_DAYS
+  TIMES_PER_WEEK
+  TIMES_PER_MONTH
 }
 
 model HabitCompletion {
