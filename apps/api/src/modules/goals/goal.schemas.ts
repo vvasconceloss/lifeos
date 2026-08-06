@@ -1,10 +1,6 @@
 export {
   createGoalBodySchema,
   updateGoalBodySchema,
-  goalResponseSchema,
-  goalDetailResponseSchema,
-  goalHabitProgressSchema,
-  goalProgressPointSchema,
   idParamSchema,
 } from "@lifeos/shared";
 

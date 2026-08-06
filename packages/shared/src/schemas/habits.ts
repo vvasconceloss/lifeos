@@ -90,53 +90,47 @@ export const updateHabitBodySchema = z
 
 export type UpdateHabitBody = z.infer<typeof updateHabitBodySchema>;
 
-export const habitResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  pillarId: z.string(),
-  pillarName: z.string(),
-  frequency: z.enum(HABIT_FREQUENCIES),
-  daysOfWeek: z.array(z.number()),
-  timesPerWeek: z.number().nullable(),
-  timesPerMonth: z.number().nullable(),
-  isActive: z.boolean(),
-  archivedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export interface HabitResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  pillarId: string;
+  pillarName: string;
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
+  isActive: boolean;
+  archivedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export type HabitResponse = z.infer<typeof habitResponseSchema>;
+export interface HabitHistoryDay {
+  date: string;
+  weekday: number;
+  scheduled: boolean;
+  completed: boolean;
+}
 
-export const habitHistoryDaySchema = z.object({
-  date: z.string(),
-  weekday: z.number(),
-  scheduled: z.boolean(),
-  completed: z.boolean(),
-});
-
-export type HabitHistoryDay = z.infer<typeof habitHistoryDaySchema>;
-
-export const habitHistorySchema = z.object({
-  habitId: z.string(),
-  habitName: z.string(),
-  frequency: z.enum(HABIT_FREQUENCIES),
-  daysOfWeek: z.array(z.number()),
-  timesPerWeek: z.number().nullable(),
-  timesPerMonth: z.number().nullable(),
-  from: z.string(),
-  to: z.string(),
-  days: z.array(habitHistoryDaySchema),
-  expected: z.number(),
-  actual: z.number(),
-  completionRate: z.number(),
-  currentStreak: z.number(),
-  bestStreak: z.number(),
-  comparison: z.object({
-    current: z.number(),
-    previous: z.number(),
-    delta: z.number(),
-  }),
-});
-
-export type HabitHistory = z.infer<typeof habitHistorySchema>;
+export interface HabitHistory {
+  habitId: string;
+  habitName: string;
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
+  from: string;
+  to: string;
+  days: HabitHistoryDay[];
+  expected: number;
+  actual: number;
+  completionRate: number;
+  currentStreak: number;
+  bestStreak: number;
+  comparison: {
+    current: number;
+    previous: number;
+    delta: number;
+  };
+}

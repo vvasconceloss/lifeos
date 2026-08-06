@@ -1,9 +1,6 @@
 export {
   registerBodySchema,
   loginBodySchema,
-  userResponseSchema,
-  authResponseSchema,
-  meResponseSchema,
 } from "@lifeos/shared";
 
 export type {

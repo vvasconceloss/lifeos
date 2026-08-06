@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { dateKeySchema } from "./common";
+import type { HabitFrequency } from "./habits";
 
 export const GOAL_STATUSES = ["ACTIVE", "COMPLETED", "ABANDONED"] as const;
 
@@ -24,45 +25,35 @@ export const updateGoalBodySchema = z.object({
 
 export type UpdateGoalBody = z.infer<typeof updateGoalBodySchema>;
 
-export const goalResponseSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string().nullable(),
-  pillarId: z.string(),
-  pillarName: z.string(),
-  pillarColor: z.string().nullable(),
-  status: z.enum(GOAL_STATUSES),
-  deadline: z.string().nullable(),
-  completedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  progress: z.number(),
-  habitCount: z.number(),
-});
+export interface GoalResponse {
+  id: string;
+  title: string;
+  description: string | null;
+  pillarId: string;
+  pillarName: string;
+  pillarColor: string | null;
+  status: GoalStatus;
+  deadline: string | null;
+  completedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  progress: number;
+  habitCount: number;
+}
 
-export type GoalResponse = z.infer<typeof goalResponseSchema>;
+export interface GoalHabitProgress {
+  habitId: string;
+  habitName: string;
+  frequency: HabitFrequency;
+  rate: number;
+}
 
-export const goalHabitProgressSchema = z.object({
-  habitId: z.string(),
-  habitName: z.string(),
-  frequency: z.enum(["DAILY", "WEEKLY_DAYS", "TIMES_PER_WEEK", "TIMES_PER_MONTH"]),
-  rate: z.number(),
-});
+export interface GoalProgressPoint {
+  label: string;
+  progress: number;
+}
 
-export type GoalHabitProgress = z.infer<typeof goalHabitProgressSchema>;
-
-export const goalProgressPointSchema = z.object({
-  label: z.string(),
-  progress: z.number(),
-});
-
-export type GoalProgressPoint = z.infer<typeof goalProgressPointSchema>;
-
-export const goalDetailResponseSchema = goalResponseSchema
-  .omit({ habitCount: true })
-  .extend({
-    habits: z.array(goalHabitProgressSchema),
-    progressHistory: z.array(goalProgressPointSchema),
-  });
-
-export type GoalDetailResponse = z.infer<typeof goalDetailResponseSchema>;
+export interface GoalDetailResponse extends Omit<GoalResponse, "habitCount"> {
+  habits: GoalHabitProgress[];
+  progressHistory: GoalProgressPoint[];
+}

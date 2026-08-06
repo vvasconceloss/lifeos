@@ -15,24 +15,18 @@ export const loginBodySchema = z.object({
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
-export const userResponseSchema = z.object({
-  id: z.string(),
-  email: z.email(),
-  name: z.string().nullable(),
-  createdAt: z.date(),
-});
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string | null;
+  createdAt: Date;
+}
 
-export type UserResponse = z.infer<typeof userResponseSchema>;
+export interface AuthResponse {
+  user: UserResponse;
+  token: string;
+}
 
-export const authResponseSchema = z.object({
-  user: userResponseSchema,
-  token: z.string(),
-});
-
-export type AuthResponse = z.infer<typeof authResponseSchema>;
-
-export const meResponseSchema = z.object({
-  user: userResponseSchema,
-});
-
-export type MeResponse = z.infer<typeof meResponseSchema>;
+export interface MeResponse {
+  user: UserResponse;
+}

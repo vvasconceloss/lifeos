@@ -1,7 +1,6 @@
 export {
   createPillarBodySchema,
   updatePillarBodySchema,
-  pillarResponseSchema,
   idParamSchema,
 } from "@lifeos/shared";
 

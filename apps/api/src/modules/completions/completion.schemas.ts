@@ -1,5 +1,4 @@
 export {
-  completionResponseSchema,
   completionParamsSchema,
   listCompletionsQuerySchema,
 } from "@lifeos/shared";

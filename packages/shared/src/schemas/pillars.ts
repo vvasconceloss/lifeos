@@ -16,12 +16,10 @@ export const updatePillarBodySchema = z.object({
 
 export type UpdatePillarBody = z.infer<typeof updatePillarBodySchema>;
 
-export const pillarResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  color: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export type PillarResponse = z.infer<typeof pillarResponseSchema>;
+export interface PillarResponse {
+  id: string;
+  name: string;
+  color: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
