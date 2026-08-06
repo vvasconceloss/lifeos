@@ -15,6 +15,7 @@ import {
   ListChecks,
   LogOut,
   BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -22,6 +23,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/insights", label: "Insights", icon: Sparkles },
   { to: "/statistics", label: "Statistics", icon: BarChart3 },
   { to: "/settings/pillars", label: "Pillars", icon: Layers },
   { to: "/settings/habits", label: "Habits", icon: ListChecks },
