@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../db/client";
-import type { RegisterBody, UserResponse } from "./auth.schemas";
+import type { RegisterBody, UpdateMeBody, UserResponse } from "./auth.schemas";
 
 const SALT_ROUNDS = 10;
 
@@ -16,12 +16,18 @@ function toUserResponse(user: {
   id: string;
   email: string;
   name: string | null;
+  timezone: string | null;
+  weekStart: number;
+  theme: string;
   createdAt: Date;
 }): UserResponse {
   return {
     id: user.id,
     email: user.email,
     name: user.name,
+    timezone: user.timezone,
+    weekStart: user.weekStart,
+    theme: user.theme,
     createdAt: user.createdAt,
   };
 }
@@ -79,6 +85,23 @@ export async function getUserById(
   if (!user) {
     return null;
   }
+
+  return toUserResponse(user);
+}
+
+export async function updateUser(
+  userId: string,
+  data: UpdateMeBody,
+): Promise<UserResponse> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.timezone !== undefined && { timezone: data.timezone }),
+      ...(data.weekStart !== undefined && { weekStart: data.weekStart }),
+      ...(data.theme !== undefined && { theme: data.theme }),
+    },
+  });
 
   return toUserResponse(user);
 }

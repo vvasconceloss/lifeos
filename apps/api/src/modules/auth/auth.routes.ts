@@ -1,8 +1,8 @@
 import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
-import { registerBodySchema, loginBodySchema } from './auth.schemas';
-import { createUser, authenticate, getUserById, AUTH_ERRORS } from './auth.service';
+import { registerBodySchema, loginBodySchema, updateMeBodySchema } from './auth.schemas';
+import { createUser, authenticate, getUserById, updateUser, AUTH_ERRORS } from './auth.service';
 
 const cookieOptions = {
   httpOnly: true,
@@ -27,6 +27,15 @@ export async function authRoutes(fastify: FastifyInstance) {
     if (!user) {
       return reply.status(401).send({ error: 'User not found' });
     }
+
+    return { user };
+  });
+
+  fastify.patch('/me', { preHandler: requireAuth }, async (request, reply) => {
+    const data = validateInput(updateMeBodySchema, request.body, reply);
+    if (!data) return;
+
+    const user = await updateUser(request.user.sub, data);
 
     return { user };
   });

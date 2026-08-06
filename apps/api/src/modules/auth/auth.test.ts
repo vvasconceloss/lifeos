@@ -160,6 +160,51 @@ describe('POST /v1/auth/login', () => {
   });
 });
 
+describe('PATCH /v1/auth/me', () => {
+  it('updates profile and preferences', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+    const registerRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+    const tokenCookie = registerRes.cookies.find((c) => c.name === 'token');
+    const cookie = `token=${tokenCookie!.value}`;
+
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/v1/auth/me',
+      headers: { cookie },
+      payload: { name: 'Victor', timezone: 'Europe/Lisbon', weekStart: 0, theme: 'dark' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().user).toMatchObject({
+      name: 'Victor',
+      timezone: 'Europe/Lisbon',
+      weekStart: 0,
+      theme: 'dark',
+    });
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/v1/auth/me',
+      payload: { name: 'Victor' },
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});
+
 describe('GET /v1/auth/me', () => {
   it('returns the current user when authenticated', async () => {
     const app = await buildApp({ csrf: false });
