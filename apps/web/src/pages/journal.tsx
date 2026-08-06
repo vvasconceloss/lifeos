@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
-import { BookOpenCheck } from "lucide-react";
+import { BedDouble, BookOpenCheck, Smile, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { DailyLogCorrelations, DailyLogResponse } from "@lifeos/shared";
+import type { DailyLogResponse } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
@@ -185,28 +185,40 @@ function LogForm({
   );
 }
 
-function CorrelationList({ title, items }: { title: string; items: { label: string; rate: number; days: number }[] }) {
+function average(values: number[]): number | null {
+  if (values.length === 0) return null;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function StateCard({
+  icon,
+  label,
+  value,
+  scale,
+  unit,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number | null;
+  scale: number;
+  unit?: string;
+}) {
+  const pct = value != null ? Math.min(100, (value / scale) * 100) : 0;
+
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium text-foreground/60">{title}</span>
-      {items.length === 0 ? (
-        <p className="text-xs text-foreground/45">No logged days in this period.</p>
-      ) : (
-        items.map((item) => (
-          <div key={item.label} className="flex items-center gap-3">
-            <span className="w-12 shrink-0 text-xs text-foreground/70">{item.label}</span>
-            <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-border/60">
-              <div className="h-full rounded-full bg-primary" style={{ width: `${item.rate}%` }} />
-            </div>
-            <span className="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-foreground/70">
-              {item.rate}%
-            </span>
-            <span className="w-12 shrink-0 text-right text-[10px] text-foreground/50">
-              {item.days}d
-            </span>
-          </div>
-        ))
-      )}
+    <div className="flex items-start gap-3">
+      <span className="mt-0.5 text-foreground/50">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-sm font-medium text-foreground">{label}</span>
+          <span className="text-lg font-bold tabular-nums text-foreground">
+            {value != null ? `${value.toFixed(1)}${unit ?? ""}` : "—"}
+          </span>
+        </div>
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -227,7 +239,6 @@ export default function JournalPage() {
   const to = monthDays[monthDays.length - 1];
 
   const [logs, setLogs] = useState<DailyLogResponse[]>([]);
-  const [correlations, setCorrelations] = useState<DailyLogCorrelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -238,13 +249,9 @@ export default function JournalPage() {
     async function load() {
       setError(false);
       try {
-        const [logsRes, corrRes] = await Promise.all([
-          api.get<{ logs: DailyLogResponse[] }>(`/daily-logs?from=${from}&to=${to}`),
-          api.get<{ correlations: DailyLogCorrelations }>(`/daily-logs/correlations?from=${from}&to=${to}`),
-        ]);
+        const logsRes = await api.get<{ logs: DailyLogResponse[] }>(`/daily-logs?from=${from}&to=${to}`);
         if (cancelled) return;
         setLogs(logsRes.data.logs);
-        setCorrelations(corrRes.data.correlations);
       } catch (e) {
         if (!cancelled && !isUnauthorizedError(e)) setError(true);
       } finally {
@@ -264,6 +271,11 @@ export default function JournalPage() {
   const now = new Date();
   const todayKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 
+  const avgMood = average(logs.filter((l) => l.mood != null).map((l) => l.mood as number));
+  const avgEnergy = average(logs.filter((l) => l.energy != null).map((l) => l.energy as number));
+  const avgSleep = average(logs.filter((l) => l.sleepHours != null).map((l) => l.sleepHours as number));
+  const loggedDays = new Set(logs.map((l) => l.date)).size;
+
   function retry() {
     setError(false);
     setLoading(true);
@@ -272,13 +284,6 @@ export default function JournalPage() {
 
   function handleSaved(saved: DailyLogResponse) {
     setLogs((prev) => [...prev.filter((l) => l.date !== saved.date), saved].sort((a, b) => a.date.localeCompare(b.date)));
-
-    api
-      .get<{ correlations: DailyLogCorrelations }>(`/daily-logs/correlations?from=${from}&to=${to}`)
-      .then((res) => setCorrelations(res.data.correlations))
-      .catch(() => {
-        // correlations refresh on the next page load
-      });
   }
 
   function goToday() {
@@ -357,18 +362,18 @@ export default function JournalPage() {
 
               <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                 <div className="mb-4 flex items-baseline justify-between">
-                  <span className="text-xs font-medium text-foreground/60">How my habits relate to my state</span>
-                  <span className="text-[10px] text-foreground/60">association, not causation</span>
+                  <span className="text-xs font-medium text-foreground/60">Your daily state this month</span>
+                  <span className="text-[10px] text-foreground/60">
+                    {loggedDays} logged day{loggedDays === 1 ? "" : "s"}
+                  </span>
                 </div>
-                {correlations ? (
-                  <div className="grid gap-6 md:grid-cols-3">
-                    <CorrelationList title="Sleep" items={correlations.sleep} />
-                    <CorrelationList title="Mood" items={correlations.mood} />
-                    <CorrelationList title="Energy" items={correlations.energy} />
-                  </div>
-                ) : null}
+                <div className="grid gap-5 md:grid-cols-3">
+                  <StateCard icon={<Smile className="size-4" />} label="Mood" value={avgMood} scale={10} unit="/10" />
+                  <StateCard icon={<Zap className="size-4" />} label="Energy" value={avgEnergy} scale={10} unit="/10" />
+                  <StateCard icon={<BedDouble className="size-4" />} label="Sleep" value={avgSleep} scale={10} unit="h" />
+                </div>
                 <p className="mt-4 border-t border-border/40 pt-3 text-[10px] text-foreground/60">
-                  These are associations observed in your logged days — they don't imply that one causes the other.
+                  Monthly averages of the values you logged. The bar shows your average on a 0–10 scale.
                 </p>
               </div>
             </div>
