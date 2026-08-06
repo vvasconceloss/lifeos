@@ -7,6 +7,12 @@ export {
   heatmapResponseSchema,
   statsQuerySchema,
   idParamSchema,
+  analyticsTrendSchema,
+  analyticsRatePointSchema,
+  analyticsHabitConsistencySchema,
+  analyticsStreakPointSchema,
+  analyticsResponseSchema,
+  analyticsQuerySchema,
 } from "@lifeos/shared";
 
 export type {
@@ -19,4 +25,10 @@ export type {
   StatsQuery,
   IdParam,
   HabitFrequency,
+  AnalyticsTrend,
+  AnalyticsRatePoint,
+  AnalyticsHabitConsistency,
+  AnalyticsStreakPoint,
+  AnalyticsResponse,
+  AnalyticsQuery,
 } from "@lifeos/shared";

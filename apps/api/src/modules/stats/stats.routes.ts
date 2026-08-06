@@ -1,10 +1,23 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
-import { idParamSchema, statsQuerySchema } from './stats.schemas';
-import { getHabitStats, getHeatmap, getMonthlyStats, getOverview } from './stats.service';
+import { idParamSchema, statsQuerySchema, analyticsQuerySchema } from './stats.schemas';
+import { getAnalytics, getHabitStats, getHeatmap, getMonthlyStats, getOverview } from './stats.service';
 
 export async function statsRoutes(fastify: FastifyInstance) {
+  fastify.get(
+    '/stats/analytics',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const query = validateInput(analyticsQuerySchema, request.query, reply);
+      if (!query) return;
+
+      const stats = await getAnalytics(request.user.sub, query.weeks ?? 12);
+
+      return { stats };
+    },
+  );
+
   fastify.get(
     '/stats/heatmap',
     { preHandler: requireAuth },
