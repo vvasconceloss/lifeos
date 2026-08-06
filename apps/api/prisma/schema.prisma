@@ -12,22 +12,28 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   name         String?
+  timezone     String?
+  weekStart    Int      @default(1)
+  theme        String   @default("system")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  pillars Pillar[]
-  habits  Habit[]
-  goals   Goal[]
+  pillars   Pillar[]
+  habits    Habit[]
+  goals     Goal[]
   dailyLogs DailyLog[]
 }
 
 model Pillar {
-  id        String   @id @default(uuid())
-  name      String
-  color     String?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  color       String?
+  icon        String?
+  description String?
+  sortOrder   Int      @default(0)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   habits Habit[]
@@ -46,6 +52,9 @@ model Habit {
   daysOfWeek    Int[]          @default([])
   timesPerWeek  Int?
   timesPerMonth Int?
+  icon          String?
+  color         String?
+  sortOrder     Int            @default(0)
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt

@@ -9,6 +9,8 @@ export const HABIT_FREQUENCIES = [
 
 export type HabitFrequency = (typeof HABIT_FREQUENCIES)[number];
 
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color");
+
 const frequencyFields = {
   frequency: z.enum(HABIT_FREQUENCIES).optional(),
   daysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
@@ -73,6 +75,8 @@ export const createHabitBodySchema = z
     name: z.string().min(1).max(200),
     description: z.string().max(1000).optional(),
     pillarId: z.uuid(),
+    icon: z.string().max(50).optional(),
+    color: hexColor.optional(),
     ...frequencyFields,
   })
   .superRefine(validateFrequencyParams);
@@ -84,11 +88,20 @@ export const updateHabitBodySchema = z
     name: z.string().min(1).max(200).optional(),
     description: z.string().max(1000).optional(),
     pillarId: z.uuid().optional(),
+    icon: z.string().max(50).optional().nullable(),
+    color: hexColor.optional().nullable(),
+    sortOrder: z.number().int().min(0).max(10000).optional(),
     ...frequencyFields,
   })
   .superRefine(validateFrequencyParams);
 
 export type UpdateHabitBody = z.infer<typeof updateHabitBodySchema>;
+
+export const habitReorderBodySchema = z.object({
+  ids: z.array(z.uuid()).min(1),
+});
+
+export type HabitReorderBody = z.infer<typeof habitReorderBodySchema>;
 
 export interface HabitResponse {
   id: string;
@@ -100,6 +113,9 @@ export interface HabitResponse {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   isActive: boolean;
   archivedAt: Date | null;
   createdAt: Date;
