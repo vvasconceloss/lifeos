@@ -8,6 +8,7 @@ import {
   getMonthReference,
   getYearRange,
   toDateKey,
+  weekStartOf,
 } from "./stats.utils";
 import {
   completionRate,
@@ -42,6 +43,11 @@ function countKeysInRange(keys: Set<string>, fromKey: string, toKey: string): nu
   return count;
 }
 
+async function getWeekStart(userId: string): Promise<number> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { weekStart: true } });
+  return user?.weekStart ?? 1;
+}
+
 function computeHabitStats(
   habit: {
     id: string;
@@ -55,6 +61,7 @@ function computeHabitStats(
   reference: Date,
   from: Date,
   to: Date,
+  weekStart = 1,
 ): HabitStats {
   const freq = frequencyParams(habit);
   const fromKey = toDateKey(from);
@@ -65,8 +72,8 @@ function computeHabitStats(
     habitId: habit.id,
     habitName: habit.name,
     completionRate: completionRate(monthKeys.size, expectedCompletions(freq, from, to)),
-    currentStreak: getCurrentStreakForFrequency(freq, completedKeys, reference),
-    bestStreak: getBestStreakForFrequency(freq, monthKeys),
+    currentStreak: getCurrentStreakForFrequency(freq, completedKeys, reference, weekStart),
+    bestStreak: getBestStreakForFrequency(freq, monthKeys, weekStart),
   };
 }
 
@@ -103,6 +110,7 @@ export async function getHabitStats(
   const reference = getMonthReference(year, month);
   const { from, to } = getMonthRange(year, month);
   const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
+  const weekStart = await getWeekStart(userId);
 
   const completions = await prisma.habitCompletion.findMany({
     where: { habitId, date: { gte: lookbackStart, lte: to } },
@@ -116,6 +124,7 @@ export async function getHabitStats(
     reference,
     from,
     to,
+    weekStart,
   );
 }
 
@@ -189,6 +198,7 @@ export async function getOverview(
   const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
   const fromKey = toDateKey(from);
   const toKey = toDateKey(to);
+  const weekStart = await getWeekStart(userId);
 
   const [habits, pillars] = await Promise.all([
     prisma.habit.findMany({
@@ -230,6 +240,7 @@ export async function getOverview(
       reference,
       from,
       to,
+      weekStart,
     ),
   );
 
@@ -372,11 +383,6 @@ export async function getHeatmap(
   return { year, month, maxCount, days };
 }
 
-function mondayOf(date: Date): Date {
-  const day = (date.getUTCDay() + 6) % 7;
-  return addDays(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())), -day);
-}
-
 function monthLabel(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
@@ -404,7 +410,8 @@ function consistencyScore(counts: number[]): number {
 export async function getAnalytics(userId: string, weeks: number): Promise<AnalyticsResponse> {
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const currentWeekStart = mondayOf(today);
+  const weekStart = await getWeekStart(userId);
+  const currentWeekStart = weekStartOf(today, weekStart);
   const firstWeekStart = addDays(currentWeekStart, -(weeks - 1) * 7);
 
   const months: { start: Date; end: Date; label: string }[] = [];
@@ -524,7 +531,7 @@ export async function getAnalytics(userId: string, weeks: number): Promise<Analy
     let best = 0;
     for (const h of habits) {
       const keys = new Set([...(completedByHabit.get(h.id) ?? [])].filter((k) => k >= toDateKey(start) && k <= toDateKey(end)));
-      best = Math.max(best, getBestStreakForFrequency(freqOf(h), keys));
+      best = Math.max(best, getBestStreakForFrequency(freqOf(h), keys, weekStart));
     }
     return { label, bestStreak: best };
   });

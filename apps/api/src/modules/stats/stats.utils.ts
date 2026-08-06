@@ -12,6 +12,11 @@ export function addDays(date: Date, days: number): Date {
   return result;
 }
 
+export function weekStartOf(date: Date, weekStart: number): Date {
+  const day = (date.getUTCDay() - weekStart + 7) % 7;
+  return addDays(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())), -day);
+}
+
 export function daysBetween(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / 86400000);
 }

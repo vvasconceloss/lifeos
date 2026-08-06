@@ -6,6 +6,7 @@ import {
   getDaysInMonth,
   parseDateKey,
   toDateKey,
+  weekStartOf,
 } from "../modules/stats/stats.utils";
 
 const MS_PER_DAY = 86400000;
@@ -69,11 +70,6 @@ function countCompletedInRange(completedKeys: Set<string>, from: Date, to: Date)
   return count;
 }
 
-function mondayOf(date: Date): Date {
-  const day = (date.getUTCDay() + 6) % 7;
-  return addDays(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())), -day);
-}
-
 function monthStart(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 }
@@ -115,12 +111,17 @@ function getWeeklyDaysBestStreak(f: FrequencyParams, completedKeys: Set<string>)
   return best;
 }
 
-function getTimesPerWeekCurrentStreak(f: FrequencyParams, completedKeys: Set<string>, reference: Date): number {
+function getTimesPerWeekCurrentStreak(
+  f: FrequencyParams,
+  completedKeys: Set<string>,
+  reference: Date,
+  weekStart: number,
+): number {
   const target = f.timesPerWeek ?? 1;
-  const currentKey = toDateKey(mondayOf(reference));
+  const currentKey = toDateKey(weekStartOf(reference, weekStart));
   let streak = 0;
   let guard = 0;
-  for (let w = mondayOf(reference); guard < 10000; w = addDays(w, -7), guard++) {
+  for (let w = weekStartOf(reference, weekStart); guard < 10000; w = addDays(w, -7), guard++) {
     const count = countCompletedInRange(completedKeys, w, addDays(w, 6));
     if (count >= target) {
       streak++;
@@ -133,7 +134,11 @@ function getTimesPerWeekCurrentStreak(f: FrequencyParams, completedKeys: Set<str
   return streak;
 }
 
-function getTimesPerWeekBestStreak(f: FrequencyParams, completedKeys: Set<string>): number {
+function getTimesPerWeekBestStreak(
+  f: FrequencyParams,
+  completedKeys: Set<string>,
+  weekStart: number,
+): number {
   if (completedKeys.size === 0) return 0;
   const target = f.timesPerWeek ?? 1;
   const dates = [...completedKeys].map(parseDateKey);
@@ -141,7 +146,7 @@ function getTimesPerWeekBestStreak(f: FrequencyParams, completedKeys: Set<string
   const last = dates.reduce((a, b) => (a.getTime() > b.getTime() ? a : b));
   let best = 0;
   let run = 0;
-  for (let w = mondayOf(first); w <= last; w = addDays(w, 7)) {
+  for (let w = weekStartOf(first, weekStart); w <= last; w = addDays(w, 7)) {
     if (countCompletedInRange(completedKeys, w, addDays(w, 6)) >= target) run++;
     else run = 0;
     if (run > best) best = run;
@@ -191,6 +196,7 @@ export function getCurrentStreakForFrequency(
   f: FrequencyParams,
   completedKeys: Set<string>,
   reference: Date,
+  weekStart = 1,
 ): number {
   switch (f.frequency) {
     case "DAILY":
@@ -198,20 +204,24 @@ export function getCurrentStreakForFrequency(
     case "WEEKLY_DAYS":
       return getWeeklyDaysCurrentStreak(f, completedKeys, reference);
     case "TIMES_PER_WEEK":
-      return getTimesPerWeekCurrentStreak(f, completedKeys, reference);
+      return getTimesPerWeekCurrentStreak(f, completedKeys, reference, weekStart);
     case "TIMES_PER_MONTH":
       return getTimesPerMonthCurrentStreak(f, completedKeys, reference);
   }
 }
 
-export function getBestStreakForFrequency(f: FrequencyParams, completedKeys: Set<string>): number {
+export function getBestStreakForFrequency(
+  f: FrequencyParams,
+  completedKeys: Set<string>,
+  weekStart = 1,
+): number {
   switch (f.frequency) {
     case "DAILY":
       return getBestStreak(completedKeys);
     case "WEEKLY_DAYS":
       return getWeeklyDaysBestStreak(f, completedKeys);
     case "TIMES_PER_WEEK":
-      return getTimesPerWeekBestStreak(f, completedKeys);
+      return getTimesPerWeekBestStreak(f, completedKeys, weekStart);
     case "TIMES_PER_MONTH":
       return getTimesPerMonthBestStreak(f, completedKeys);
   }
