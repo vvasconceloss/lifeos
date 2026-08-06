@@ -17,6 +17,7 @@ model User {
 
   pillars Pillar[]
   habits  Habit[]
+  goals   Goal[]
 }
 
 model Pillar {
@@ -29,6 +30,7 @@ model Pillar {
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   habits Habit[]
+  goals  Goal[]
 
   @@index([userId])
 }
@@ -51,6 +53,7 @@ model Habit {
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   pillar      Pillar            @relation(fields: [pillarId], references: [id], onDelete: Restrict)
   completions HabitCompletion[]
+  goalHabits  GoalHabit[]
 
   @@index([userId])
   @@index([pillarId])
@@ -61,6 +64,43 @@ enum HabitFrequency {
   WEEKLY_DAYS
   TIMES_PER_WEEK
   TIMES_PER_MONTH
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  userId      String
+  pillarId    String
+  status      GoalStatus @default(ACTIVE)
+  deadline    DateTime?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pillar Pillar      @relation(fields: [pillarId], references: [id], onDelete: Restrict)
+  habits GoalHabit[]
+
+  @@index([userId])
+  @@index([pillarId])
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model GoalHabit {
+  goalId    String
+  habitId   String
+  createdAt DateTime @default(now())
+
+  goal  Goal  @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, habitId])
 }
 
 model HabitCompletion {
