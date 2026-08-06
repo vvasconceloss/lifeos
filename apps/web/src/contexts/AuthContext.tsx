@@ -24,6 +24,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.data.user);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await api.get<{ user: User }>("/auth/me");
+      setUser(res.data.user);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout");
@@ -34,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout }
+    <AuthContext.Provider value={{ user, loading, register, login, refreshUser, logout }
     }>
       {children}
     </AuthContext.Provider>

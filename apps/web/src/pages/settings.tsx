@@ -1,0 +1,170 @@
+import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { useState } from "react";
+import { AppLayout } from "@/components/app-layout";
+import { ProtectedRoute } from "@/components/protected-route";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
+import type { User } from "@/contexts/AuthContextBase";
+
+const TIMEZONES = [
+  "UTC",
+  "Europe/Lisbon",
+  "Europe/London",
+  "Europe/Madrid",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "America/New_York",
+  "America/Sao_Paulo",
+  "America/Los_Angeles",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Asia/Kolkata",
+  "Australia/Sydney",
+];
+
+const WEEK_START_OPTIONS = [
+  { value: 1, label: "Monday" },
+  { value: 0, label: "Sunday" },
+  { value: 6, label: "Saturday" },
+];
+
+const inputClass =
+  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
+
+function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<void> }) {
+  const { setTheme } = useTheme();
+  const [name, setName] = useState(user.name ?? "");
+  const [themePref, setThemePref] = useState<"light" | "dark" | "system">(
+    (user.theme as "light" | "dark" | "system") || "system",
+  );
+  const [timezone, setTimezone] = useState(user.timezone ?? "");
+  const [weekStart, setWeekStart] = useState(user.weekStart ?? 1);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const payload: Record<string, unknown> = {
+        name: name.trim() || null,
+        theme: themePref,
+        weekStart,
+      };
+      if (timezone) payload.timezone = timezone;
+
+      await api.patch("/auth/me", payload);
+      setTheme(themePref);
+      await onSaved();
+      toast.success("Settings saved");
+    } catch {
+      toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+      <div>
+        <h3 className="mb-1 text-sm font-semibold text-foreground">Profile</h3>
+        <p className="mb-3 text-xs text-foreground/60">Your display name across the app.</p>
+        <div className="grid gap-2">
+          <label htmlFor="s-name" className="text-xs font-medium text-foreground/60">
+            Name
+          </label>
+          <input
+            id="s-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      <div className="border-t border-border/40 pt-4">
+        <h3 className="mb-1 text-sm font-semibold text-foreground">Preferences</h3>
+        <p className="mb-3 text-xs text-foreground/60">Theme, timezone and the day your week starts.</p>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <label htmlFor="s-theme" className="text-xs font-medium text-foreground/60">
+              Theme
+            </label>
+            <select
+              id="s-theme"
+              value={themePref}
+              onChange={(e) => setThemePref(e.target.value as typeof themePref)}
+              className={inputClass}
+            >
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="s-tz" className="text-xs font-medium text-foreground/60">
+              Timezone
+            </label>
+            <select
+              id="s-tz"
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Not set</option>
+              {TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="s-week" className="text-xs font-medium text-foreground/60">
+              Week starts on
+            </label>
+            <select
+              id="s-week"
+              value={weekStart}
+              onChange={(e) => setWeekStart(Number(e.target.value))}
+              className={inputClass}
+            >
+              {WEEK_START_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+      >
+        {saving ? <Spinner className="size-4" /> : null}
+        {saving ? "Saving..." : "Save settings"}
+      </button>
+    </div>
+  );
+}
+
+export default function SettingsPage() {
+  const { user, refreshUser } = useAuth();
+
+  return (
+    <ProtectedRoute>
+      <AppLayout>
+        <main className="mx-auto w-full max-w-lg px-6 py-6">
+          <h2 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">Settings</h2>
+          {user ? <SettingsForm key={user.id} user={user} onSaved={refreshUser} /> : null}
+        </main>
+      </AppLayout>
+    </ProtectedRoute>
+  );
+}
