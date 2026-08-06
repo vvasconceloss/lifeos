@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const dateKey = z
+export const dateKeySchema = z
   .string()
   .regex(
     /^\d{4}-\d{2}-\d{2}$/,
@@ -19,6 +19,8 @@ const dateKey = z
     "Invalid calendar date",
   );
 
+export type DateKey = z.infer<typeof dateKeySchema>;
+
 export const idParamSchema = z.object({
   id: z.uuid(),
 });
@@ -27,14 +29,14 @@ export type IdParam = z.infer<typeof idParamSchema>;
 
 export const completionParamsSchema = z.object({
   id: z.uuid(),
-  date: dateKey,
+  date: dateKeySchema,
 });
 
 export type CompletionParams = z.infer<typeof completionParamsSchema>;
 
 export const listCompletionsQuerySchema = z.object({
-  from: dateKey.optional(),
-  to: dateKey.optional(),
+  from: dateKeySchema.optional(),
+  to: dateKeySchema.optional(),
 });
 
 export type ListCompletionsQuery = z.infer<typeof listCompletionsQuerySchema>;
