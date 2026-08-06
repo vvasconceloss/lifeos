@@ -2,7 +2,6 @@ import { prisma } from "../../db/client";
 import type { AnalyticsResponse, HabitFrequency, HabitStats, HeatmapResponse, MonthlyStats, PillarStats, StatsOverview } from "./stats.schemas";
 import {
   addDays,
-  buildDailyKeySet,
   buildHeatmapDays,
   getDaysInMonth,
   getMonthRange,
@@ -32,6 +31,17 @@ function frequencyParams(habit: {
   };
 }
 
+/** Upper bound for current-streak lookback when loading completion history (≈1 year). */
+const STREAK_LOOKBACK_DAYS = 370;
+
+function countKeysInRange(keys: Set<string>, fromKey: string, toKey: string): number {
+  let count = 0;
+  for (const key of keys) {
+    if (key >= fromKey && key <= toKey) count++;
+  }
+  return count;
+}
+
 function computeHabitStats(
   habit: {
     id: string;
@@ -41,22 +51,40 @@ function computeHabitStats(
     timesPerWeek: number | null;
     timesPerMonth: number | null;
   },
-  dates: Date[],
-  year: number,
-  month: number,
+  completedKeys: Set<string>,
+  reference: Date,
+  from: Date,
+  to: Date,
 ): HabitStats {
-  const reference = getMonthReference(year, month);
   const freq = frequencyParams(habit);
-  const { from, to } = getMonthRange(year, month);
-  const allKeys = buildDailyKeySet(dates, reference);
-  const monthKeys = buildDailyKeySet(dates.filter((d) => d >= from && d <= to), reference);
+  const fromKey = toDateKey(from);
+  const toKey = toDateKey(to);
+  const monthKeys = new Set([...completedKeys].filter((k) => k >= fromKey && k <= toKey));
 
   return {
     habitId: habit.id,
     habitName: habit.name,
     completionRate: completionRate(monthKeys.size, expectedCompletions(freq, from, to)),
-    currentStreak: getCurrentStreakForFrequency(freq, allKeys, reference),
+    currentStreak: getCurrentStreakForFrequency(freq, completedKeys, reference),
     bestStreak: getBestStreakForFrequency(freq, monthKeys),
+  };
+}
+
+function habitInput(h: {
+  id: string;
+  name: string;
+  frequency: HabitFrequency;
+  daysOfWeek: number[];
+  timesPerWeek: number | null;
+  timesPerMonth: number | null;
+}) {
+  return {
+    id: h.id,
+    name: h.name,
+    frequency: h.frequency,
+    daysOfWeek: h.daysOfWeek,
+    timesPerWeek: h.timesPerWeek,
+    timesPerMonth: h.timesPerMonth,
   };
 }
 
@@ -72,65 +100,22 @@ export async function getHabitStats(
 
   if (!habit) return null;
 
+  const reference = getMonthReference(year, month);
+  const { from, to } = getMonthRange(year, month);
+  const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
+
   const completions = await prisma.habitCompletion.findMany({
-    where: { habitId },
+    where: { habitId, date: { gte: lookbackStart, lte: to } },
     select: { date: true },
   });
+  const keys = new Set(completions.map((c) => toDateKey(c.date)));
 
   return computeHabitStats(
-    {
-      id: habit.id,
-      name: habit.name,
-      frequency: habit.frequency as HabitFrequency,
-      daysOfWeek: habit.daysOfWeek,
-      timesPerWeek: habit.timesPerWeek,
-      timesPerMonth: habit.timesPerMonth,
-    },
-    completions.map((c) => c.date),
-    year,
-    month,
-  );
-}
-
-async function getHabitStatsList(
-  userId: string,
-  year: number,
-  month: number,
-): Promise<HabitStats[]> {
-  const habits = await prisma.habit.findMany({
-    where: { userId, isActive: true },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const habitIds = habits.map((h) => h.id);
-  if (habitIds.length === 0) return [];
-
-  const completions = await prisma.habitCompletion.findMany({
-    where: { habitId: { in: habitIds } },
-    select: { habitId: true, date: true },
-  });
-
-  const datesByHabit = new Map<string, Date[]>();
-  for (const completion of completions) {
-    const dates = datesByHabit.get(completion.habitId) ?? [];
-    dates.push(completion.date);
-    datesByHabit.set(completion.habitId, dates);
-  }
-
-  return habits.map((h) =>
-    computeHabitStats(
-      {
-        id: h.id,
-        name: h.name,
-        frequency: h.frequency as HabitFrequency,
-        daysOfWeek: h.daysOfWeek,
-        timesPerWeek: h.timesPerWeek,
-        timesPerMonth: h.timesPerMonth,
-      },
-      datesByHabit.get(h.id) ?? [],
-      year,
-      month,
-    ),
+    habitInput(habit as Parameters<typeof habitInput>[0]),
+    keys,
+    reference,
+    from,
+    to,
   );
 }
 
@@ -199,20 +184,98 @@ export async function getOverview(
   year: number,
   month: number,
 ): Promise<StatsOverview> {
-  const [pillarStats, habitStats, monthly] = await Promise.all([
-    getPillarStats(userId, year, month),
-    getHabitStatsList(userId, year, month),
-    getMonthlyStats(userId, year, month),
+  const { from, to } = getMonthRange(year, month);
+  const reference = getMonthReference(year, month);
+  const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
+  const fromKey = toDateKey(from);
+  const toKey = toDateKey(to);
+
+  const [habits, pillars] = await Promise.all([
+    prisma.habit.findMany({
+      where: { userId, isActive: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.pillar.findMany({ where: { userId }, orderBy: { createdAt: "asc" } }),
   ]);
 
-  return {
-    year,
-    month,
-    totalCompletions: monthly.totalCompletions,
-    successRate: monthly.successRate,
-    pillarStats,
-    habitStats,
-  };
+  const habitIds = habits.map((h) => h.id);
+
+  const completions =
+    habitIds.length > 0
+      ? await prisma.habitCompletion.findMany({
+          where: { habitId: { in: habitIds }, date: { gte: lookbackStart, lte: to } },
+          select: { habitId: true, date: true },
+        })
+      : [];
+
+  const completedByHabit = new Map<string, Set<string>>();
+  const completedByDay = new Map<string, number>();
+  for (const c of completions) {
+    const key = toDateKey(c.date);
+    let set = completedByHabit.get(c.habitId);
+    if (!set) {
+      set = new Set();
+      completedByHabit.set(c.habitId, set);
+    }
+    set.add(key);
+    if (key >= fromKey && key <= toKey) {
+      completedByDay.set(key, (completedByDay.get(key) ?? 0) + 1);
+    }
+  }
+
+  const habitStats = habits.map((h) =>
+    computeHabitStats(
+      habitInput(h),
+      completedByHabit.get(h.id) ?? new Set(),
+      reference,
+      from,
+      to,
+    ),
+  );
+
+  const habitCountByPillar = new Map<string, number>();
+  for (const h of habits) {
+    habitCountByPillar.set(h.pillarId, (habitCountByPillar.get(h.pillarId) ?? 0) + 1);
+  }
+
+  const pillarStats = pillars.map((pillar) => {
+    let completed = 0;
+    let total = 0;
+    for (const h of habits) {
+      if (h.pillarId !== pillar.id) continue;
+      total += expectedCompletions(frequencyParams(h), from, to);
+      completed += countKeysInRange(completedByHabit.get(h.id) ?? new Set(), fromKey, toKey);
+    }
+    return {
+      pillarId: pillar.id,
+      pillarName: pillar.name,
+      color: pillar.color,
+      activeHabitCount: habitCountByPillar.get(pillar.id) ?? 0,
+      completed,
+      total,
+      completionRate: completionRate(completed, total),
+    };
+  });
+
+  const daysInMonth = getDaysInMonth(year, month);
+  const dailyCounts: { date: string; count: number }[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    dailyCounts.push({ date: dateStr, count: completedByDay.get(dateStr) ?? 0 });
+  }
+
+  const habitProgress = habits.map((h) => ({
+    habitId: h.id,
+    habitName: h.name,
+    completed: countKeysInRange(completedByHabit.get(h.id) ?? new Set(), fromKey, toKey),
+    goal: expectedCompletions(frequencyParams(h), from, to),
+  }));
+
+  const totalCompletions = dailyCounts.reduce((s, d) => s + d.count, 0);
+  const totalPossible = habitProgress.reduce((s, h) => s + h.goal, 0);
+  const successRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
+
+  return { year, month, totalCompletions, successRate, pillarStats, habitStats };
 }
 
 export async function getMonthlyStats(
