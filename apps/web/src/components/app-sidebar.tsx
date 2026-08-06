@@ -1,4 +1,20 @@
 import {
+  LayoutDashboard,
+  Layers,
+  ListChecks,
+  LogOut,
+  BarChart3,
+  Sparkles,
+  Target,
+  NotebookPen,
+  User,
+} from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
+import { UserAvatar } from "@/components/user-avatar";
+import { Link, useLocation } from "@tanstack/react-router";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -9,20 +25,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  LayoutDashboard,
-  Layers,
-  ListChecks,
-  LogOut,
-  BarChart3,
-  Sparkles,
-  Target,
-  NotebookPen,
-  Settings,
-} from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { useTheme } from "@/hooks/use-theme";
-import { Link, useLocation } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard },
@@ -30,7 +32,6 @@ const NAV_ITEMS = [
   { to: "/statistics", label: "Statistics", icon: BarChart3 },
   { to: "/goals", label: "Goals", icon: Target },
   { to: "/journal", label: "Journal", icon: NotebookPen },
-  { to: "/settings", label: "Settings", icon: Settings },
   { to: "/settings/pillars", label: "Pillars", icon: Layers },
   { to: "/settings/habits", label: "Habits", icon: ListChecks },
 ];
@@ -53,9 +54,6 @@ export function AppSidebar() {
               />
               <div className="flex flex-col leading-tight">
                 <span className="font-semibold uppercase">LifeOS</span>
-                <span className="text-xs text-muted-foreground">
-                  {user?.email}
-                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -84,13 +82,39 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={logout}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <LogOut />
-              <span>Sign out</span>
-            </SidebarMenuButton>
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    className="flex h-8 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                    aria-label="Open profile menu"
+                  >
+                    <UserAvatar email={user?.email ?? ""} className="size-6" />
+                    <span className="min-w-0 flex-1 truncate text-sidebar-foreground/80 group-data-[collapsible=icon]:hidden">
+                      {user?.email}
+                    </span>
+                  </button>
+                }
+              />
+              <PopoverContent className="w-52 p-1" side="top" align="start">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
+                >
+                  <User className="size-4" />
+                  Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
+                >
+                  <LogOut className="size-4" />
+                  Log out
+                </button>
+              </PopoverContent>
+            </Popover>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

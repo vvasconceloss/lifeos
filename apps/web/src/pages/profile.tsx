@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Spinner } from "@/components/ui/spinner";
+import { UserAvatar } from "@/components/user-avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import type { User } from "@/contexts/AuthContextBase";
@@ -33,7 +34,7 @@ const WEEK_START_OPTIONS = [
 const inputClass =
   "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
-function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<void> }) {
+function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<void> }) {
   const { setTheme } = useTheme();
   const [name, setName] = useState(user.name ?? "");
   const [themePref, setThemePref] = useState<"light" | "dark" | "system">(
@@ -56,25 +57,25 @@ function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<vo
       await api.patch("/auth/me", payload);
       setTheme(themePref);
       await onSaved();
-      toast.success("Settings saved");
+      toast.success("Profile updated");
     } catch {
-      toast.error("Failed to save settings");
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="grid gap-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-      <div>
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
         <h3 className="mb-1 text-sm font-semibold text-foreground">Profile</h3>
         <p className="mb-3 text-xs text-foreground/60">Your display name across the app.</p>
         <div className="grid gap-2">
-          <label htmlFor="s-name" className="text-xs font-medium text-foreground/60">
+          <label htmlFor="p-name" className="text-xs font-medium text-foreground/60">
             Name
           </label>
           <input
-            id="s-name"
+            id="p-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
@@ -83,16 +84,16 @@ function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<vo
         </div>
       </div>
 
-      <div className="border-t border-border/40 pt-4">
+      <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
         <h3 className="mb-1 text-sm font-semibold text-foreground">Preferences</h3>
         <p className="mb-3 text-xs text-foreground/60">Theme, timezone and the day your week starts.</p>
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <label htmlFor="s-theme" className="text-xs font-medium text-foreground/60">
+            <label htmlFor="p-theme" className="text-xs font-medium text-foreground/60">
               Theme
             </label>
             <select
-              id="s-theme"
+              id="p-theme"
               value={themePref}
               onChange={(e) => setThemePref(e.target.value as typeof themePref)}
               className={inputClass}
@@ -104,11 +105,11 @@ function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<vo
           </div>
 
           <div className="grid gap-2">
-            <label htmlFor="s-tz" className="text-xs font-medium text-foreground/60">
+            <label htmlFor="p-tz" className="text-xs font-medium text-foreground/60">
               Timezone
             </label>
             <select
-              id="s-tz"
+              id="p-tz"
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
               className={inputClass}
@@ -123,11 +124,11 @@ function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<vo
           </div>
 
           <div className="grid gap-2">
-            <label htmlFor="s-week" className="text-xs font-medium text-foreground/60">
+            <label htmlFor="p-week" className="text-xs font-medium text-foreground/60">
               Week starts on
             </label>
             <select
-              id="s-week"
+              id="p-week"
               value={weekStart}
               onChange={(e) => setWeekStart(Number(e.target.value))}
               className={inputClass}
@@ -142,27 +143,37 @@ function SettingsForm({ user, onSaved }: { user: User; onSaved: () => Promise<vo
         </div>
       </div>
 
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-      >
-        {saving ? <Spinner className="size-4" /> : null}
-        {saving ? "Saving..." : "Save settings"}
-      </button>
+      <div className="lg:col-span-2">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 sm:w-auto"
+        >
+          {saving ? <Spinner className="size-4" /> : null}
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+      </div>
     </div>
   );
 }
 
-export default function SettingsPage() {
+export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
 
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-lg px-6 py-6">
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">Settings</h2>
-          {user ? <SettingsForm key={user.id} user={user} onSaved={refreshUser} /> : null}
+        <main className="mx-auto w-full max-w-4xl px-6 py-6">
+          <div className="mb-6 flex items-center gap-4">
+            {user && <UserAvatar email={user.email} className="size-14 text-xl" />}
+            <div className="min-w-0">
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                {user?.name || "Your profile"}
+              </h2>
+              <p className="truncate text-sm text-foreground/60">{user?.email}</p>
+            </div>
+          </div>
+          {user ? <ProfileForm key={user.id} user={user} onSaved={refreshUser} /> : null}
         </main>
       </AppLayout>
     </ProtectedRoute>
