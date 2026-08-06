@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile
 # The Prisma config reads DATABASE_URL via env(); a placeholder is enough to generate the client.
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 RUN pnpm --filter @lifeos/api exec prisma generate
+RUN pnpm --filter @lifeos/api build
 
 ENV NODE_ENV=production
 EXPOSE 3000
