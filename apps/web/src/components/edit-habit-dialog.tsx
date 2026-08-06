@@ -45,7 +45,7 @@ interface Habit {
 }
 
 const inputClass =
-  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring";
+  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function EditHabitDialog({
   habit,
@@ -136,7 +136,7 @@ export function EditHabitDialog({
         render={
           <button
             type="button"
-            className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+            className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
             aria-label={`Edit ${habit.name}`}
           >
             <Pencil className="size-4" />

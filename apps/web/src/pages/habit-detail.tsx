@@ -26,7 +26,7 @@ function SummaryCard({ label, value, sub }: { label: string; value: string; sub?
     <div className="flex flex-col gap-0.5 rounded-2xl border border-border/80 bg-card px-4 py-3 shadow-sm">
       <span className="text-[11px] font-medium text-foreground/60">{label}</span>
       <span className="text-xl font-bold tracking-tight text-foreground tabular-nums">{value}</span>
-      {sub && <span className="text-[10px] text-foreground/50">{sub}</span>}
+      {sub && <span className="text-[10px] text-foreground/60">{sub}</span>}
     </div>
   );
 }
@@ -82,7 +82,7 @@ export default function HabitDetailPage() {
       <AppLayout>
         <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-6">
           {loading && !history ? (
-            <div className="flex flex-1 items-center justify-center text-foreground/50">
+            <div className="flex flex-1 items-center justify-center text-foreground/60">
               <Spinner />
             </div>
           ) : error ? (
@@ -128,7 +128,7 @@ export default function HabitDetailPage() {
                     {history.comparison.delta < 0 && <ArrowDownRight className="size-5 text-destructive" aria-hidden />}
                     <span className="text-foreground">{history.comparison.delta > 0 ? "+" : ""}{history.comparison.delta}%</span>
                   </span>
-                  <span className="text-[10px] text-foreground/50">
+                  <span className="text-[10px] text-foreground/60">
                     {history.comparison.current}% now · {history.comparison.previous}% before
                   </span>
                 </div>
@@ -155,7 +155,7 @@ export default function HabitDetailPage() {
                               ? cell.date > todayKey
                                 ? "bg-border/40 text-foreground/40"
                                 : "border border-destructive/40 text-foreground/60"
-                              : "text-foreground/25"
+                              : "text-foreground/40"
                         }`}
                         role="img"
                         aria-label={`${cell.date}: ${cell.completed ? "completed" : cell.scheduled ? "scheduled, not completed" : "not scheduled"}`}
@@ -167,7 +167,7 @@ export default function HabitDetailPage() {
                     ),
                   )}
                 </div>
-                <div className="mt-3 flex shrink-0 flex-wrap gap-4 text-[10px] text-foreground/50">
+                <div className="mt-3 flex shrink-0 flex-wrap gap-4 text-[10px] text-foreground/60">
                   <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-emerald-500" /> Completed</span>
                   <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] border border-destructive/40" /> Scheduled, missed</span>
                   <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-border/40" /> Scheduled, future</span>

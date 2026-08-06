@@ -125,7 +125,7 @@ export default function GoalDetailPage() {
       <AppLayout>
         <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           {loading && !goal ? (
-            <div className="flex flex-1 items-center justify-center text-foreground/50">
+            <div className="flex flex-1 items-center justify-center text-foreground/60">
               <Spinner />
             </div>
           ) : error ? (
@@ -142,7 +142,7 @@ export default function GoalDetailPage() {
                 </Link>
                 <div className="min-w-0 flex-1">
                   <h2 className="truncate text-lg font-semibold tracking-tight text-foreground">{goal.title}</h2>
-                  <span className="text-xs text-foreground/50">{goal.pillarName}</span>
+                  <span className="text-xs text-foreground/60">{goal.pillarName}</span>
                 </div>
                 <GoalStatusBadge status={goal.status} />
                 <EditGoalDialog goal={goal} pillars={pillars} onUpdated={handleUpdated} />
@@ -200,7 +200,7 @@ export default function GoalDetailPage() {
               <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                 <span className="mb-3 block text-xs font-medium text-foreground/60">Supporting habits</span>
                 {goal.habits.length === 0 ? (
-                  <p className="py-4 text-center text-xs text-foreground/45">
+                  <p className="py-4 text-center text-xs text-foreground/60">
                     No habits linked yet. Add a habit below to start tracking progress.
                   </p>
                 ) : (

@@ -72,7 +72,7 @@ function HeadlineCard({ label, value, sub }: { label: string; value: React.React
     <div className="flex flex-col gap-1 rounded-2xl border border-border/80 bg-card px-4 py-3 shadow-sm">
       <span className="text-[11px] font-medium text-foreground/60">{label}</span>
       <div className="text-xl font-bold tracking-tight text-foreground tabular-nums">{value}</div>
-      {sub && <span className="text-[10px] text-foreground/50">{sub}</span>}
+      {sub && <span className="text-[10px] text-foreground/60">{sub}</span>}
     </div>
   );
 }
@@ -94,7 +94,7 @@ export function InsightsSection({ analytics }: { analytics: AnalyticsResponse })
     <div className="flex flex-col gap-6">
       <div className="flex items-baseline justify-between">
         <span className="text-xs font-medium text-foreground/60">How am I progressing?</span>
-        <span className="text-[10px] text-foreground/50">
+        <span className="text-[10px] text-foreground/60">
           last {analytics.weeks} weeks · this week in progress
         </span>
       </div>
@@ -137,7 +137,7 @@ export function InsightsSection({ analytics }: { analytics: AnalyticsResponse })
         question="Which pillar should I focus on this month?"
       >
         {pillars.length === 0 ? (
-          <p className="py-10 text-center text-xs text-foreground/45">No habits yet.</p>
+          <p className="py-10 text-center text-xs text-foreground/60">No habits yet.</p>
         ) : (
           <div style={{ height: 180 }}>
             <ResponsiveContainer width="100%" height="100%">

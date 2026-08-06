@@ -66,7 +66,7 @@ export function HabitCard({
       <div className="flex min-w-0 flex-1 flex-col">
         <span
           className={`text-sm ${
-            habit.isActive ? "text-foreground" : "text-foreground/50 line-through"
+            habit.isActive ? "text-foreground" : "text-foreground/60 line-through"
           }`}
         >
           <Link to="/habits/$id" params={{ id: habit.id }} className="hover:underline">
@@ -74,7 +74,7 @@ export function HabitCard({
           </Link>
         </span>
         {habit.description && (
-          <span className="truncate text-xs text-foreground/50">{habit.description}</span>
+          <span className="truncate text-xs text-foreground/60">{habit.description}</span>
         )}
         <span className="mt-1.5">
           <FrequencyBadge
@@ -94,7 +94,7 @@ export function HabitCard({
             render={<button />}
             onClick={() => onArchive(habit.id)}
             disabled={archivingId === habit.id}
-            className="rounded-md p-1.5 text-foreground/50 hover:text-foreground disabled:opacity-50"
+            className="rounded-md p-1.5 text-foreground/60 hover:text-foreground disabled:opacity-50"
             aria-label={`Archive ${habit.name}`}
           >
             {archivingId === habit.id ? <Spinner /> : <Archive className="size-4" />}
@@ -106,7 +106,7 @@ export function HabitCard({
         <AlertDialogTrigger
           render={<button />}
           disabled={deletingId === habit.id}
-          className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
+          className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
           aria-label={`Delete ${habit.name}`}
         >
           {deletingId === habit.id ? <Spinner /> : <Trash2 className="size-4" />}

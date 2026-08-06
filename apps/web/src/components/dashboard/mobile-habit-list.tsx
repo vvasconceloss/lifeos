@@ -48,7 +48,7 @@ export function MobileHabitList({
         <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">
           Today
         </span>
-        <span className="text-xs text-foreground/50">{todayLabel}</span>
+        <span className="text-xs text-foreground/60">{todayLabel}</span>
       </div>
 
       {Object.entries(grouped).map(([pillarName, habits]) => (
@@ -81,7 +81,7 @@ export function MobileHabitList({
                     >
                       {habit.name}
                     </Link>
-                    <p className="text-xs text-foreground/50">
+                    <p className="text-xs text-foreground/60">
                       {completed}/{goal} this month · {pct}%
                     </p>
                   </div>

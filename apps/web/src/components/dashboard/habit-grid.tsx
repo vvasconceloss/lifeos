@@ -60,7 +60,7 @@ export function HabitGrid({
               const isToday = d === todayStr;
               const isFuture = d > todayStr;
               return (
-                <div key={d} className={`flex min-w-6 flex-1 items-center justify-center py-3 text-center font-mono text-[11px] leading-none ${isToday ? "font-bold text-foreground" : isFuture ? "text-foreground/25" : "text-foreground/65"}`}>
+                <div key={d} className={`flex min-w-6 flex-1 items-center justify-center py-3 text-center font-mono text-[11px] leading-none ${isToday ? "font-bold text-foreground" : isFuture ? "text-foreground/40" : "text-foreground/65"}`}>
                   {day}
                 </div>
               );

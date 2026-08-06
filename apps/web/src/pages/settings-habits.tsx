@@ -143,7 +143,7 @@ export default function SettingsHabitsPage() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-16 text-foreground/50">
+            <div className="flex justify-center py-16 text-foreground/60">
               <Spinner className="size-5" />
             </div>
           ) : error ? (

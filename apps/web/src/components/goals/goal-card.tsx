@@ -66,7 +66,7 @@ export function GoalCard({
             <AlertDialogTrigger
               render={<button />}
               disabled={deletingId === goal.id}
-              className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
+              className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
               aria-label={`Delete ${goal.title}`}
             >
               {deletingId === goal.id ? <Spinner /> : <Trash2 className="size-4" />}
@@ -107,7 +107,7 @@ export function GoalCard({
         </span>
       </div>
 
-      <div className="flex items-center gap-3 pl-4 text-[10px] text-foreground/50">
+      <div className="flex items-center gap-3 pl-4 text-[10px] text-foreground/60">
         {goal.habitCount === 0 ? (
           <Tooltip>
             <TooltipTrigger

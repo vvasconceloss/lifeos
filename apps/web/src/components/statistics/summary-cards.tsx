@@ -21,7 +21,7 @@ export function SummaryCards({ overview }: { overview: StatsOverview }) {
     <div>
       <div className="mb-3 flex items-baseline gap-2">
         <span className="text-xs font-medium text-foreground/60">Summary</span>
-        <span className="text-[10px] text-foreground/50">{formatMonthLabel(overview.year, overview.month)}</span>
+        <span className="text-[10px] text-foreground/60">{formatMonthLabel(overview.year, overview.month)}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map((card) => (
@@ -31,7 +31,7 @@ export function SummaryCards({ overview }: { overview: StatsOverview }) {
           </div>
         ))}
         {activePillars === 0 && habitCount === 0 ? (
-          <p className="text-sm text-foreground/50">No habits yet — create one to start tracking.</p>
+          <p className="text-sm text-foreground/60">No habits yet — create one to start tracking.</p>
         ) : null}
       </div>
     </div>

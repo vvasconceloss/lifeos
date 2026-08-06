@@ -59,7 +59,7 @@ export function InsightsRow({
           </PieChart>
           <div>
             <div className="text-xl font-bold tracking-tight text-foreground">{successRate}%</div>
-            <div className="text-[10px] text-foreground/50">monthly progress</div>
+            <div className="text-[10px] text-foreground/60">monthly progress</div>
           </div>
         </div>
         <div className="flex items-center gap-2 border-t border-border/40 pt-3">
@@ -70,7 +70,7 @@ export function InsightsRow({
           </div>
           <div>
             <div className="tabular-nums text-sm font-semibold text-foreground">{momentumAvg}/d</div>
-            <div className="text-[10px] text-foreground/50">7-day avg</div>
+            <div className="text-[10px] text-foreground/60">7-day avg</div>
           </div>
         </div>
       </div>

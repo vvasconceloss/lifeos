@@ -16,7 +16,7 @@ export function MonthNavigation({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <button onClick={onPrev} aria-label="Previous month" className="flex items-center justify-center rounded-md p-1 text-foreground/50 hover:text-foreground">
+        <button onClick={onPrev} aria-label="Previous month" className="flex items-center justify-center rounded-md p-1 text-foreground/60 hover:text-foreground">
           <ChevronLeft className="size-4" />
         </button>
         {monthOffset !== 0 && (
@@ -28,7 +28,7 @@ export function MonthNavigation({
       <span className="flex items-center text-sm font-semibold text-foreground">
         {label}
       </span>
-      <button onClick={onNext} aria-label="Next month" className="flex items-center justify-center rounded-md p-1 text-foreground/50 hover:text-foreground">
+      <button onClick={onNext} aria-label="Next month" className="flex items-center justify-center rounded-md p-1 text-foreground/60 hover:text-foreground">
         <ChevronRight className="size-4" />
       </button>
     </div>

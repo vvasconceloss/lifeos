@@ -80,7 +80,7 @@ export function EditPillarDialog({
         render={
           <button
             type="button"
-            className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+            className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
             aria-label={`Edit ${pillar.name}`}
           >
             <Pencil className="size-4" />
@@ -106,7 +106,7 @@ export function EditPillarDialog({
               placeholder="e.g. Health"
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "ep-name-error" : undefined}
-              className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 ${
+              className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 ${
                 nameError
                   ? "border-destructive focus:border-destructive focus:ring-destructive/30"
                   : "border-input focus:ring-ring"

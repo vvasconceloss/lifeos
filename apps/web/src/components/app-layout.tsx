@@ -30,8 +30,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
       <AppSidebar />
-      <SidebarInset className="flex h-full max-h-full flex-1 flex-col overflow-hidden">
+      <SidebarInset id="main-content" className="flex h-full max-h-full flex-1 flex-col overflow-hidden">
         <header className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
           <div className="flex items-center gap-3">
             <SidebarTrigger />

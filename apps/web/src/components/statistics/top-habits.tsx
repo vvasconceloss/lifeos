@@ -20,14 +20,14 @@ export function TopHabits({
     <div className="flex flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="text-xs font-medium text-foreground/60">Top habits</span>
-        <span className="text-[10px] text-foreground/50">{formatMonthLabel(year, month)}</span>
+        <span className="text-[10px] text-foreground/60">{formatMonthLabel(year, month)}</span>
       </div>
       {habits.length === 0 ? (
-        <p className="py-4 text-center text-sm text-foreground/50">No data yet.</p>
+        <p className="py-4 text-center text-sm text-foreground/60">No data yet.</p>
       ) : (
         <div className="grid flex-1 grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/50">
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/60">
               Top rate
             </span>
             {topRate.map((habit) => (
@@ -40,7 +40,7 @@ export function TopHabits({
             ))}
           </div>
           <div className="flex flex-col gap-2">
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/50">
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/60">
               Longest streak
             </span>
             {topStreak.map((habit) => (

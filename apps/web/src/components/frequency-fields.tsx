@@ -4,7 +4,7 @@ import { DAY_ABBREV, FREQUENCY_LABELS } from "@/lib/frequency";
 import type { HabitFrequency } from "@lifeos/shared";
 
 const inputClass =
-  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring";
+  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function FrequencyFields({
   frequency,

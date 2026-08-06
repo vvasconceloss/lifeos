@@ -101,7 +101,7 @@ export function EditGoalDialog({
         render={
           <button
             type="button"
-            className="rounded-md p-1.5 text-foreground/50 hover:text-foreground"
+            className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
             aria-label={`Edit ${goal.title}`}
           >
             <Pencil className="size-4" />

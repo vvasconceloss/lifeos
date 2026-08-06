@@ -13,10 +13,10 @@ export function PillarStats({
     <div className="flex flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="text-xs font-medium text-foreground/60">By pillar</span>
-        <span className="text-[10px] text-foreground/50">{monthLabel}</span>
+        <span className="text-[10px] text-foreground/60">{monthLabel}</span>
       </div>
       {withHabits.length === 0 ? (
-        <p className="py-4 text-center text-sm text-foreground/50">No data yet.</p>
+        <p className="py-4 text-center text-sm text-foreground/60">No data yet.</p>
       ) : (
         <div className="flex flex-1 flex-col justify-center gap-3">
           {withHabits.map((pillar) => (

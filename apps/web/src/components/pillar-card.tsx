@@ -53,7 +53,7 @@ export function PillarCard({
           <AlertDialogTrigger
             render={<button />}
             disabled={deletingId === pillar.id}
-            className="rounded-md p-1.5 text-foreground/50 hover:text-destructive disabled:opacity-50"
+            className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
             aria-label={`Delete ${pillar.name}`}
           >
             {deletingId === pillar.id ? <Spinner /> : <Trash2 className="size-4" />}

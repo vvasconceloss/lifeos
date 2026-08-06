@@ -141,7 +141,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
     <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="text-xs font-medium text-foreground/60">Activity</span>
-        <span className="text-[10px] text-foreground/50">
+        <span className="text-[10px] text-foreground/60">
           {isMobile ? `${monthLabel} ${year}` : year}
         </span>
       </div>
@@ -151,7 +151,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
           <Spinner />
         </div>
       ) : isEmpty ? (
-        <p className="py-3 text-center text-xs text-foreground/45">
+        <p className="py-3 text-center text-xs text-foreground/60">
           {emptyText}
         </p>
       ) : isMobile ? (
