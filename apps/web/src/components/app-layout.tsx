@@ -12,13 +12,21 @@ const PAGE_TITLES: Record<string, string> = {
   "/app": "Dashboard",
   "/insights": "Insights",
   "/statistics": "Statistics",
+  "/goals": "Goals",
   "/settings/pillars": "Pillars",
   "/settings/habits": "Habits",
 };
 
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  if (pathname.startsWith("/goals/")) return "Goal";
+  if (pathname.startsWith("/habits/")) return "Habit";
+  return "LifeOS";
+}
+
 export function AppLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const pageTitle = PAGE_TITLES[pathname] ?? "LifeOS";
+  const pageTitle = getPageTitle(pathname);
 
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
