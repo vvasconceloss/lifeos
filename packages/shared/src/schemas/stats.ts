@@ -70,3 +70,59 @@ export const heatmapResponseSchema = z.object({
 });
 
 export type HeatmapResponse = z.infer<typeof heatmapResponseSchema>;
+
+export const analyticsTrendSchema = z.object({
+  direction: z.enum(["up", "down", "stable"]),
+  delta: z.number(),
+});
+
+export type AnalyticsTrend = z.infer<typeof analyticsTrendSchema>;
+
+export const analyticsRatePointSchema = z.object({
+  label: z.string(),
+  from: z.string(),
+  to: z.string(),
+  rate: z.number(),
+  completed: z.number(),
+  expected: z.number(),
+});
+
+export type AnalyticsRatePoint = z.infer<typeof analyticsRatePointSchema>;
+
+export const analyticsHabitConsistencySchema = z.object({
+  habitId: z.string(),
+  habitName: z.string(),
+  rate: z.number(),
+  consistency: z.number(),
+});
+
+export type AnalyticsHabitConsistency = z.infer<typeof analyticsHabitConsistencySchema>;
+
+export const analyticsStreakPointSchema = z.object({
+  label: z.string(),
+  bestStreak: z.number(),
+});
+
+export type AnalyticsStreakPoint = z.infer<typeof analyticsStreakPointSchema>;
+
+export const analyticsResponseSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  weeks: z.number(),
+  weeklyRates: z.array(analyticsRatePointSchema),
+  monthlyRates: z.array(analyticsRatePointSchema),
+  trend: analyticsTrendSchema,
+  consistency: z.number(),
+  dailyAverage: z.number(),
+  habitConsistency: z.array(analyticsHabitConsistencySchema),
+  streakHistory: z.array(analyticsStreakPointSchema),
+  pillarStats: z.array(pillarStatsSchema),
+});
+
+export type AnalyticsResponse = z.infer<typeof analyticsResponseSchema>;
+
+export const analyticsQuerySchema = z.object({
+  weeks: z.coerce.number().int().min(4).max(52).optional(),
+});
+
+export type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>;
