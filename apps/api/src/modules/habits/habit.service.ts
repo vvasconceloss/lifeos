@@ -65,6 +65,9 @@ function toResponse(habit: {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   isActive: boolean;
   archivedAt: Date | null;
   createdAt: Date;
@@ -81,6 +84,9 @@ function toResponse(habit: {
     daysOfWeek: habit.daysOfWeek,
     timesPerWeek: habit.timesPerWeek,
     timesPerMonth: habit.timesPerMonth,
+    icon: habit.icon,
+    color: habit.color,
+    sortOrder: habit.sortOrder,
     isActive: habit.isActive,
     archivedAt: habit.archivedAt,
     createdAt: habit.createdAt,
@@ -112,6 +118,8 @@ export async function createHabit(
       daysOfWeek: frequency.daysOfWeek,
       timesPerWeek: frequency.timesPerWeek,
       timesPerMonth: frequency.timesPerMonth,
+      ...(data.icon ? { icon: data.icon } : {}),
+      ...(data.color ? { color: data.color } : {}),
     },
     include: { pillar: { select: { name: true } } },
   });
@@ -162,6 +170,9 @@ export async function updateHabit(
       ...(data.name !== undefined && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.pillarId !== undefined && { pillarId: data.pillarId }),
+      ...(data.icon !== undefined && { icon: data.icon }),
+      ...(data.color !== undefined && { color: data.color }),
+      ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
       ...(frequency
         ? {
             frequency: frequency.frequency,
@@ -175,6 +186,26 @@ export async function updateHabit(
   });
 
   return { habit: toResponse(habit) };
+}
+
+export async function reorderHabits(
+  userId: string,
+  ids: string[],
+): Promise<{ error: string; status: number } | { count: number }> {
+  const owned = await prisma.habit.findMany({
+    where: { id: { in: ids }, userId },
+    select: { id: true },
+  });
+
+  if (owned.length !== ids.length) {
+    return { error: "Habit not found", status: 404 };
+  }
+
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.habit.update({ where: { id }, data: { sortOrder: index } })),
+  );
+
+  return { count: ids.length };
 }
 
 export async function archiveHabit(
@@ -229,7 +260,7 @@ export async function listHabits(
     include: {
       pillar: { select: { name: true } },
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
   return habits.map(toResponse);
@@ -263,6 +294,8 @@ export async function getHabitHistory(
   });
 
   if (!habit) return null;
+
+  const weekStart = (await prisma.user.findUnique({ where: { id: userId }, select: { weekStart: true } }))?.weekStart ?? 1;
 
   const { from: start, to: end } = dayKeyRange(from, to);
   const windowLen = Math.round((end.getTime() - start.getTime()) / MS_PER_DAY) + 1;
@@ -303,8 +336,8 @@ export async function getHabitHistory(
     expected,
     actual,
     completionRate: currentRate,
-    currentStreak: getCurrentStreakForFrequency(freq, keys, end),
-    bestStreak: getBestStreakForFrequency(freq, keys),
+    currentStreak: getCurrentStreakForFrequency(freq, keys, end, weekStart),
+    bestStreak: getBestStreakForFrequency(freq, keys, weekStart),
     comparison: {
       current: currentRate,
       previous: previousRate,

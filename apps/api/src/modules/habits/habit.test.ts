@@ -510,6 +510,47 @@ describe('POST /v1/habits/:id/archive', () => {
   });
 });
 
+describe('habit personalization', () => {
+  it('creates a habit with icon and color', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/habits',
+      headers: { cookie },
+      payload: { name: 'Run', pillarId, icon: '🏃', color: '#22c55e' },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json().habit).toMatchObject({ icon: '🏃', color: '#22c55e', sortOrder: 0 });
+
+    await app.close();
+  });
+
+  it('reorders habits', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const a = (await app.inject({ method: 'POST', url: '/v1/habits', headers: { cookie }, payload: { name: 'A', pillarId } })).json().habit;
+    const b = (await app.inject({ method: 'POST', url: '/v1/habits', headers: { cookie }, payload: { name: 'B', pillarId } })).json().habit;
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/habits/reorder',
+      headers: { cookie },
+      payload: { ids: [b.id, a.id] },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const list = await app.inject({ method: 'GET', url: '/v1/habits', headers: { cookie } });
+    expect(list.json().habits.map((h: { name: string }) => h.name)).toEqual(['B', 'A']);
+
+    await app.close();
+  });
+});
+
 describe('input validation', () => {
   it('rejects a non-uuid habit id', async () => {
     const app = await buildApp({ csrf: false });

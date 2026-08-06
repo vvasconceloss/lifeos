@@ -5,6 +5,9 @@ function toResponse(pillar: {
   id: string;
   name: string;
   color: string | null;
+  icon: string | null;
+  description: string | null;
+  sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }): PillarResponse {
@@ -12,6 +15,9 @@ function toResponse(pillar: {
     id: pillar.id,
     name: pillar.name,
     color: pillar.color,
+    icon: pillar.icon,
+    description: pillar.description,
+    sortOrder: pillar.sortOrder,
     createdAt: pillar.createdAt,
     updatedAt: pillar.updatedAt,
   };
@@ -26,6 +32,8 @@ export async function createPillar(
       userId,
       name: data.name,
       ...(data.color ? { color: data.color } : {}),
+      ...(data.icon ? { icon: data.icon } : {}),
+      ...(data.description ? { description: data.description } : {}),
     },
   });
 
@@ -50,10 +58,33 @@ export async function updatePillar(
     data: {
       ...(data.name !== undefined ? { name: data.name } : {}),
       ...(data.color !== undefined ? { color: data.color } : {}),
+      ...(data.icon !== undefined ? { icon: data.icon } : {}),
+      ...(data.description !== undefined ? { description: data.description } : {}),
+      ...(data.sortOrder !== undefined ? { sortOrder: data.sortOrder } : {}),
     },
   });
 
   return { pillar: toResponse(updated) };
+}
+
+export async function reorderPillars(
+  userId: string,
+  ids: string[],
+): Promise<{ error: string; status: number } | { count: number }> {
+  const owned = await prisma.pillar.findMany({
+    where: { id: { in: ids }, userId },
+    select: { id: true },
+  });
+
+  if (owned.length !== ids.length) {
+    return { error: PILLAR_ERRORS.NOT_FOUND, status: 404 };
+  }
+
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.pillar.update({ where: { id }, data: { sortOrder: index } })),
+  );
+
+  return { count: ids.length };
 }
 
 export const PILLAR_ERRORS = {
@@ -88,7 +119,7 @@ export async function deletePillar(
 export async function listPillars(userId: string): Promise<PillarResponse[]> {
   const pillars = await prisma.pillar.findMany({
     where: { userId },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
   return pillars.map(toResponse);

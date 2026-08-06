@@ -353,6 +353,47 @@ describe('DELETE /v1/pillars/:id', () => {
   });
 });
 
+describe('POST /v1/pillars/reorder', () => {
+  it('persists the given order', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const a = (await app.inject({ method: 'POST', url: '/v1/pillars', headers: { cookie }, payload: { name: 'A', icon: '🏃', description: 'First' } })).json().pillar;
+    const b = (await app.inject({ method: 'POST', url: '/v1/pillars', headers: { cookie }, payload: { name: 'B' } })).json().pillar;
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/pillars/reorder',
+      headers: { cookie },
+      payload: { ids: [b.id, a.id] },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const list = await app.inject({ method: 'GET', url: '/v1/pillars', headers: { cookie } });
+    expect(list.json().pillars.map((p: { name: string }) => p.name)).toEqual(['B', 'A']);
+    expect(list.json().pillars[1]).toMatchObject({ icon: '🏃', description: 'First' });
+
+    await app.close();
+  });
+
+  it('rejects ids that are not owned by the user', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndGetCookie(app, uniqueEmail());
+    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const a = (await app.inject({ method: 'POST', url: '/v1/pillars', headers: { cookie: cookieA }, payload: { name: 'A' } })).json().pillar;
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/pillars/reorder',
+      headers: { cookie: cookieB },
+      payload: { ids: [a.id] },
+    });
+
+    expect(response.statusCode).toBe(404);
+
+    await app.close();
+  });
+});
+
 describe('input validation', () => {
   it('rejects a non-uuid id on PATCH', async () => {
     const app = await buildApp({ csrf: false });

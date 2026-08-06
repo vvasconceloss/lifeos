@@ -1,6 +1,7 @@
 export {
   createHabitBodySchema,
   updateHabitBodySchema,
+  habitReorderBodySchema,
   idParamSchema,
   listHabitsQuerySchema,
 } from "@lifeos/shared";
@@ -8,6 +9,7 @@ export {
 export type {
   CreateHabitBody,
   UpdateHabitBody,
+  HabitReorderBody,
   HabitResponse,
   IdParam,
   ListHabitsQuery,

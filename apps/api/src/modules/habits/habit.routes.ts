@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
-import { createHabitBodySchema, updateHabitBodySchema, idParamSchema, listHabitsQuerySchema } from './habit.schemas';
+import { createHabitBodySchema, updateHabitBodySchema, idParamSchema, listHabitsQuerySchema, habitReorderBodySchema } from './habit.schemas';
 import { listCompletionsQuerySchema } from '../completions/completion.schemas';
-import { archiveHabit, createHabit, deleteHabit, getHabit, getHabitHistory, listHabits, updateHabit } from './habit.service';
+import { archiveHabit, createHabit, deleteHabit, getHabit, getHabitHistory, listHabits, reorderHabits, updateHabit } from './habit.service';
 
 export async function habitRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -19,6 +19,23 @@ export async function habitRoutes(fastify: FastifyInstance) {
       );
 
       return { habits };
+    },
+  );
+
+  fastify.post(
+    '/reorder',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const data = validateInput(habitReorderBodySchema, request.body, reply);
+      if (!data) return;
+
+      const result = await reorderHabits(request.user.sub, data.ids);
+
+      if ('error' in result) {
+        return reply.status(result.status).send({ error: result.error });
+      }
+
+      return result;
     },
   );
 
