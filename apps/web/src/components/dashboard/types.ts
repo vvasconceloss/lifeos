@@ -11,6 +11,8 @@ export interface Habit {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
 }
 export interface Completion { habitId: string; date: string }
 export interface HabitProgress { habitId: string; habitName: string; completed: number; goal: number }

@@ -25,6 +25,9 @@ interface Pillar {
   id: string;
   name: string;
   color: string | null;
+  icon: string | null;
+  description: string | null;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,12 +41,16 @@ export function EditPillarDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [icon, setIcon] = useState("");
+  const [description, setDescription] = useState("");
   const [color, setColor] = useState("");
   const [saving, setSaving] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
 
   function syncFromPillar() {
     setName(pillar.name);
+    setIcon(pillar.icon ?? "");
+    setDescription(pillar.description ?? "");
     setColor(pillar.color ?? "");
     setNameTouched(false);
   }
@@ -55,8 +62,10 @@ export function EditPillarDialog({
     if (!canSubmit) return;
     setSaving(true);
     try {
-      const body: Record<string, string> = { name: name.trim() };
-      body.color = color || "";
+      const body: Record<string, unknown> = { name: name.trim() };
+      body.color = color || null;
+      body.icon = icon.trim() || null;
+      body.description = description.trim() || null;
       const res = await api.patch<{ pillar: Pillar }>(`/pillars/${pillar.id}`, body);
       onUpdated(res.data.pillar);
       toast.success("Pillar updated");
@@ -117,6 +126,26 @@ export function EditPillarDialog({
                 {nameError}
               </p>
             )}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="ep-icon">Icon (optional)</Label>
+            <input
+              id="ep-icon"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="e.g. 🏥"
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="ep-desc">Description (optional)</Label>
+            <textarea
+              id="ep-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
           <div className="grid gap-2">
             <Label>Color</Label>

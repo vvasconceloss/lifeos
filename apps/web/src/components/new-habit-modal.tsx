@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { FrequencyFields } from "@/components/frequency-fields";
@@ -42,8 +42,16 @@ interface Habit {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   archivedAt: string | null;
 }
+
+const HABIT_COLORS = [
+  "#ef4444", "#f97316", "#eab308", "#22c55e",
+  "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
+];
 
 const inputClass =
   "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring";
@@ -58,6 +66,8 @@ export function NewHabitModal({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState("");
+  const [color, setColor] = useState("");
   const [pillarId, setPillarId] = useState("");
   const [frequency, setFrequency] = useState<HabitFrequency>("DAILY");
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
@@ -90,6 +100,8 @@ export function NewHabitModal({
   function reset() {
     setName("");
     setDescription("");
+    setIcon("");
+    setColor("");
     setPillarId("");
     setFrequency("DAILY");
     setDaysOfWeek([]);
@@ -111,6 +123,8 @@ export function NewHabitModal({
         frequency,
       };
       if (description.trim()) payload.description = description.trim();
+      if (icon.trim()) payload.icon = icon.trim();
+      if (color) payload.color = color;
       if (frequency === "WEEKLY_DAYS") payload.daysOfWeek = daysOfWeek;
       if (frequency === "TIMES_PER_WEEK") payload.timesPerWeek = Number(timesPerWeek);
       if (frequency === "TIMES_PER_MONTH") payload.timesPerMonth = Number(timesPerMonth);
@@ -181,6 +195,41 @@ export function NewHabitModal({
               placeholder="e.g. Run 5km"
               className={inputClass}
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="nh-icon">Icon (optional)</Label>
+            <input
+              id="nh-icon"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="e.g. 🏃"
+              className={inputClass}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Color (optional)</Label>
+            <div className="flex flex-wrap gap-2">
+              {HABIT_COLORS.map((c) => {
+                const active = color === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(active ? "" : c)}
+                    className="relative flex size-7 items-center justify-center rounded-full transition-all"
+                    style={{ backgroundColor: c }}
+                    aria-label={`Color ${c}`}
+                    aria-pressed={active}
+                  >
+                    {active && (
+                      <span className="absolute inset-0 flex items-center justify-center rounded-full ring-2 ring-foreground ring-offset-1 ring-offset-background">
+                        <Check className="size-3.5 text-white drop-shadow-md" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="nh-pillar">Pillar</Label>

@@ -15,6 +15,9 @@ interface Pillar {
   id: string;
   name: string;
   color: string | null;
+  icon: string | null;
+  description: string | null;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,6 +71,20 @@ export default function SettingsPillarsPage() {
     }
   }
 
+  async function movePillar(index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= pillars.length) return;
+    const next = [...pillars];
+    [next[index], next[target]] = [next[target], next[index]];
+    setPillars(next);
+    try {
+      await api.post("/pillars/reorder", { ids: next.map((p) => p.id) });
+    } catch {
+      toast.error("Failed to reorder pillars");
+      reload();
+    }
+  }
+
   return (
     <ProtectedRoute>
       <AppLayout>
@@ -93,11 +110,15 @@ export default function SettingsPillarsPage() {
             />
           ) : (
             <ul className="space-y-2">
-              {pillars.map((pillar) => (
+              {pillars.map((pillar, index) => (
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
                   deletingId={deletingId}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < pillars.length - 1}
+                  onMoveUp={() => movePillar(index, -1)}
+                  onMoveDown={() => movePillar(index, 1)}
                   onDelete={handleDelete}
                   onUpdated={handleUpdated}
                 />

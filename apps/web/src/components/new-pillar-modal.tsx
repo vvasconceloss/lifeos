@@ -19,6 +19,9 @@ interface Pillar {
   id: string;
   name: string;
   color: string | null;
+  icon: string | null;
+  description: string | null;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +39,8 @@ export function NewPillarModal({
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [icon, setIcon] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [creating, setCreating] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
@@ -44,6 +49,8 @@ export function NewPillarModal({
 
   function reset() {
     setName("");
+    setIcon("");
+    setDescription("");
     setSelectedColor("");
     setNameTouched(false);
   }
@@ -55,13 +62,15 @@ export function NewPillarModal({
       const res = await api.post<{ pillar: Pillar }>("/pillars", {
         name: name.trim(),
         ...(selectedColor ? { color: selectedColor } : {}),
+        ...(icon.trim() ? { icon: icon.trim() } : {}),
+        ...(description.trim() ? { description: description.trim() } : {}),
       });
       onCreated(res.data.pillar);
       reset();
       setOpen(false);
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error("Name must be between 1 and 100 characters");
+        toast.error("Check the pillar details and try again.");
       } else {
         toast.error("Failed to create pillar");
       }
@@ -105,6 +114,27 @@ export function NewPillarModal({
                 {nameError}
               </p>
             )}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="np-icon">Icon (optional)</Label>
+            <input
+              id="np-icon"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="e.g. 🏥"
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="np-desc">Description (optional)</Label>
+            <textarea
+              id="np-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              placeholder="What does this pillar mean to you?"
+              className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
           <div className="grid gap-2">
             <Label>Colors (Optional)</Label>

@@ -29,6 +29,9 @@ interface Habit {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   archivedAt: string | null;
 }
 
@@ -89,6 +92,27 @@ export default function SettingsHabitsPage() {
 
   function handleUpdated(updated: Habit) {
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
+  }
+
+  async function moveHabit(items: Habit[], index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= items.length) return;
+    const next = [...items];
+    [next[index], next[target]] = [next[target], next[index]];
+    const ids = next.map((h) => h.id);
+
+    setHabits((prev) => {
+      const byId = new Map(prev.map((h) => [h.id, h]));
+      const movedIds = new Set(ids);
+      return [...prev.filter((h) => !movedIds.has(h.id)), ...ids.map((id) => byId.get(id) as Habit)];
+    });
+
+    try {
+      await api.post("/habits/reorder", { ids });
+    } catch {
+      toast.error("Failed to reorder habits");
+      reload();
+    }
   }
 
   async function handleArchive(id: string) {
@@ -164,13 +188,17 @@ export default function SettingsHabitsPage() {
               {ungroupedHabits.length > 0 && (
                 <div>
                   <ul className="space-y-2">
-                    {ungroupedHabits.map((habit) => (
+                    {ungroupedHabits.map((habit, index) => (
                       <HabitCard
                         key={habit.id}
                         habit={habit}
                         pillars={pillars}
                         deletingId={deletingId}
                         archivingId={archivingId}
+                        canMoveUp={index > 0}
+                        canMoveDown={index < ungroupedHabits.length - 1}
+                        onMoveUp={() => moveHabit(ungroupedHabits, index, -1)}
+                        onMoveDown={() => moveHabit(ungroupedHabits, index, 1)}
                         onArchive={handleArchive}
                         onDelete={handleDelete}
                         onUpdated={handleUpdated}
@@ -192,13 +220,17 @@ export default function SettingsHabitsPage() {
                     {group.name}
                   </h3>
                   <ul className="space-y-2">
-                    {group.habits.map((habit) => (
+                    {group.habits.map((habit, index) => (
                       <HabitCard
                         key={habit.id}
                         habit={habit}
                         pillars={pillars}
                         deletingId={deletingId}
                         archivingId={archivingId}
+                        canMoveUp={index > 0}
+                        canMoveDown={index < group.habits.length - 1}
+                        onMoveUp={() => moveHabit(group.habits, index, -1)}
+                        onMoveDown={() => moveHabit(group.habits, index, 1)}
                         onArchive={handleArchive}
                         onDelete={handleDelete}
                         onUpdated={handleUpdated}

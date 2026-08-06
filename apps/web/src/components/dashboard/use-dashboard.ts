@@ -70,7 +70,7 @@ export function useDashboard() {
   const habitsWithColor = useMemo(
     () => activeHabits.map((h) => ({
       ...h,
-      color: pillarMap[h.pillarId] ?? "#6b7280",
+      color: h.color ?? pillarMap[h.pillarId] ?? "#6b7280",
     })),
     [activeHabits, pillarMap],
   );

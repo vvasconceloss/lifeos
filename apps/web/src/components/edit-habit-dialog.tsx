@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { FrequencyFields } from "@/components/frequency-fields";
@@ -41,8 +41,16 @@ interface Habit {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   archivedAt: string | null;
 }
+
+const HABIT_COLORS = [
+  "#ef4444", "#f97316", "#eab308", "#22c55e",
+  "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
+];
 
 const inputClass =
   "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring";
@@ -59,6 +67,8 @@ export function EditHabitDialog({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState("");
+  const [color, setColor] = useState("");
   const [pillarId, setPillarId] = useState("");
   const [frequency, setFrequency] = useState<HabitFrequency>("DAILY");
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
@@ -71,6 +81,8 @@ export function EditHabitDialog({
   function syncFromHabit() {
     setName(habit.name);
     setDescription(habit.description ?? "");
+    setIcon(habit.icon ?? "");
+    setColor(habit.color ?? "");
     setPillarId(habit.pillarId);
     setFrequency(habit.frequency);
     setDaysOfWeek(habit.daysOfWeek);
@@ -104,6 +116,8 @@ export function EditHabitDialog({
       const payload: Record<string, unknown> = {
         name: name.trim(),
         description: description.trim() || undefined,
+        icon: icon.trim() || null,
+        color: color || null,
         ...(pillarId ? { pillarId } : {}),
         frequency,
       };
@@ -184,6 +198,41 @@ export function EditHabitDialog({
               placeholder="e.g. Run 5km"
               className={inputClass}
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="eh-icon">Icon (optional)</Label>
+            <input
+              id="eh-icon"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="e.g. 🏃"
+              className={inputClass}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Color (optional)</Label>
+            <div className="flex flex-wrap gap-2">
+              {HABIT_COLORS.map((c) => {
+                const active = color === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(active ? "" : c)}
+                    className="relative flex size-7 items-center justify-center rounded-full transition-all"
+                    style={{ backgroundColor: c }}
+                    aria-label={`Color ${c}`}
+                    aria-pressed={active}
+                  >
+                    {active && (
+                      <span className="absolute inset-0 flex items-center justify-center rounded-full ring-2 ring-foreground ring-offset-1 ring-offset-background">
+                        <Check className="size-3.5 text-white drop-shadow-md" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="eh-pillar">Pillar</Label>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { EditPillarDialog } from "@/components/edit-pillar-dialog";
 import {
@@ -18,6 +18,9 @@ interface Pillar {
   id: string;
   name: string;
   color: string | null;
+  icon: string | null;
+  description: string | null;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,11 +28,19 @@ interface Pillar {
 export function PillarCard({
   pillar,
   deletingId,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onDelete,
   onUpdated,
 }: {
   pillar: Pillar;
   deletingId: string | null;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onDelete: (id: string) => void;
   onUpdated: (pillar: Pillar) => void;
 }) {
@@ -38,15 +49,36 @@ export function PillarCard({
   return (
     <li className="flex items-center justify-between rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm transition-colors hover:bg-accent/30">
       <span className="flex min-w-0 flex-1 items-center gap-2 text-sm text-foreground">
+        {pillar.icon && <span className="shrink-0">{pillar.icon}</span>}
         {pillar.color && (
           <span
             className="inline-block size-2.5 shrink-0 rounded-full"
             style={{ backgroundColor: pillar.color }}
           />
         )}
-        {pillar.name}
+        <span className="truncate">{pillar.name}</span>
       </span>
       <div className="flex shrink-0 items-center gap-1">
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
+            aria-label={`Move ${pillar.name} up`}
+          >
+            <ArrowUp className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
+            aria-label={`Move ${pillar.name} down`}
+          >
+            <ArrowDown className="size-3.5" />
+          </button>
+        </div>
         <EditPillarDialog pillar={pillar} onUpdated={onUpdated} />
 
         <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>

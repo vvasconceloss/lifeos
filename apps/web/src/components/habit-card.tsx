@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Archive, Trash2 } from "lucide-react";
+import { Archive, ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Spinner } from "@/components/ui/spinner";
 import { EditHabitDialog } from "@/components/edit-habit-dialog";
@@ -39,6 +39,9 @@ interface Habit {
   daysOfWeek: number[];
   timesPerWeek: number | null;
   timesPerMonth: number | null;
+  icon: string | null;
+  color: string | null;
+  sortOrder: number;
   archivedAt: string | null;
 }
 
@@ -47,6 +50,10 @@ export function HabitCard({
   pillars,
   deletingId,
   archivingId,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onArchive,
   onDelete,
   onUpdated,
@@ -55,6 +62,10 @@ export function HabitCard({
   pillars: Pillar[];
   deletingId: string | null;
   archivingId: string | null;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdated: (habit: Habit) => void;
@@ -65,11 +76,15 @@ export function HabitCard({
     <li className="flex items-center gap-2 rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm transition-colors hover:bg-accent/30">
       <div className="flex min-w-0 flex-1 flex-col">
         <span
-          className={`text-sm ${
+          className={`flex items-center gap-1.5 text-sm ${
             habit.isActive ? "text-foreground" : "text-foreground/60 line-through"
           }`}
         >
-          <Link to="/habits/$id" params={{ id: habit.id }} className="hover:underline">
+          {habit.icon && <span className="shrink-0">{habit.icon}</span>}
+          {habit.color && (
+            <span className="inline-block size-2.5 shrink-0 rounded-full" style={{ backgroundColor: habit.color }} />
+          )}
+          <Link to="/habits/$id" params={{ id: habit.id }} className="truncate hover:underline">
             {habit.name}
           </Link>
         </span>
@@ -85,10 +100,31 @@ export function HabitCard({
           />
         </span>
       </div>
-      {habit.isActive && (
-        <EditHabitDialog habit={habit} pillars={pillars} onUpdated={onUpdated} />
-      )}
-      {habit.isActive && (
+      <div className="flex shrink-0 items-center gap-1">
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
+            aria-label={`Move ${habit.name} up`}
+          >
+            <ArrowUp className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
+            aria-label={`Move ${habit.name} down`}
+          >
+            <ArrowDown className="size-3.5" />
+          </button>
+        </div>
+        {habit.isActive && (
+          <EditHabitDialog habit={habit} pillars={pillars} onUpdated={onUpdated} />
+        )}
+        {habit.isActive && (
         <Tooltip>
           <TooltipTrigger
             render={<button />}
@@ -132,6 +168,7 @@ export function HabitCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </li>
   );
 }
