@@ -1,5 +1,38 @@
 import { z } from "zod";
 
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color");
+
+export const onboardingBodySchema = z.object({
+  pillars: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(100),
+        color: hexColor.optional(),
+        icon: z.string().max(50).optional(),
+        description: z.string().max(500).optional(),
+      }),
+    )
+    .max(20),
+  habits: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(200),
+        pillarIndex: z.number().int().min(0).max(19),
+        icon: z.string().max(50).optional(),
+        color: hexColor.optional(),
+      }),
+    )
+    .max(50),
+});
+
+export type OnboardingBody = z.infer<typeof onboardingBodySchema>;
+
+export interface OnboardingResponse {
+  user: UserResponse;
+  pillarsCreated: number;
+  habitsCreated: number;
+}
+
 export const registerBodySchema = z.object({
   email: z.email().min(5).max(254),
   password: z.string().min(8).max(72),
@@ -20,6 +53,7 @@ export const updateMeBodySchema = z.object({
   timezone: z.string().max(100).optional().nullable(),
   weekStart: z.number().int().min(0).max(6).optional(),
   theme: z.enum(["light", "dark", "system"]).optional(),
+  onboarded: z.boolean().optional(),
 });
 
 export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;
@@ -31,6 +65,7 @@ export interface UserResponse {
   timezone: string | null;
   weekStart: number;
   theme: string;
+  onboarded: boolean;
   createdAt: Date;
 }
 

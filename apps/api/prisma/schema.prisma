@@ -15,6 +15,7 @@ model User {
   timezone     String?
   weekStart    Int      @default(1)
   theme        String   @default("system")
+  onboarded    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
