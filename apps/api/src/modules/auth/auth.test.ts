@@ -205,6 +205,185 @@ describe('PATCH /v1/auth/me', () => {
   });
 });
 
+describe('POST /v1/auth/onboarding', () => {
+  function cookieFrom(res: { cookies: Array<{ name: string; value: string }> }): string {
+    const tokenCookie = res.cookies.find((c) => c.name === 'token');
+    return `token=${tokenCookie!.value}`;
+  }
+
+  it('creates pillars and habits and marks the user as onboarded', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    const registerRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+    const cookie = cookieFrom(registerRes);
+
+    expect(registerRes.json().user.onboarded).toBe(false);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      headers: { cookie },
+      payload: {
+        pillars: [
+          { name: 'Health', color: '#ef4444', icon: '❤️' },
+          { name: 'Engineering', color: '#3b82f6', icon: '💻' },
+        ],
+        habits: [
+          { name: 'Drink water', pillarIndex: 0, icon: '💧' },
+          { name: 'Program', pillarIndex: 1, icon: '⌨️' },
+        ],
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      user: { email, onboarded: true },
+      pillarsCreated: 2,
+      habitsCreated: 2,
+    });
+
+    const meRes = await app.inject({
+      method: 'GET',
+      url: '/v1/auth/me',
+      headers: { cookie },
+    });
+    expect(meRes.json().user.onboarded).toBe(true);
+
+    const pillarsRes = await app.inject({
+      method: 'GET',
+      url: '/v1/pillars',
+      headers: { cookie },
+    });
+    expect(pillarsRes.json().pillars).toHaveLength(2);
+    expect(pillarsRes.json().pillars.map((p: { name: string }) => p.name)).toEqual([
+      'Health',
+      'Engineering',
+    ]);
+
+    const habitsRes = await app.inject({
+      method: 'GET',
+      url: '/v1/habits?includeArchived=true',
+      headers: { cookie },
+    });
+    expect(habitsRes.json().habits).toHaveLength(2);
+    expect(habitsRes.json().habits.map((h: { name: string }) => h.name)).toEqual([
+      'Drink water',
+      'Program',
+    ]);
+
+    await app.close();
+  });
+
+  it('marks the user as onboarded when no pillars are selected (skip)', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    const registerRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+    const cookie = cookieFrom(registerRes);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      headers: { cookie },
+      payload: { pillars: [], habits: [] },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      user: { email, onboarded: true },
+      pillarsCreated: 0,
+      habitsCreated: 0,
+    });
+
+    await app.close();
+  });
+
+  it('rejects a habit referencing a non-selected pillar', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    const registerRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+    const cookie = cookieFrom(registerRes);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      headers: { cookie },
+      payload: {
+        pillars: [{ name: 'Health' }],
+        habits: [{ name: 'Program', pillarIndex: 1 }],
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: 'A habit references a pillar that was not selected',
+    });
+
+    await app.close();
+  });
+
+  it('rejects calling onboarding twice', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    const registerRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+    const cookie = cookieFrom(registerRes);
+
+    await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      headers: { cookie },
+      payload: { pillars: [], habits: [] },
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      headers: { cookie },
+      payload: { pillars: [], habits: [] },
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      error: 'User already completed onboarding',
+    });
+
+    await app.close();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/onboarding',
+      payload: { pillars: [], habits: [] },
+    });
+
+    expect(response.statusCode).toBe(401);
+
+    await app.close();
+  });
+});
+
 describe('GET /v1/auth/me', () => {
   it('returns the current user when authenticated', async () => {
     const app = await buildApp({ csrf: false });

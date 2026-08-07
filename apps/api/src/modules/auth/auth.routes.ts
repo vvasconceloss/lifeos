@@ -1,8 +1,9 @@
 import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
-import { registerBodySchema, loginBodySchema, updateMeBodySchema } from './auth.schemas';
+import { onboardingBodySchema, registerBodySchema, loginBodySchema, updateMeBodySchema } from './auth.schemas';
 import { createUser, authenticate, getUserById, updateUser, AUTH_ERRORS } from './auth.service';
+import { completeOnboarding } from './onboarding.service';
 
 const cookieOptions = {
   httpOnly: true,
@@ -38,6 +39,19 @@ export async function authRoutes(fastify: FastifyInstance) {
     const user = await updateUser(request.user.sub, data);
 
     return { user };
+  });
+
+  fastify.post('/onboarding', { preHandler: requireAuth }, async (request, reply) => {
+    const data = validateInput(onboardingBodySchema, request.body, reply);
+    if (!data) return;
+
+    const result = await completeOnboarding(request.user.sub, data);
+
+    if ('error' in result) {
+      return reply.status(result.status).send({ error: result.error });
+    }
+
+    return reply.status(201).send(result);
   });
 
   fastify.post('/register', async (request, reply) => {

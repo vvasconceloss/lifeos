@@ -12,13 +12,14 @@ export function comparePassword(password: string, hash: string): boolean {
   return bcrypt.compareSync(password, hash);
 }
 
-function toUserResponse(user: {
+export function toUserResponse(user: {
   id: string;
   email: string;
   name: string | null;
   timezone: string | null;
   weekStart: number;
   theme: string;
+  onboarded: boolean;
   createdAt: Date;
 }): UserResponse {
   return {
@@ -28,6 +29,7 @@ function toUserResponse(user: {
     timezone: user.timezone,
     weekStart: user.weekStart,
     theme: user.theme,
+    onboarded: user.onboarded,
     createdAt: user.createdAt,
   };
 }
@@ -100,6 +102,7 @@ export async function updateUser(
       ...(data.timezone !== undefined && { timezone: data.timezone }),
       ...(data.weekStart !== undefined && { weekStart: data.weekStart }),
       ...(data.theme !== undefined && { theme: data.theme }),
+      ...(data.onboarded !== undefined && { onboarded: data.onboarded }),
     },
   });
 
