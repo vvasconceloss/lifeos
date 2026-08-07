@@ -1,6 +1,7 @@
 import AppPage from "./pages/app";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
+import LandingPage from "./pages/landing";
 import InsightsPage from "./pages/insights";
 import StatisticsPage from "./pages/statistics";
 import HabitDetailPage from "./pages/habit-detail";
@@ -11,19 +12,14 @@ import ProfilePage from "./pages/profile";
 import OnboardingPage from "./pages/onboarding";
 import SettingsHabitsPage from "./pages/settings-habits";
 import SettingsPillarsPage from "./pages/settings-pillars";
-import { createRouter, RouterProvider, createRoute, createRootRoute, redirect } from "@tanstack/react-router";
+import { createRouter, RouterProvider, createRoute, createRootRoute } from "@tanstack/react-router";
 
 const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  beforeLoad: () => {
-    throw redirect({
-      to: "/app",
-      replace: true,
-    });
-  },
+  component: LandingPage,
 });
 
 const registerRoute = createRoute({
