@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/app" });
+      navigate({ to: user.onboarded ? "/app" : "/onboarding" });
     }
   }, [user, loading, navigate]);
 
@@ -59,8 +59,8 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      await login({ email: email.trim(), password });
-      navigate({ to: "/app" });
+      const u = await login({ email: email.trim(), password });
+      navigate({ to: u.onboarded ? "/onboarding" : "/app" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         toast.error("Invalid email or password");

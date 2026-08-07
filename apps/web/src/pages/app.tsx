@@ -46,12 +46,22 @@ export default function DashboardPage() {
                   : "Start by creating your first habit."
               }
               action={
-                <Link
-                  to={d.pillars.length === 0 ? "/settings/pillars" : "/settings/habits"}
-                  className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                  {d.pillars.length === 0 ? "Create pillar" : "Create habit"}
-                </Link>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {!user?.onboarded && (
+                    <Link
+                      to="/onboarding"
+                      className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      Set up LifeOS
+                    </Link>
+                  )}
+                  <Link
+                    to={d.pillars.length === 0 ? "/settings/pillars" : "/settings/habits"}
+                    className="inline-flex rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent/50"
+                  >
+                    {d.pillars.length === 0 ? "Create pillar" : "Create habit"}
+                  </Link>
+                </div>
               }
             />
           ) : (

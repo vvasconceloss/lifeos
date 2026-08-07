@@ -80,7 +80,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/app" });
+      navigate({ to: user.onboarded ? "/app" : "/onboarding" });
     }
   }, [user, loading, navigate]);
 
@@ -113,12 +113,12 @@ export default function RegisterPage() {
     setSubmitting(true);
 
     try {
-      await register({
+      const u = await register({
         email: email.trim(),
         password,
         ...(name.trim() ? { name: name.trim() } : {}),
       });
-      navigate({ to: "/app" });
+      navigate({ to: u.onboarded ? "/onboarding" : "/app" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
         toast.error("This email is already registered");

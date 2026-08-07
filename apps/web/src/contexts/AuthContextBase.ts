@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-export type User = { id: string; email: string; name: string | null; timezone: string | null; weekStart: number; theme: string; createdAt: string; }
+export type User = { id: string; email: string; name: string | null; timezone: string | null; weekStart: number; theme: string; onboarded: boolean; createdAt: string; }
 export type RegisterData = { email: string; password: string; name?: string; }
 export type LoginData = { email: string; password: string; }
 export type AuthResponse = { user: User; token: string; }
@@ -8,8 +8,8 @@ export type AuthResponse = { user: User; token: string; }
 export type AuthContextValue = {
   user: User | null;
   loading: boolean;
-  register: (data: RegisterData) => Promise<void>;
-  login: (data: LoginData) => Promise<void>;
+  register: (data: RegisterData) => Promise<User>;
+  login: (data: LoginData) => Promise<User>;
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
 }

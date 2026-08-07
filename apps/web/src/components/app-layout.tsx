@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
-import { useLocation } from "@tanstack/react-router";
+import { useEffect, type ReactNode } from "react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/use-auth";
 import {
   SidebarProvider,
   SidebarInset,
@@ -28,7 +29,15 @@ function getPageTitle(pathname: string): string {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const pageTitle = getPageTitle(pathname);
+
+  useEffect(() => {
+    if (!loading && user && !user.onboarded && pathname !== "/onboarding") {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
 
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
