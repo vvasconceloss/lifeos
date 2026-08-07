@@ -6,3 +6,13 @@ allowBuilds:
   bcrypt: true
   esbuild: true
   prisma: true
+overrides:
+  "fast-uri@>=3.0.0 <4.0.0": "3.1.5"
+  "fast-uri@>=4.0.0 <5.0.0": "4.1.2"
+  find-my-way: "9.7.0"
+  postcss: "8.5.26"
+  esbuild: "0.28.1"
+  brace-expansion: "5.0.9"
+  js-yaml: "4.3.1"
+  hono: "4.12.34"
+  "@hono/node-server": "2.1.0"
