@@ -68,6 +68,56 @@ describe('POST /v1/auth/register', () => {
 
     await app.close();
   });
+
+  it('rejects a password without a letter or a number', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const noLetter = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: uniqueEmail(), password: '12345678' },
+    });
+    const noNumber = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: uniqueEmail(), password: 'abcdefgh' },
+    });
+
+    expect(noLetter.statusCode).toBe(400);
+    expect(noNumber.statusCode).toBe(400);
+    expect(noLetter.json().details[0].message).toContain('at least one letter');
+    expect(noNumber.json().details[0].message).toContain('at least one number');
+
+    await app.close();
+  });
+
+  it('returns 429 after exceeding the register rate limit', async () => {
+    const previousMax = process.env.REGISTER_RATE_LIMIT_MAX;
+    process.env.REGISTER_RATE_LIMIT_MAX = '3';
+
+    const app = await buildApp({ csrf: false });
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/auth/register',
+        payload: { email: uniqueEmail(), password: 'test1234' },
+      });
+      statuses.push(res.statusCode);
+    }
+
+    expect(statuses.slice(0, 3)).toEqual([201, 201, 201]);
+    expect(statuses[3]).toBe(429);
+
+    await app.close();
+
+    if (previousMax === undefined) {
+      delete process.env.REGISTER_RATE_LIMIT_MAX;
+    } else {
+      process.env.REGISTER_RATE_LIMIT_MAX = previousMax;
+    }
+  });
 });
 
 describe('POST /v1/auth/login', () => {

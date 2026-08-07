@@ -54,25 +54,36 @@ export async function authRoutes(fastify: FastifyInstance) {
     return reply.status(201).send(result);
   });
 
-  fastify.post('/register', async (request, reply) => {
-    const data = validateInput(registerBodySchema, request.body, reply);
-    if (!data) return;
+  fastify.post(
+    '/register',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.REGISTER_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.REGISTER_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
+      const data = validateInput(registerBodySchema, request.body, reply);
+      if (!data) return;
 
-    try {
-      const user = await createUser(data);
-      const token = await setAuthCookie(reply, {
-        sub: user.id,
-        email: user.email,
-      });
+      try {
+        const user = await createUser(data);
+        const token = await setAuthCookie(reply, {
+          sub: user.id,
+          email: user.email,
+        });
 
-      return reply.status(201).send({ user, token });
-    } catch (error) {
-      if (error instanceof Error && error.message === AUTH_ERRORS.EMAIL_ALREADY_EXISTS) {
-        return reply.status(409).send({ error: error.message });
+        return reply.status(201).send({ user, token });
+      } catch (error) {
+        if (error instanceof Error && error.message === AUTH_ERRORS.EMAIL_ALREADY_EXISTS) {
+          return reply.status(409).send({ error: error.message });
+        }
+        throw error;
       }
-      throw error;
-    }
-  });
+    },
+  );
 
   fastify.post('/logout', async (_request, reply) => {
     reply.clearCookie('token', { path: '/' });
