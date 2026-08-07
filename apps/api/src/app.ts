@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
 import { jwtPlugin } from './plugins/jwt';
 import { corsPlugin } from './plugins/cors';
 import { csrfPlugin } from './plugins/csrf';
@@ -19,7 +20,23 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstance> {
   const fastify = Fastify({
-    logger: true
+    genReqId: () => randomUUID(),
+    logger: {
+      level: process.env.LOG_LEVEL ?? 'info',
+      redact: {
+        paths: [
+          'req.headers.cookie',
+          'req.headers.authorization',
+          'res.headers["set-cookie"]',
+        ],
+        censor: '[redacted]',
+      },
+    },
+  });
+
+  fastify.addHook('onSend', (request, reply, _payload, done) => {
+    reply.header('x-request-id', request.id);
+    done();
   });
 
   await fastify.register(cookiesPlugin);
