@@ -48,6 +48,7 @@ type AssocHabit = {
     daysOfWeek: number[];
     timesPerWeek: number | null;
     timesPerMonth: number | null;
+    createdAt: Date;
   };
 };
 
@@ -78,8 +79,8 @@ function computeView(
   today: Date,
   withHistory: boolean,
 ): { response: GoalResponse; habits: GoalHabitProgress[]; history: GoalProgressPoint[] } {
-  const habits = associations.map(({ habit, createdAt }) => {
-    const start = utcMidnight(createdAt);
+  const habits = associations.map(({ habit }) => {
+    const start = utcMidnight(habit.createdAt);
     return {
       habitId: habit.id,
       habitName: habit.name,
@@ -99,8 +100,8 @@ function computeView(
     for (let w = 7; w >= 0; w--) {
       const ws = addDays(currentWeekStart, -w * 7);
       const we = addDays(ws, 6) > today ? today : addDays(ws, 6);
-      const rates = associations.map(({ habit, createdAt }) =>
-        rateOf(freqOf(habit), keysByHabit.get(habit.id), utcMidnight(createdAt), we),
+      const rates = associations.map(({ habit }) =>
+        rateOf(freqOf(habit), keysByHabit.get(habit.id), utcMidnight(habit.createdAt), we),
       );
       history.push({
         label: ws.toLocaleDateString("en-US", { month: "short", day: "numeric" }),

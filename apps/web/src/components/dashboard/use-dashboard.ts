@@ -128,7 +128,12 @@ export function useDashboard() {
     goal: expectedForMonth(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month),
   }));
 
-  const last7 = chartData.slice(-7);
+  const last7 = chartData
+    .filter((d) => {
+      const key = `${year}-${String(month).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
+      return key <= todayStr;
+    })
+    .slice(-7);
   const momentumAvg = last7.length > 0 ? Math.round(last7.reduce((s, d) => s + d.completions, 0) / last7.length) : 0;
   const max7 = Math.max(...last7.map((x) => x.completions), 1);
 
