@@ -7,6 +7,8 @@ import StatisticsPage from "./pages/statistics";
 import HabitDetailPage from "./pages/habit-detail";
 import GoalsPage from "./pages/goals";
 import GoalDetailPage from "./pages/goal-detail";
+import ProjectsPage from "./pages/projects";
+import ProjectDetailPage from "./pages/project-detail";
 import JournalPage from "./pages/journal";
 import ProfilePage from "./pages/profile";
 import OnboardingPage from "./pages/onboarding";
@@ -82,6 +84,18 @@ const goalDetailRoute = createRoute({
   component: GoalDetailPage,
 });
 
+const projectsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/projects",
+  component: ProjectsPage,
+});
+
+const projectDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/projects/$id",
+  component: ProjectDetailPage,
+});
+
 const journalRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/journal",
@@ -100,7 +114,7 @@ const onboardingRoute = createRoute({
   component: OnboardingPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, journalRoute, profileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, journalRoute, profileRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

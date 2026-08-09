@@ -8,6 +8,7 @@ import {
   Target,
   NotebookPen,
   User,
+  FolderKanban,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { to: "/insights", label: "Insights", icon: Sparkles },
   { to: "/statistics", label: "Statistics", icon: BarChart3 },
   { to: "/goals", label: "Goals", icon: Target },
+  { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/journal", label: "Journal", icon: NotebookPen },
   { to: "/settings/pillars", label: "Pillars", icon: Layers },
   { to: "/settings/habits", label: "Habits", icon: ListChecks },

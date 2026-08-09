@@ -14,6 +14,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/insights": "Insights",
   "/statistics": "Statistics",
   "/goals": "Goals",
+  "/projects": "Projects",
   "/journal": "Journal",
   "/profile": "Profile",
   "/settings/pillars": "Pillars",
@@ -23,6 +24,7 @@ const PAGE_TITLES: Record<string, string> = {
 function getPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   if (pathname.startsWith("/goals/")) return "Goal";
+  if (pathname.startsWith("/projects/")) return "Project";
   if (pathname.startsWith("/habits/")) return "Habit";
   return "LifeOS";
 }
