@@ -7,6 +7,7 @@ import type { HabitHistory, HabitHistoryDay } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
+import { FrequencyBadge } from "@/components/frequency-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorState } from "@/components/error-state";
 
@@ -102,6 +103,13 @@ export default function HabitDetailPage() {
                     <h2 className="truncate text-lg font-semibold tracking-tight text-foreground">
                       {history.habitName}
                     </h2>
+                    <FrequencyBadge
+                      className="mt-1"
+                      frequency={history.frequency}
+                      daysOfWeek={history.daysOfWeek}
+                      timesPerWeek={history.timesPerWeek}
+                      timesPerMonth={history.timesPerMonth}
+                    />
                   </div>
                 </div>
                 <MonthNavigation
@@ -153,9 +161,9 @@ export default function HabitDetailPage() {
                             ? "bg-emerald-500 text-white"
                             : cell.scheduled
                               ? cell.date > todayKey
-                                ? "bg-border/40 text-foreground/40"
-                                : "border border-destructive/40 text-foreground/60"
-                              : "text-foreground/40"
+                                ? "bg-border/50 text-foreground/50"
+                                : "border border-destructive/40 text-foreground/70"
+                              : "text-foreground/30"
                         }`}
                         role="img"
                         aria-label={`${cell.date}: ${cell.completed ? "completed" : cell.scheduled ? "scheduled, not completed" : "not scheduled"}`}
@@ -170,8 +178,8 @@ export default function HabitDetailPage() {
                 <div className="mt-3 flex shrink-0 flex-wrap gap-4 text-[10px] text-foreground/60">
                   <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-emerald-500" /> Completed</span>
                   <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] border border-destructive/40" /> Scheduled, missed</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-border/40" /> Scheduled, future</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] border border-border/40" /> Not scheduled</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-border/50" /> Scheduled, future</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-foreground/10" /> Not scheduled</span>
                 </div>
               </div>
             </div>
