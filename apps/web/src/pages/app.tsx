@@ -30,7 +30,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden px-6 py-6">
+        <div className="mx-auto flex w-full max-w-full flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6 md:overflow-hidden">
           {d.initialLoading ? (
             <DashboardSkeleton />
           ) : d.error ? (
@@ -65,8 +65,8 @@ export default function DashboardPage() {
               }
             />
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col gap-6">
-              <div className="flex items-baseline justify-between gap-4">
+            <div className="flex flex-col gap-6 md:min-h-0 md:flex-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                 <div>
                   <p className="text-sm text-foreground/65">
                     {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}

@@ -36,7 +36,7 @@ export function InsightsRow({
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="flex w-full shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:w-56">
+      <div className="hidden shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:flex lg:w-56">
         <span className="mb-2 text-xs font-medium text-foreground/60">Per habit</span>
         <div className="flex flex-1 flex-col justify-center gap-1.5">
           {habitProgress.slice(0, 5).map((hp) => (

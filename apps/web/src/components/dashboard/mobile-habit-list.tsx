@@ -43,7 +43,7 @@ export function MobileHabitList({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-5 overflow-y-auto scroll-subtle md:hidden">
+    <div className="flex flex-col gap-5 md:hidden">
       <div className="flex items-baseline justify-between px-1">
         <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">
           Today
