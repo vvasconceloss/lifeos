@@ -90,13 +90,13 @@ function LogForm({
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-      <div>
+    <div className="flex h-full min-h-0 flex-col gap-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+      <div className="shrink-0">
         <span className="text-xs font-medium text-foreground/60">Log entry</span>
         <p className="text-sm font-semibold text-foreground">{formatFullDate(date)}</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
         <div className="grid gap-2">
           <span className="text-xs font-medium text-foreground/60">Mood</span>
           <div className="flex flex-wrap gap-1">
@@ -158,8 +158,8 @@ function LogForm({
           />
         </div>
 
-        <div className="grid gap-2">
-          <label htmlFor="j-notes" className="text-xs font-medium text-foreground/60">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <label htmlFor="j-notes" className="shrink-0 text-xs font-medium text-foreground/60">
             Notes
           </label>
           <textarea
@@ -167,15 +167,15 @@ function LogForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
+            className={`${inputClass} min-h-20 flex-1 resize-y`}
             placeholder="How did the day go?"
-            className={inputClass}
           />
         </div>
 
         <button
           onClick={handleSave}
           disabled={saving || isFuture}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? <Spinner className="size-4" /> : null}
           {saving ? "Saving..." : isFuture ? "Future days can't be logged" : log ? "Update entry" : "Save entry"}
@@ -295,7 +295,7 @@ export default function JournalPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
+        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6 lg:overflow-hidden">
           {loading ? (
             <div className="flex flex-1 items-center justify-center text-foreground/50">
               <Spinner />
@@ -303,8 +303,8 @@ export default function JournalPage() {
           ) : error ? (
             <ErrorState onRetry={retry} />
           ) : (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-6">
+              <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <BookOpenCheck className="size-5 text-foreground/60" aria-hidden />
                   <span className="text-xs font-medium text-foreground/60">Daily journal</span>
@@ -318,12 +318,12 @@ export default function JournalPage() {
                 />
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-2">
                 <LogForm key={selectedDate} date={selectedDate} log={selectedLog} onSaved={handleSaved} />
 
                 <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-                  <span className="text-xs font-medium text-foreground/60">Monthly calendar</span>
-                  <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-medium text-foreground/40">
+                  <span className="shrink-0 text-xs font-medium text-foreground/60">Monthly calendar</span>
+                  <div className="grid shrink-0 grid-cols-7 gap-1.5 text-center text-[10px] font-medium text-foreground/40">
                     {WEEKDAY_LABELS.map((l) => (
                       <div key={l}>{l}</div>
                     ))}
@@ -354,13 +354,13 @@ export default function JournalPage() {
                       ),
                     )}
                   </div>
-                  <p className="text-[10px] text-foreground/50">
+                  <p className="shrink-0 text-[10px] text-foreground/50">
                     Logged days are colored by mood &amp; energy (the stronger the green, the better the day).
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+              <div className="shrink-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                 <div className="mb-4 flex items-baseline justify-between">
                   <span className="text-xs font-medium text-foreground/60">Your daily state this month</span>
                   <span className="text-[10px] text-foreground/60">

@@ -269,7 +269,7 @@ export default function ProjectDetailPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
+        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6 lg:overflow-hidden">
           {loading && !project ? (
             <div className="flex flex-1 items-center justify-center text-foreground/60">
               <Spinner />
@@ -277,8 +277,8 @@ export default function ProjectDetailPage() {
           ) : error ? (
             <ErrorState onRetry={retry} />
           ) : project ? (
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-6">
+              <div className="flex shrink-0 flex-wrap items-center gap-3">
                 <Link
                   to="/projects"
                   className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/80 text-foreground/60 hover:text-foreground"
@@ -294,67 +294,78 @@ export default function ProjectDetailPage() {
                 <EditProjectDialog project={project} pillars={pillars} onUpdated={handleUpdated} />
               </div>
 
-              <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-                <div className="mb-2 flex items-baseline justify-between">
-                  <span className="text-xs font-medium text-foreground/60">Progress</span>
-                  <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-                    {project.progress}%
-                  </span>
-                </div>
-                <div className="h-3 w-full overflow-hidden rounded-full bg-border/60">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${project.progress}%`, backgroundColor: project.pillarColor ?? "var(--chart-1)" }}
-                  />
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-xs text-foreground/60">
-                    {doneCount} of {tasks.length} tasks done
-                  </span>
-                  <div className="flex gap-2">
-                    {STATUSES.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => handleStatus(s)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                          project.status === s
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-accent text-foreground/70 hover:bg-accent/70"
-                        }`}
-                      >
-                        {s.toLowerCase().replace("_", " ")}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs font-medium text-foreground/60">Tasks</span>
-                  {project && <NewTaskModal projectId={project.id} onCreated={() => setReloadKey((k) => k + 1)} />}
-                </div>
-
-                {tasks.length === 0 ? (
-                  <p className="py-4 text-center text-xs text-foreground/60">
-                    No tasks yet. Add a task to get started.
-                  </p>
-                ) : (
-                  <ul className="space-y-2">
-                    {tasks.map((task, index) => (
-                      <TaskRow
-                        key={task.id}
-                        task={task}
-                        index={index}
-                        count={tasks.length}
-                        onToggle={handleToggleTask}
-                        onSave={handleSaveTaskTitle}
-                        onDelete={handleDeleteTask}
-                        onMove={handleMoveTask}
+              <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(18rem,22rem)_1fr]">
+                <div className="flex shrink-0 flex-col gap-6">
+                  <div className="shrink-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+                    <div className="mb-2 flex items-baseline justify-between">
+                      <span className="text-xs font-medium text-foreground/60">Progress</span>
+                      <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                        {project.progress}%
+                      </span>
+                    </div>
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-border/60">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${project.progress}%`, backgroundColor: project.pillarColor ?? "var(--chart-1)" }}
                       />
-                    ))}
-                  </ul>
-                )}
+                    </div>
+                    <div className="mt-3 text-xs text-foreground/60">
+                      {doneCount} of {tasks.length} tasks done
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-border/40 pt-4">
+                      {STATUSES.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleStatus(s)}
+                          className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                            project.status === s
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-accent text-foreground/70 hover:bg-accent/70"
+                          }`}
+                        >
+                          {s.toLowerCase().replace("_", " ")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {project.description && (
+                    <div className="shrink-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+                      <span className="text-xs font-medium text-foreground/60">Description</span>
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/70">
+                        {project.description}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+                  <div className="mb-3 flex shrink-0 items-center justify-between">
+                    <span className="text-xs font-medium text-foreground/60">Tasks</span>
+                    {project && <NewTaskModal projectId={project.id} onCreated={() => setReloadKey((k) => k + 1)} />}
+                  </div>
+
+                  {tasks.length === 0 ? (
+                    <p className="py-4 text-center text-xs text-foreground/60">
+                      No tasks yet. Add a task to get started.
+                    </p>
+                  ) : (
+                    <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto scroll-subtle lg:overflow-x-hidden">
+                      {tasks.map((task, index) => (
+                        <TaskRow
+                          key={task.id}
+                          task={task}
+                          index={index}
+                          count={tasks.length}
+                          onToggle={handleToggleTask}
+                          onSave={handleSaveTaskTitle}
+                          onDelete={handleDeleteTask}
+                          onMove={handleMoveTask}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             </div>
           ) : null}

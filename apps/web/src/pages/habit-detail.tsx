@@ -80,7 +80,7 @@ export default function HabitDetailPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-6">
+        <div className="mx-auto flex w-full max-w-full min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6 lg:overflow-hidden">
           {loading && !history ? (
             <div className="flex flex-1 items-center justify-center text-foreground/60">
               <Spinner />
@@ -113,7 +113,7 @@ export default function HabitDetailPage() {
                 />
               </div>
 
-              <div className="grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="grid shrink-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <SummaryCard
                   label="Completion rate"
                   value={`${history.completionRate}%`}
