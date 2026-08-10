@@ -2,6 +2,17 @@
 
 All notable changes to LifeOS.
 
+## Unreleased
+
+### Fixed
+
+- **Analytics scale:** completion/success rates for the **current month** are now computed over
+  the elapsed days only (`[month start → today]`), so a fully-on-track month reports 100% mid-month
+  instead of being diluted by future days. Applied to `/stats/overview`, `/stats/monthly`,
+  `/stats/analytics` (current week/month) and the dashboard success rate. Per-habit "goal" numbers
+  (grid/mobile "X/goal") keep the full month as the target. Semantics documented in
+  `docs/FREQUENCIES.md` §5.1.
+
 ## v1.5.0 — Public Beta (2026-08)
 
 The v1.5 release turns the v1.0 MVP into an intermediate product ready for other people to use.

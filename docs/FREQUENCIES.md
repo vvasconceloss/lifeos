@@ -111,6 +111,25 @@ completionRate(P) = min(100, round(100 × actual(P) / expected(P)))
 - The rate is capped at 100 because exceeding a soft/volume target is not considered
   "more than perfect".
 
+### 5.1 Elapsed-aware rates (current period)
+
+Rates describe **actual performance so far**. For the **current, in-progress period**
+(month or week) the denominator only counts the days that have actually elapsed — up to
+today — never the future days of that period:
+
+- `GET /stats/overview`, `GET /stats/monthly` and the dashboard success rate divide
+  `actual` by the expected completions over `[period start → today]` when the queried
+  period is the current month; past months use the whole month.
+- `GET /stats/analytics` does the same for the current **week** (already) and for the
+  current **month** in `monthlyRates`.
+- Per-habit **goal** numbers (dashboard grid and mobile "X/goal") deliberately keep the
+  **full month** as the target — they answer "progress toward this month's goal", while
+  rates answer "how well am I doing so far". So on day 9 of a fully-on-track daily
+  habit you see `9/31` (goal) together with a `100%` rate (performance so far).
+
+This keeps the metrics consistent with real usage: a mid-month completion rate is never
+diluted by days that have not happened yet.
+
 ---
 
 ## 6. Streaks
