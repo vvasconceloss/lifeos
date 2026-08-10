@@ -152,7 +152,7 @@ export function NewHabitModal({
         <Plus className="mr-1.5 size-4" />
         New Habit
       </DialogTrigger>
-      <DialogContent className="sm:max-w-106.25">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create new habit</DialogTitle>
           <DialogDescription>
@@ -160,7 +160,7 @@ export function NewHabitModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="nh-name">Habit name</Label>
             <input
@@ -291,6 +291,7 @@ export function NewHabitModal({
             timesPerMonth={timesPerMonth}
             error={freqError}
             idPrefix="nh"
+            className="contents"
             onFrequency={setFrequency}
             onDaysOfWeek={setDaysOfWeek}
             onTimesPerWeek={setTimesPerWeek}

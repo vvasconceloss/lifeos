@@ -157,13 +157,13 @@ export function EditHabitDialog({
           </button>
         }
       />
-      <DialogContent className="sm:max-w-106.25">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit habit</DialogTitle>
           <DialogDescription>Update the habit details and schedule.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="eh-name">Habit name</Label>
             <input
@@ -277,6 +277,7 @@ export function EditHabitDialog({
             timesPerMonth={timesPerMonth}
             error={freqError}
             idPrefix="eh"
+            className="contents"
             onFrequency={setFrequency}
             onDaysOfWeek={setDaysOfWeek}
             onTimesPerWeek={setTimesPerWeek}

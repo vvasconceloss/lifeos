@@ -13,6 +13,7 @@ export function FrequencyFields({
   timesPerMonth,
   error,
   idPrefix = "freq",
+  className,
   onFrequency,
   onDaysOfWeek,
   onTimesPerWeek,
@@ -25,6 +26,7 @@ export function FrequencyFields({
   timesPerMonth: string;
   error?: string;
   idPrefix?: string;
+  className?: string;
   onFrequency: (f: HabitFrequency) => void;
   onDaysOfWeek: (days: number[]) => void;
   onTimesPerWeek: (v: string) => void;
@@ -39,7 +41,7 @@ export function FrequencyFields({
   }
 
   return (
-    <>
+    <div className={cn("grid gap-4", className)}>
       <div className="grid gap-2">
         <Label htmlFor={`${idPrefix}-freq`}>Frequency</Label>
         <select
@@ -60,7 +62,7 @@ export function FrequencyFields({
       </div>
 
       {frequency === "WEEKLY_DAYS" && (
-        <div className="grid gap-2">
+        <div className="grid gap-2 sm:col-span-full">
           <Label>Days of the week</Label>
           <div className="flex flex-wrap gap-1.5">
             {DAY_ABBREV.map((label, value) => {
@@ -92,7 +94,7 @@ export function FrequencyFields({
       )}
 
       {frequency === "TIMES_PER_WEEK" && (
-        <div className="grid gap-2">
+        <div className="grid gap-2 sm:col-span-full">
           <Label htmlFor={`${idPrefix}-tpw`}>Times per week</Label>
           <input
             id={`${idPrefix}-tpw`}
@@ -116,7 +118,7 @@ export function FrequencyFields({
       )}
 
       {frequency === "TIMES_PER_MONTH" && (
-        <div className="grid gap-2">
+        <div className="grid gap-2 sm:col-span-full">
           <Label htmlFor={`${idPrefix}-tpm`}>Times per month</Label>
           <input
             id={`${idPrefix}-tpm`}
@@ -138,6 +140,6 @@ export function FrequencyFields({
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }
