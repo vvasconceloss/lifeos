@@ -106,4 +106,17 @@ describe('Authentication flows', () => {
 
     expect(await screen.findByText('Welcome to LifeOS')).toBeInTheDocument();
   });
+
+  it('shows the login form instead of the dashboard when already in demo mode', async () => {
+    const demoUser = { ...loggedInUser, id: 'demo-1', email: 'demo@lifeos.com', name: 'Demo User', isDemo: true };
+    server.use(
+      http.get('/v1/auth/me', () => HttpResponse.json({ user: demoUser })),
+      http.post('/v1/auth/logout', () => HttpResponse.json({ ok: true })),
+    );
+
+    renderApp('/login');
+
+    expect(await screen.findByRole('heading', { name: /Welcome back/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+  });
 });

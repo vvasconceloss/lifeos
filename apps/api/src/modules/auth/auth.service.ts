@@ -4,6 +4,14 @@ import type { RegisterBody, UpdateMeBody, UserResponse } from "./auth.schemas";
 
 const SALT_ROUNDS = 10;
 
+export const DEMO_EMAIL = "demo@lifeos.com";
+export const DEMO_PASSWORD = "demo-lifeos-2026";
+export const DEMO_NAME = "Demo User";
+
+export function isDemoEmail(email: string): boolean {
+  return email === DEMO_EMAIL;
+}
+
 export function hashPassword(password: string): string {
   return bcrypt.hashSync(password, SALT_ROUNDS);
 }
@@ -32,6 +40,7 @@ export function toUserResponse(user: {
     theme: user.theme,
     onboarded: user.onboarded,
     gamification: user.gamification,
+    isDemo: isDemoEmail(user.email),
     createdAt: user.createdAt,
   };
 }

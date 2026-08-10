@@ -15,7 +15,7 @@ interface FieldErrors {
 }
 
 export default function LoginPage() {
-  const { user, loading, login } = useAuth();
+  const { user, loading, login, logout } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,10 +26,15 @@ export default function LoginPage() {
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
-    if (!loading && user) {
-      navigate({ to: user.onboarded ? "/app" : "/onboarding" });
+    if (loading) return;
+    if (!user) return;
+    if (user.isDemo) {
+      // The demo session must never block the real login/register pages.
+      void logout();
+      return;
     }
-  }, [user, loading, navigate]);
+    navigate({ to: user.onboarded ? "/app" : "/onboarding" });
+  }, [user, loading, logout, navigate]);
 
   function clearFieldError(field: keyof FieldErrors) {
     if (hasSubmitted && errors[field]) {

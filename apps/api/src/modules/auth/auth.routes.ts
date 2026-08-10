@@ -2,9 +2,9 @@ import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
 import { onboardingBodySchema, registerBodySchema, loginBodySchema, updateMeBodySchema } from './auth.schemas';
-import { createUser, authenticate, getUserById, updateUser, AUTH_ERRORS } from './auth.service';
+import { createUser, authenticate, getUserById, updateUser, DEMO_EMAIL, AUTH_ERRORS } from './auth.service';
 import { completeOnboarding } from './onboarding.service';
-import { seedDemoUser, getDemoUserResponse, DEMO_EMAIL } from './demo.service';
+import { seedDemoUser, getDemoUserResponse } from './demo.service';
 
 const cookieOptions = {
   httpOnly: true,

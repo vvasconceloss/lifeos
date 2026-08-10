@@ -1,9 +1,5 @@
 import { prisma } from "../../db/client";
-import { hashPassword, toUserResponse } from "../auth/auth.service";
-
-export const DEMO_EMAIL = "demo@lifeos.com";
-export const DEMO_PASSWORD = "demo-lifeos-2026";
-export const DEMO_NAME = "Demo User";
+import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_NAME, hashPassword, toUserResponse } from "../auth/auth.service";
 
 function utcDateKey(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));

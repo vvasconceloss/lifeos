@@ -73,6 +73,7 @@ export interface UserResponse {
   theme: string;
   onboarded: boolean;
   gamification: boolean;
+  isDemo: boolean;
   createdAt: Date;
 }
 
