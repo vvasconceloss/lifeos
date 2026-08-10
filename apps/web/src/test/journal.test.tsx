@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+import { screen } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
+import { server } from './server';
+import { renderApp } from './utils';
+
+const log = {
+  id: 'l1',
+  date: '2026-08-05',
+  mood: 8,
+  energy: 7,
+  sleepHours: 7.5,
+  notes: 'Good day',
+  createdAt: '',
+  updatedAt: '',
+};
+
+describe('Journal', () => {
+  it('renders the daily form and the monthly calendar', async () => {
+    server.use(
+      http.get('/v1/daily-logs', () => HttpResponse.json({ logs: [log] })),
+      http.get('/v1/daily-logs/correlations', () =>
+        HttpResponse.json({ correlations: { sleep: [], mood: [], energy: [] } }),
+      ),
+    );
+
+    renderApp('/journal');
+
+    expect(await screen.findByText('Daily journal')).toBeInTheDocument();
+    expect(screen.getByText(/Log entry/)).toBeInTheDocument();
+    expect(screen.getByText('Monthly calendar')).toBeInTheDocument();
+  });
+
+  it('shows the correlations card with association, not causation language', async () => {
+    server.use(
+      http.get('/v1/daily-logs', () => HttpResponse.json({ logs: [] })),
+      http.get('/v1/daily-logs/correlations', () =>
+        HttpResponse.json({
+          correlations: {
+            sleep: [{ label: '7–9h', rate: 87, days: 12 }],
+            mood: [{ label: '8–10', rate: 91, days: 9 }],
+            energy: [{ label: '5–7', rate: 74, days: 6 }],
+          },
+        }),
+      ),
+    );
+
+    renderApp('/journal');
+
+    expect(await screen.findByText('Completion rate vs. your daily state')).toBeInTheDocument();
+    expect(screen.getByText(/Association, not causation/i)).toBeInTheDocument();
+    expect(screen.getByText('87% · 12 days')).toBeInTheDocument();
+    expect(screen.getByText('91% · 9 days')).toBeInTheDocument();
+  });
+});

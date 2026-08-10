@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { BedDouble, BookOpenCheck, Smile, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { DailyLogResponse } from "@lifeos/shared";
+import type { DailyLogCorrelations, DailyLogResponse } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
@@ -223,6 +223,63 @@ function StateCard({
   );
 }
 
+function CorrelationRow({ label, rate, days }: { label: string; rate: number; days: number }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2 text-xs">
+        <span className="font-medium text-foreground">{label}</span>
+        <span className="tabular-nums text-foreground/60">
+          {rate}% · {days} day{days === 1 ? "" : "s"}
+        </span>
+      </div>
+      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${rate}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations }) {
+  const groups = [
+    { title: "Sleep", icon: <BedDouble className="size-4" />, rows: correlations.sleep },
+    { title: "Mood", icon: <Smile className="size-4" />, rows: correlations.mood },
+    { title: "Energy", icon: <Zap className="size-4" />, rows: correlations.energy },
+  ];
+  const hasData = groups.some((g) => g.rows.length > 0);
+
+  return (
+    <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+      <span className="text-xs font-medium text-foreground/60">Completion rate vs. your daily state</span>
+      {!hasData ? (
+        <p className="mt-3 text-sm text-foreground/60">
+          Log a few days (mood, energy or sleep) alongside your habits to see how your state relates
+          to your completion rate.
+        </p>
+      ) : (
+        <div className="mt-4 grid gap-5 md:grid-cols-3">
+          {groups.map((g) =>
+            g.rows.length > 0 ? (
+              <div key={g.title} className="flex flex-col gap-3">
+                <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                  <span className="text-foreground/50">{g.icon}</span>
+                  {g.title}
+                </span>
+                {g.rows.map((row) => (
+                  <CorrelationRow key={row.label} label={row.label} rate={row.rate} days={row.days} />
+                ))}
+              </div>
+            ) : null,
+          )}
+        </div>
+      )}
+      <p className="mt-4 border-t border-border/40 pt-3 text-[10px] text-foreground/60">
+        Association, not causation — this shows how your logged state and completion rate tend to
+        co-occur, not that one causes the other.
+      </p>
+    </div>
+  );
+}
+
 export default function JournalPage() {
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
@@ -239,6 +296,7 @@ export default function JournalPage() {
   const to = monthDays[monthDays.length - 1];
 
   const [logs, setLogs] = useState<DailyLogResponse[]>([]);
+  const [correlations, setCorrelations] = useState<DailyLogCorrelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -259,7 +317,18 @@ export default function JournalPage() {
       }
     }
 
+    async function loadCorrelations() {
+      setCorrelations(null);
+      try {
+        const res = await api.get<{ correlations: DailyLogCorrelations }>(`/daily-logs/correlations?from=${from}&to=${to}`);
+        if (!cancelled) setCorrelations(res.data.correlations);
+      } catch {
+        if (!cancelled) setCorrelations(null);
+      }
+    }
+
     load();
+    loadCorrelations();
     return () => {
       cancelled = true;
     };
@@ -376,6 +445,8 @@ export default function JournalPage() {
                   Monthly averages of the values you logged. The bar shows your average on a 0–10 scale.
                 </p>
               </div>
+
+              {correlations ? <CorrelationsCard correlations={correlations} /> : null}
             </div>
           )}
         </div>
