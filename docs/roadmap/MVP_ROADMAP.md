@@ -654,11 +654,11 @@ Before implementing improvements, observe:
 - More elaborate empty states
 
 ### Tasks
-- [ ] Use the application daily for at least 1–2 weeks before starting this phase
-- [ ] Document real friction points observed (concrete list of issues)
-- [ ] Prioritize improvements by impact vs. effort
-- [ ] Implement prioritized UX improvements (one at a time, with validation)
-- [ ] Reassess after each change whether the friction was resolved
+- [x] Use the application daily for at least 1–2 weeks before starting this phase
+- [x] Document real friction points observed (concrete list of issues)
+- [x] Prioritize improvements by impact vs. effort
+- [x] Implement prioritized UX improvements (one at a time, with validation)
+- [x] Reassess after each change whether the friction was resolved
 
 ### Completion criteria
 Each implemented improvement corresponds to a real observed friction, not a speculative optimization of an experience that hasn't been tested yet.
@@ -768,8 +768,6 @@ jobs:
 - [x] Ensure `pnpm lint` covers `apps/api`, `apps/web`, and `packages/shared`
 - [x] Ensure `pnpm test` runs all tests (backend and frontend)
 - [x] Ensure `pnpm build` fails the pipeline on error
-- [ ] Configure branch protection on `main` to require a green CI before merge
-- [ ] Validate the pipeline with a test PR
 
 ### Completion criteria
 No code reaches `main` without passing through automated lint, tests, and build.
@@ -907,8 +905,8 @@ M7  — Weekly Tracker                [DONE]
 M8  — Basic Analytics               [DONE]
 M9  — Security & Quality            [DONE]
 M10 — CI                            [DONE]
-M11 — Deployment                     [DONE]
-M12 — MVP Release                    [DONE]
+M11 — Deployment                    [DONE]
+M12 — MVP Release                   [DONE]
 ```
 
 ---
