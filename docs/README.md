@@ -7,32 +7,32 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 - **[LifeOS README](../README.md)** — product overview, features, setup, deploy.
 - **[CHANGELOG](../CHANGELOG.md)** — v1.0 → v1.5 release history.
 
-## Roadmap & plans
+## Roadmap & backlog
 
 | Document | What it is |
 |---|---|
-| [`1.5_PLAN.md`](1.5_PLAN.md) | The v1.5 roadmap: objectives, specs and checklists for every phase (audit, UX, frequencies, analytics, goals, projects, journal, personalization, onboarding, gamification, observability, testing, CI/CD, release). |
-| [`MVP_PLAN.md`](MVP_PLAN.md) | The original v1.0 MVP plan (Foundation → Deployment). Historical reference. |
+| [`roadmap/ROADMAP.md`](roadmap/ROADMAP.md) | The v1.5 roadmap: objectives, specs and the task backlog for every phase (audit, UX, frequencies, analytics, goals, projects, journal, personalization, onboarding, gamification, observability, testing, CI/CD, release). |
+| [`roadmap/MVP_ROADMAP.md`](roadmap/MVP_ROADMAP.md) | The original v1.0 MVP plan (Foundation → Deployment). Historical reference. |
 
 ## Domain & data model
 
 | Document | What it is |
 |---|---|
-| [`DOMAIN_RULES.md`](DOMAIN_RULES.md) | Business rules and the entity model (users, pillars, habits, completions, goals, projects, daily logs) — read this before working on the data layer. |
-| [`FREQUENCIES.md`](FREQUENCIES.md) | Habit frequency model and how expected/completed/rate are defined per frequency — read this before touching habit statistics or streaks. |
+| [`domain/DOMAIN_RULES.md`](domain/DOMAIN_RULES.md) | Business rules and the entity model (users, pillars, habits, completions, goals, projects, daily logs) — read this before working on the data layer. |
+| [`domain/FREQUENCIES.md`](domain/FREQUENCIES.md) | Habit frequency model and how expected/completed/rate are defined per frequency — read this before touching habit statistics or streaks. |
 
 ## Feature references
 
 | Document | What it is |
 |---|---|
-| [`GAMIFICATION.md`](GAMIFICATION.md) | The optional XP/level/rank system: the transparent formula, level curve and ranks. |
+| [`features/GAMIFICATION.md`](features/GAMIFICATION.md) | The optional XP/level/rank system: the transparent formula, level curve and ranks. |
 
 ## Operations & deployment
 
 | Document | What it is |
 |---|---|
-| [`OPS.md`](OPS.md) | Production hardening: logging, health checks, graceful shutdown, rate limits, security controls, backups, connection pooling. |
-| [`DEPLOYMENT.md`](DEPLOYMENT.md) | How LifeOS is deployed: Vercel (web) → Render (API) → Neon (Postgres), env vars, CI/CD, rollback. |
+| [`ops/OPS.md`](ops/OPS.md) | Production hardening: logging, health checks, graceful shutdown, rate limits, security controls, backups, connection pooling. |
+| [`ops/DEPLOYMENT.md`](ops/DEPLOYMENT.md) | How LifeOS is deployed: Vercel (web) → Render (API) → Neon (Postgres), env vars, CI/CD, rollback. |
 
 ## Repository conventions
 
