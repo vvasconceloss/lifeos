@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { UserAvatar } from "@/components/user-avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
+import { cn } from "@/lib/utils";
 import type { User } from "@/contexts/AuthContextBase";
 
 const TIMEZONES = [
@@ -42,6 +43,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
   );
   const [timezone, setTimezone] = useState(user.timezone ?? "");
   const [weekStart, setWeekStart] = useState(user.weekStart ?? 1);
+  const [gamification, setGamification] = useState(user.gamification);
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -51,6 +53,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
         name: name.trim() || null,
         theme: themePref,
         weekStart,
+        gamification,
       };
       if (timezone) payload.timezone = timezone;
 
@@ -140,6 +143,33 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               ))}
             </select>
           </div>
+
+          <div className="flex items-start justify-between gap-3 border-t border-border/40 pt-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Gamification</p>
+              <p className="text-xs text-foreground/60">
+                Show XP, levels and ranks. Off by default.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={gamification}
+              aria-label="Toggle gamification"
+              onClick={() => setGamification((v) => !v)}
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                gamification ? "bg-primary" : "bg-border",
+              )}
+            >
+              <span
+                className={cn(
+                  "inline-block size-4 rounded-full bg-background shadow-sm transition-transform",
+                  gamification ? "translate-x-6" : "translate-x-1",
+                )}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -163,7 +193,7 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-4xl px-6 py-6">
+        <main className="mx-auto flex w-full max-w-4xl min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center gap-4">
             {user && <UserAvatar email={user.email} className="size-14 text-xl" />}
             <div className="min-w-0">
@@ -173,7 +203,9 @@ export default function ProfilePage() {
               <p className="truncate text-sm text-foreground/60">{user?.email}</p>
             </div>
           </div>
-          {user ? <ProfileForm key={user.id} user={user} onSaved={refreshUser} /> : null}
+          <div className="min-h-0 flex-1">
+            {user ? <ProfileForm key={user.id} user={user} onSaved={refreshUser} /> : null}
+          </div>
         </main>
       </AppLayout>
     </ProtectedRoute>

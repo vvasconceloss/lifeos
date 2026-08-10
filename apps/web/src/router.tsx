@@ -9,6 +9,7 @@ import GoalsPage from "./pages/goals";
 import GoalDetailPage from "./pages/goal-detail";
 import ProjectsPage from "./pages/projects";
 import ProjectDetailPage from "./pages/project-detail";
+import ProgressionPage from "./pages/progression";
 import JournalPage from "./pages/journal";
 import ProfilePage from "./pages/profile";
 import OnboardingPage from "./pages/onboarding";
@@ -96,6 +97,12 @@ const projectDetailRoute = createRoute({
   component: ProjectDetailPage,
 });
 
+const progressionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/progression",
+  component: ProgressionPage,
+});
+
 const journalRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/journal",
@@ -114,7 +121,7 @@ const onboardingRoute = createRoute({
   component: OnboardingPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, journalRoute, profileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

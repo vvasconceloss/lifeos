@@ -9,6 +9,7 @@ import {
   NotebookPen,
   User,
   FolderKanban,
+  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { to: "/statistics", label: "Statistics", icon: BarChart3 },
   { to: "/goals", label: "Goals", icon: Target },
   { to: "/projects", label: "Projects", icon: FolderKanban },
+  { to: "/progression", label: "Progression", icon: Trophy },
   { to: "/journal", label: "Journal", icon: NotebookPen },
   { to: "/settings/pillars", label: "Pillars", icon: Layers },
   { to: "/settings/habits", label: "Habits", icon: ListChecks },
@@ -42,6 +44,10 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
   const { pathname } = useLocation();
+
+  const navItems = NAV_ITEMS.filter(
+    (item) => item.to !== "/progression" || user?.gamification,
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -65,7 +71,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <SidebarMenuItem key={item.to}>
                   <SidebarMenuButton
                     isActive={pathname === item.to}
