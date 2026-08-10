@@ -48,8 +48,8 @@ public demo account (`demo@lifeos.com`) pre-loaded with realistic data.
   archiving and an individual history calendar with current/best streaks.
 - **Goals** — outcomes linked to supporting habits, with progress derived from real completions.
 - **Projects & Tasks** — structured work with a task checklist; progress updates automatically.
-- **Daily Journal** — log mood, energy, sleep and notes; see how they correlate with your
-  completion rate (association, not causation).
+- **Daily Journal** — log mood, energy, sleep (hours + minutes) and notes; see how your logged days
+  distribute across mood, energy and sleep buckets.
 - **Analytics** — Insights (trends, consistency, focus areas) and Statistics (monthly summary,
   per-pillar, heatmap).
 - **Onboarding** — a guided first-run flow with default areas and suggested habits (skippable).

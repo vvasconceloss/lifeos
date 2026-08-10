@@ -512,7 +512,7 @@ Important: these correlations must be presented as **association**, never as cau
 - [x] Implement daily log history
 - [x] Implement a calendar view of daily logs
 - [x] Implement an endpoint correlating daily logs with completion rate (e.g., sleep vs. completion rate)
-- [x] Implement the display of these correlations in the frontend, with explicit association (not causation) language
+- [x] Implement the display of the state-bucket distribution in the frontend (day counts per bucket)
 - [x] Test the full flow: log daily entry → mark habits → see the correlation reflected over time (manual)
 
 ### Implementation notes — Phase 7
@@ -520,11 +520,11 @@ Important: these correlations must be presented as **association**, never as cau
 - **Model:** `DailyLog` (userId, date, mood 1–10, energy 1–10, sleepHours float, notes) with `@@unique([userId, date])`. Migration `20260805210000_add_daily_log`.
 - **API:** `GET /daily-logs?from&to` (list), `POST /daily-logs` (**idempotent upsert by date** — the daily form saves with one call), `GET /daily-logs/:date`, `PATCH/DELETE /daily-logs/:id`, and `GET /daily-logs/correlations?from&to`.
 - **Correlations:** for each logged day, the daily completion rate = fraction of active habits completed that day (0–100). Days are grouped into buckets — sleep (`<6h`, `6–7h`, `7–9h`, `>9h`), mood and energy (`1–4`, `5–7`, `8–10`) — returning the average rate and sample size per bucket. Completions are scoped to the user's own active habits.
-- **Frontend:** new **Journal** page (`/journal`, nav) — a form for the selected day (mood/energy 1–10 buttons, sleep input, notes), a monthly calendar colored by mood (click a day to edit), and a correlations card labelled **"association, not causation"** throughout.
+- **Frontend:** new **Journal** page (`/journal`, nav) — a form for the selected day (mood/energy 1–10 buttons, sleep in **hours + minutes**, notes), a monthly calendar colored by mood (click a day to edit), and a **"Your logged days by state"** card showing how many days fell in each sleep (`<6h`, `6–7h`, `7–9h`, `>9h`) and mood/energy (`1–4`, `5–7`, `8–10`) bucket. The card deliberately shows the day distribution rather than percentages — the per-bucket completion-rate averages stay server-side.
 - **Tests:** 9 daily-log tests (CRUD/upsert, range+by-date, correlations, isolation).
 
 ### Completion criteria
-The user can log mood, energy, sleep, and notes daily, view the history, and view correlations with habit completion rate, always presented as association rather than causation.
+The user can log mood, energy, sleep, and notes daily, view the history, and see how their logged days are distributed across state buckets (computed from the same data as the correlations endpoint).
 
 ---
 

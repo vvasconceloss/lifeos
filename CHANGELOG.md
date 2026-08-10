@@ -20,8 +20,9 @@ integration, frontend integration, and an E2E main-flow test) running in CI.
   from the habits' completion rates, with progress-over-time on the goal detail page.
 - **Projects & Tasks** — structured work per pillar with a task checklist; project progress is
   derived from completed tasks, with task reordering and inline editing.
-- **Daily Journal / Life Logs** — log mood, energy, sleep and notes per day; monthly mood calendar;
-  correlations with completion rate presented as *association, not causation*.
+- **Daily Journal / Life Logs** — log mood, energy, sleep (hours + minutes) and notes per day;
+  monthly mood calendar; a "logged days by state" card showing how many days fell in each
+  sleep/mood/energy bucket.
 - **Onboarding** — first-login detection with a 3-step wizard (areas → first habits → ready),
   default pillar/habit suggestions and a skip path; empty-state guidance for skipped users.
 - **Personalization** — profile page (`/profile`) with name, theme (light/dark/system), timezone and
