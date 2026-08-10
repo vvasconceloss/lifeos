@@ -2,6 +2,12 @@ import { PieChart, Pie, Cell } from "recharts";
 import type { ChartData, HabitProgress } from "./types";
 import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer } from "recharts";
 
+function monthColor(successRate: number): string {
+  if (successRate >= 80) return "#22c55e";
+  if (successRate >= 50) return "#eab308";
+  return "#ef4444";
+}
+
 export function InsightsRow({
   chartData,
   habitProgress,
@@ -21,6 +27,8 @@ export function InsightsRow({
   momentumAvg: number;
   max7: number;
 }) {
+  const color = monthColor(successRate);
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
@@ -31,9 +39,14 @@ export function InsightsRow({
               <XAxis dataKey="day" tick={{ fontSize: 8, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} interval={3} />
               <YAxis allowDecimals={false} tick={{ fontSize: 8, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} width={18} />
               <ReTooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 11, padding: "4px 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }} />
-              <Line type="natural" dataKey="completions" stroke="var(--chart-1)" strokeWidth={3} dot={{ r: 3, fill: "var(--chart-1)" }} activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--background)" }} />
+              <Line type="natural" dataKey="completions" stroke={color} strokeWidth={3} dot={{ r: 3, fill: color }} activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--background)", fill: color }} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+        <div className="mt-2 flex items-center gap-4 text-[10px] text-foreground/60">
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#22c55e]" /> On track</span>
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#eab308]" /> Partial</span>
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#ef4444]" /> Low month</span>
         </div>
       </div>
       <div className="hidden shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:flex lg:w-56">
