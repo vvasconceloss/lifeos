@@ -1,0 +1,46 @@
+# Render blueprint for the LifeOS API (free plan).
+# Docs: docs/DEPLOYMENT.md
+# Note: the PostgreSQL database is hosted externally on Neon — its connection
+# string is provided as the DATABASE_URL env var (no `databases` block here).
+services:
+  - type: web
+    name: lifeos-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @lifeos/api build
+    startCommand: pnpm --filter @lifeos/api start
+    preDeployCommand: pnpm --filter @lifeos/api migrate:deploy
+    healthCheckPath: /v1/health/ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "3000"
+      - key: LOG_LEVEL
+        value: info
+      - key: RATE_LIMIT_MAX
+        value: "300"
+      - key: RATE_LIMIT_WINDOW
+        value: 1 minute
+      - key: LOGIN_RATE_LIMIT_MAX
+        value: "5"
+      - key: LOGIN_RATE_LIMIT_WINDOW
+        value: 1 minute
+      - key: REGISTER_RATE_LIMIT_MAX
+        value: "10"
+      - key: REGISTER_RATE_LIMIT_WINDOW
+        value: 1 minute
+      # Set these in the Render dashboard (never commit secrets):
+      # - DATABASE_URL  -> Neon PostgreSQL connection string (include ?sslmode=require)
+      # - JWT_SECRET    -> long random value (openssl rand -hex 32)
+      # - ALLOWED_ORIGINS -> comma-separated production origins, e.g. https://your-app.vercel.app
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
