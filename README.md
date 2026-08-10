@@ -1,16 +1,42 @@
+<div align="center">
+
+<img src="apps/web/public/lifeos-black-icon.png" alt="LifeOS logo" width="96" height="96" />
+
 # LifeOS
 
-> LifeOS is a system for observing and intentionally improving your life.
+> Build a life you can measure, understand, and improve.
 
 A web app for tracking habits, goals and projects, understanding how your days actually go, and
 slowly building a life you can measure, understand and improve.
 
-Built with **Node.js**, **TypeScript**, **React** and **PostgreSQL**.
+<p align="center">
+
+[![CI](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml/badge.svg)](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
+[![Tests](https://img.shields.io/badge/tests-253%20passing-22c55e.svg)](CHANGELOG.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-8b5cf6.svg)](https://github.com/vvasconceloss/lifeos/pulls)
+
+</p>
+
+</div>
 
 **v1.5 (Public Beta) is released** — see [`docs/README.md`](docs/README.md) as the documentation
 entry point (roadmap, domain rules, frequencies, gamification, ops, deployment), the
 [`CHANGELOG.md`](CHANGELOG.md) for the release history, and
 [`docs/1.5_PLAN.md`](docs/1.5_PLAN.md) for the phase-by-phase roadmap.
+
+---
+
+## Demo
+
+Try it live from the [landing page](https://lifeos.app) — the **View Demo** button logs you into a
+public demo account (`demo@lifeos.com`) pre-loaded with realistic data.
+
+![LifeOS dashboard](apps/web/public/screenshots/dashboard.png)
 
 ---
 
@@ -113,7 +139,7 @@ pnpm --filter @lifeos/web dev
 
 ```bash
 pnpm lint     # eslint across api, web and shared
-pnpm test     # API tests (230, requires PostgreSQL) + Web integration tests (9)
+pnpm test     # API tests (236, requires PostgreSQL) + Web integration tests (17)
 pnpm build    # typecheck/build api and web
 ```
 
