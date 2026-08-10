@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
@@ -7,12 +8,14 @@ import {
   Check,
   Layers,
   NotebookPen,
+  Play,
   Sparkles,
   Target,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/use-auth";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -215,6 +218,31 @@ function Card({
   );
 }
 
+function DemoButton({ size = "lg" }: { size?: "lg" | "default" }) {
+  const { demoLogin } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  async function handleDemo() {
+    setLoading(true);
+    try {
+      await demoLogin();
+      navigate({ to: "/app" });
+    } catch {
+      navigate({ to: "/login" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button variant="outline" size={size} onClick={handleDemo} disabled={loading}>
+      <Play className="mr-1 size-4" aria-hidden />
+      {loading ? "Loading demo…" : "View Demo"}
+    </Button>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -286,9 +314,7 @@ export default function LandingPage() {
                 Get Started
                 <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
-              <Button variant="outline" size="lg" render={<a href="#how-it-works" />}>
-                View Demo
-              </Button>
+              <DemoButton size="lg" />
             </motion.div>
           </motion.div>
         </section>
@@ -406,68 +432,20 @@ export default function LandingPage() {
               description="The same interface you'll use every day — clear in both light and dark mode."
             />
             <StaggerGroup className="grid items-start gap-8 lg:grid-cols-2">
-              <StaggerItem>
+              <StaggerItem className="lg:col-span-2">
                 <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
                   <div className="flex items-center justify-between border-b border-border/80 px-5 py-3">
                     <span className="text-sm font-semibold text-foreground">Dashboard</span>
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      Today
+                      Live demo
                     </span>
                   </div>
-                  <div className="space-y-2 p-6">
-                    {[
-                      { name: "Read for 20 minutes", done: true, color: "#8b5cf6" },
-                      { name: "Exercise for 30 minutes", done: true, color: "#ef4444" },
-                      { name: "Call a friend", done: false, color: "#ec4899" },
-                    ].map((habit) => (
-                      <div key={habit.name} className="flex items-center gap-3 rounded-xl border border-border/80 bg-background px-4 py-3">
-                        <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: habit.color }} />
-                        <span className="flex-1 truncate text-sm text-foreground">{habit.name}</span>
-                        {habit.done ? (
-                          <span className="flex size-6 items-center justify-center rounded-md" style={{ backgroundColor: habit.color }}>
-                            <Check className="size-4 text-white" aria-hidden />
-                          </span>
-                        ) : (
-                          <span className="flex size-6 items-center justify-center rounded-md border border-foreground/25" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </StaggerItem>
-              <StaggerItem className="space-y-8">
-                <div className="overflow-hidden rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xs font-medium text-foreground/60">Completion rate</span>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      last 12 weeks
-                    </span>
-                  </div>
-                  <div className="mt-5 flex h-20 items-end gap-1.5">
-                    {[35, 48, 42, 60, 55, 70, 66, 78, 72, 85, 80, 90].map((v, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t-sm"
-                        style={{ height: `${v}%`, backgroundColor: "var(--primary)" }}
-                        aria-hidden
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="overflow-hidden rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
-                  <span className="text-xs font-medium text-foreground/60">Your daily state this month</span>
-                  <div className="mt-5 grid grid-cols-3 gap-4">
-                    {[
-                      { label: "Mood", value: "7.2/10" },
-                      { label: "Energy", value: "6.8/10" },
-                      { label: "Sleep", value: "7.1h" },
-                    ].map((s) => (
-                      <div key={s.label}>
-                        <div className="text-xl font-bold tabular-nums text-foreground">{s.value}</div>
-                        <div className="mt-1 text-[10px] text-foreground/60">{s.label}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <img
+                    src="/screenshots/dashboard.png"
+                    alt="LifeOS dashboard with the monthly habit grid"
+                    loading="lazy"
+                    className="block h-auto w-full"
+                  />
                 </div>
               </StaggerItem>
             </StaggerGroup>
@@ -524,6 +502,7 @@ export default function LandingPage() {
                 Get Started
                 <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
+              <DemoButton size="lg" />
               <Button variant="ghost" size="lg" render={<Link to="/login" />}>
                 Log in
               </Button>
