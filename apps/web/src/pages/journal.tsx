@@ -272,8 +272,8 @@ function StateCard({
 function CorrelationRow({ label, days }: { label: string; days: number }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className="text-sm font-medium text-foreground">{label}</span>
-      <span className="text-2xl font-bold tabular-nums leading-none text-foreground">
+      <span className="min-w-0 truncate text-sm font-medium text-foreground">{label}</span>
+      <span className="shrink-0 min-w-[4rem] whitespace-nowrap text-right text-2xl font-bold tabular-nums leading-none text-foreground">
         {days}
         <span className="ml-1 text-xs font-medium text-foreground/50">
           day{days === 1 ? "" : "s"}
@@ -304,8 +304,8 @@ function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations
           {groups.map((g) =>
             g.rows.length > 0 ? (
               <div key={g.title} className="flex flex-col gap-3">
-                <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                  <span className="text-foreground/50">{g.icon}</span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-foreground">
+                  <span className="shrink-0 text-foreground/50">{g.icon}</span>
                   {g.title}
                 </span>
                 {g.rows.map((row) => (
