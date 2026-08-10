@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { BedDouble, BookOpenCheck, Smile, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DailyLogCorrelations, DailyLogResponse } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -275,9 +275,7 @@ function CorrelationRow({ label, days }: { label: string; days: number }) {
       <span className="min-w-0 truncate text-sm font-medium text-foreground">{label}</span>
       <span className="shrink-0 min-w-[4rem] whitespace-nowrap text-right text-2xl font-bold tabular-nums leading-none text-foreground">
         {days}
-        <span className="ml-1 text-xs font-medium text-foreground/50">
-          day{days === 1 ? "" : "s"}
-        </span>
+        <span className="ml-1 text-xs font-medium text-foreground/50">d</span>
       </span>
     </div>
   );
@@ -340,6 +338,8 @@ export default function JournalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [correlationsReload, setCorrelationsReload] = useState(0);
+  const correlationsMonth = useRef("");
 
   useEffect(() => {
     let cancelled = false;
@@ -358,7 +358,11 @@ export default function JournalPage() {
     }
 
     async function loadCorrelations() {
-      setCorrelations(null);
+      const monthKey = `${from}-${to}`;
+      if (correlationsMonth.current !== monthKey) {
+        correlationsMonth.current = monthKey;
+        setCorrelations(null);
+      }
       try {
         const res = await api.get<{ correlations: DailyLogCorrelations }>(`/daily-logs/correlations?from=${from}&to=${to}`);
         if (!cancelled) setCorrelations(res.data.correlations);
@@ -372,7 +376,7 @@ export default function JournalPage() {
     return () => {
       cancelled = true;
     };
-  }, [from, to, reloadKey]);
+  }, [from, to, reloadKey, correlationsReload]);
 
   const logsByDate = new Map(logs.map((l) => [l.date, l]));
   const selectedLog = logsByDate.get(selectedDate);
@@ -393,6 +397,7 @@ export default function JournalPage() {
 
   function handleSaved(saved: DailyLogResponse) {
     setLogs((prev) => [...prev.filter((l) => l.date !== saved.date), saved].sort((a, b) => a.date.localeCompare(b.date)));
+    setCorrelationsReload((k) => k + 1);
   }
 
   function goToday() {
