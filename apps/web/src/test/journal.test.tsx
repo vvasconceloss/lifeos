@@ -31,7 +31,7 @@ describe('Journal', () => {
     expect(screen.getByText('Monthly calendar')).toBeInTheDocument();
   });
 
-  it('shows the correlations card with association, not causation language', async () => {
+  it('shows the logged-days distribution card by state bucket', async () => {
     server.use(
       http.get('/v1/daily-logs', () => HttpResponse.json({ logs: [] })),
       http.get('/v1/daily-logs/correlations', () =>
@@ -47,9 +47,10 @@ describe('Journal', () => {
 
     renderApp('/journal');
 
-    expect(await screen.findByText('Completion rate vs. your daily state')).toBeInTheDocument();
-    expect(screen.getByText(/Association, not causation/i)).toBeInTheDocument();
-    expect(screen.getByText('87% · 12 days')).toBeInTheDocument();
-    expect(screen.getByText('91% · 9 days')).toBeInTheDocument();
+    expect(await screen.findByText('Your logged days by state')).toBeInTheDocument();
+    expect(screen.getByText('12 days')).toBeInTheDocument();
+    expect(screen.getByText('9 days')).toBeInTheDocument();
+    expect(screen.getByText('6 days')).toBeInTheDocument();
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
   });
 });

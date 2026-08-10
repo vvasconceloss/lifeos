@@ -29,6 +29,24 @@ function stateClass(score: number | null): string {
   return "bg-emerald-500/70 text-foreground";
 }
 
+function toneBarClass(score: number | null): string {
+  if (score == null) return "bg-border/60";
+  if (score <= 2) return "bg-red-500";
+  if (score <= 4) return "bg-orange-500";
+  if (score <= 6) return "bg-amber-500";
+  if (score <= 8) return "bg-emerald-500";
+  return "bg-emerald-600";
+}
+
+function sleepScore(hours: number): number {
+  if (hours < 5) return 2;
+  if (hours < 6.5) return 4;
+  if (hours < 7) return 6;
+  if (hours <= 9) return 9;
+  if (hours <= 10) return 8;
+  return 6;
+}
+
 function formatFullDate(dateKey: string): string {
   const [y, m, d] = dateKey.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
@@ -62,7 +80,8 @@ function LogForm({
 }) {
   const [mood, setMood] = useState<number | null>(log?.mood ?? null);
   const [energy, setEnergy] = useState<number | null>(log?.energy ?? null);
-  const [sleepHours, setSleepHours] = useState(log?.sleepHours != null ? String(log.sleepHours) : "");
+  const [sleepH, setSleepH] = useState(log?.sleepHours != null ? String(Math.floor(log.sleepHours)) : "");
+  const [sleepM, setSleepM] = useState(log?.sleepHours != null ? String(Math.round((log.sleepHours % 1) * 60)) : "");
   const [notes, setNotes] = useState(log?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
@@ -76,7 +95,11 @@ function LogForm({
       const payload: Record<string, unknown> = { date };
       if (mood != null) payload.mood = mood;
       if (energy != null) payload.energy = energy;
-      if (sleepHours) payload.sleepHours = Number(sleepHours);
+      if (sleepH !== "") {
+        const hours = Math.max(0, Math.min(24, Number(sleepH) || 0));
+        const minutes = hours >= 24 ? 0 : Math.max(0, Math.min(59, Number(sleepM) || 0));
+        payload.sleepHours = hours + minutes / 60;
+      }
       if (notes.trim()) payload.notes = notes.trim();
 
       const res = await api.post<{ log: DailyLogResponse }>("/daily-logs", payload);
@@ -142,20 +165,41 @@ function LogForm({
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="j-sleep" className="text-xs font-medium text-foreground/60">
-            Sleep (hours)
-          </label>
-          <input
-            id="j-sleep"
-            type="number"
-            min={0}
-            max={24}
-            step={0.5}
-            value={sleepHours}
-            onChange={(e) => setSleepHours(e.target.value)}
-            placeholder="e.g. 7.5"
-            className={inputClass}
-          />
+          <span className="text-xs font-medium text-foreground/60">Sleep</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <label htmlFor="j-sleep-h" className="text-[10px] text-foreground/50">
+                Hours
+              </label>
+              <input
+                id="j-sleep-h"
+                type="number"
+                min={0}
+                max={24}
+                step={1}
+                value={sleepH}
+                onChange={(e) => setSleepH(e.target.value)}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <label htmlFor="j-sleep-m" className="text-[10px] text-foreground/50">
+                Minutes
+              </label>
+              <input
+                id="j-sleep-m"
+                type="number"
+                min={0}
+                max={59}
+                step={1}
+                value={sleepM}
+                onChange={(e) => setSleepM(e.target.value)}
+                placeholder="00"
+                className={inputClass}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -194,16 +238,18 @@ function StateCard({
   icon,
   label,
   value,
-  scale,
+  max,
   unit,
+  tone,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number | null;
-  scale: number;
+  max: number;
   unit?: string;
+  tone: string;
 }) {
-  const pct = value != null ? Math.min(100, (value / scale) * 100) : 0;
+  const pct = value != null ? Math.min(100, (value / max) * 100) : 0;
 
   return (
     <div className="flex items-start gap-3">
@@ -216,25 +262,20 @@ function StateCard({
           </span>
         </div>
         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+          <div className={cn("h-full rounded-full", tone)} style={{ width: `${pct}%` }} />
         </div>
       </div>
     </div>
   );
 }
 
-function CorrelationRow({ label, rate, days }: { label: string; rate: number; days: number }) {
+function CorrelationRow({ label, days }: { label: string; days: number }) {
   return (
-    <div>
-      <div className="flex items-baseline justify-between gap-2 text-xs">
-        <span className="font-medium text-foreground">{label}</span>
-        <span className="tabular-nums text-foreground/60">
-          {rate}% · {days} day{days === 1 ? "" : "s"}
-        </span>
-      </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${rate}%` }} />
-      </div>
+    <div className="flex items-center justify-between gap-2 text-xs">
+      <span className="font-medium text-foreground">{label}</span>
+      <span className="tabular-nums text-foreground/60">
+        {days} day{days === 1 ? "" : "s"}
+      </span>
     </div>
   );
 }
@@ -249,33 +290,29 @@ function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-      <span className="text-xs font-medium text-foreground/60">Completion rate vs. your daily state</span>
+      <span className="text-xs font-medium text-foreground/60">Your logged days by state</span>
       {!hasData ? (
         <p className="mt-3 text-sm text-foreground/60">
-          Log a few days (mood, energy or sleep) alongside your habits to see how your state relates
-          to your completion rate.
+          Log a few days (mood, energy or sleep) to see how your days are distributed across these
+          buckets.
         </p>
       ) : (
         <div className="mt-4 grid gap-5 md:grid-cols-3">
           {groups.map((g) =>
             g.rows.length > 0 ? (
-              <div key={g.title} className="flex flex-col gap-3">
+              <div key={g.title} className="flex flex-col gap-2.5">
                 <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                   <span className="text-foreground/50">{g.icon}</span>
                   {g.title}
                 </span>
                 {g.rows.map((row) => (
-                  <CorrelationRow key={row.label} label={row.label} rate={row.rate} days={row.days} />
+                  <CorrelationRow key={row.label} label={row.label} days={row.days} />
                 ))}
               </div>
             ) : null,
           )}
         </div>
       )}
-      <p className="mt-4 border-t border-border/40 pt-3 text-[10px] text-foreground/60">
-        Association, not causation — this shows how your logged state and completion rate tend to
-        co-occur, not that one causes the other.
-      </p>
     </div>
   );
 }
@@ -437,12 +474,34 @@ export default function JournalPage() {
                   </span>
                 </div>
                 <div className="grid gap-5 md:grid-cols-3">
-                  <StateCard icon={<Smile className="size-4" />} label="Mood" value={avgMood} scale={10} unit="/10" />
-                  <StateCard icon={<Zap className="size-4" />} label="Energy" value={avgEnergy} scale={10} unit="/10" />
-                  <StateCard icon={<BedDouble className="size-4" />} label="Sleep" value={avgSleep} scale={10} unit="h" />
+                  <StateCard
+                    icon={<Smile className="size-4" />}
+                    label="Mood"
+                    value={avgMood}
+                    max={10}
+                    unit="/10"
+                    tone={toneBarClass(avgMood)}
+                  />
+                  <StateCard
+                    icon={<Zap className="size-4" />}
+                    label="Energy"
+                    value={avgEnergy}
+                    max={10}
+                    unit="/10"
+                    tone={toneBarClass(avgEnergy)}
+                  />
+                  <StateCard
+                    icon={<BedDouble className="size-4" />}
+                    label="Sleep"
+                    value={avgSleep}
+                    max={12}
+                    unit="h"
+                    tone={toneBarClass(avgSleep != null ? sleepScore(avgSleep) : null)}
+                  />
                 </div>
                 <p className="mt-4 border-t border-border/40 pt-3 text-[10px] text-foreground/60">
-                  Monthly averages of the values you logged. The bar shows your average on a 0–10 scale.
+                  Monthly averages of the values you logged. Bars are drawn on each metric's own
+                  scale (mood/energy 1–10, sleep 0–12h) and colored by how good the value is.
                 </p>
               </div>
 
