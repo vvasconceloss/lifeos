@@ -95,6 +95,9 @@ The API handles `SIGINT`/`SIGTERM`: it stops accepting connections, closes the F
 
 ## Deployment checklist (production)
 
+Full production setup (Render API, Vercel web, Neon Postgres, env vars, CI/CD and rollback) is in
+[`DEPLOYMENT.md`](DEPLOYMENT.md).
+
 1. `pnpm install --frozen-lockfile`
 2. `pnpm lint && pnpm --filter @lifeos/api test && pnpm build`
 3. `pnpm --filter @lifeos/api migrate:deploy`
