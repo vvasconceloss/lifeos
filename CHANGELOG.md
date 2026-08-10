@@ -60,11 +60,11 @@ integration, frontend integration, and an E2E main-flow test) running in CI.
 
 ### Testing & CI/CD
 
-- API suite: **230 tests** (auth, habits/frequency, completions/streaks, goals, projects,
-  progression, daily logs, stats, isolation, plugins) including an **E2E main-flow test**
+- API suite: **236 tests** (auth, habits/frequency, completions/streaks, goals, projects,
+  progression, daily logs, stats, isolation, plugins, demo account) including an **E2E main-flow test**
   (register → create pillar → create habit → complete habit → dashboard reflects progress).
-- Frontend integration suite: **9 tests** (Vitest + Testing Library + MSW) covering login, register,
-  dashboard view, completing a habit, and creating a habit/goal.
+- Frontend integration suite: **17 tests** (Vitest + Testing Library + MSW) covering login, register,
+  dashboard view, completing a habit, creating a habit/goal, the demo login and demo isolation.
 - GitHub Actions CI: lint → test → build on PR and `main` (with a Postgres service container).
 - Deployment: API on **Render** (`render.yaml`, migrations run pre-deploy), web on **Vercel**
   (`apps/web/vercel.json`, Root Directory `apps/web`), **PostgreSQL on Neon**.

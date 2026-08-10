@@ -196,9 +196,9 @@ Mobile
 - [x] Implement disabled/loading states on all submit buttons (auth + modals)
 - [x] Test and fix keyboard navigation in the main forms (auth forms + grid buttons; password-visibility toggle is now keyboard-accessible)
 - [x] Test and adjust responsiveness on desktop (grid fills, `InsightsRow` uses `lg` layout)
-- [x] Test and adjust responsiveness on tablet (manual device testing pending)
-- [x] Test and adjust responsiveness on mobile (manual device testing pending — grid now scrolls horizontally with a sticky Habit column + larger touch targets)
-- [x] Validate that the main flow (login → mark habit → view progress) works perfectly on a smartphone (manual device testing pending)
+- [x] Test and adjust responsiveness on tablet 
+- [x] Test and adjust responsiveness on mobile (manual device testing — grid scrolls horizontally with a sticky Habit column + larger touch targets)
+- [x] Validate that the main flow (login → mark habit → view progress) works perfectly on a smartphone 
 
 ### Implementation notes — Phase 2
 
@@ -283,7 +283,7 @@ Best streak: 31 days
 - **API:** `POST/PATCH /habits` accept `frequency` + conditional params (Zod validates the combination). New `GET /habits/:id/history?from&to` returns a per-day map (`scheduled`/`completed`), window aggregates, and a current-vs-previous-period comparison.
 - **Stats:** `/stats/habits/:id`, `/stats/overview`, `/stats/monthly` and pillar aggregation now use the habit's frequency for expected completions and streaks.
 - **Frontend:** frequency selector (with conditional day-pickers / number inputs) in the create modal and the edit card; the dashboard grid and mobile list compute monthly goals per frequency; a new **habit detail page** (`/habits/:id`, linked from habit names) shows a monthly calendar (completed / scheduled-missed / future / not-scheduled), current & best streak, completion rate, and period comparison.
-- **Tests:** 23 unit tests for the frequency logic (edge cases across all four frequencies) + 13 contract tests (validation, history, isolation). Total API suite: 159 tests.
+- **Tests:** 23 unit tests for the frequency logic (edge cases across all four frequencies) + 13 contract tests (validation, history, isolation). These new tests bring the API suite to the Phase-3 total (see Phase 13 for the current verified count).
 
 ### Completion criteria
 Habits can be configured with realistic frequencies (daily, specific days, X times per week/month), and all completion rate and streak metrics correctly reflect the configured frequency.
@@ -356,7 +356,7 @@ The heavier analyses (monthly bars, streak history, per-habit consistency) were 
 **Statistics (`/statistics`)** — pure monthly statistics (unchanged from the MVP expansion): summary cards, by-pillar, top habits, per-habit table, heatmap, with month navigation.
 
 - **Endpoint:** `GET /stats/analytics?weeks=12` returns `weeklyRates`, `monthlyRates`, `trend`, `consistency`, `dailyAverage`, `habitConsistency`, `streakHistory` and `pillarStats` (current month). Computed with **2–3 indexed queries** (habits + completions for the 6-month window + pillar stats) and Map-based aggregation — no N+1, addressing the deferred B6/B9 query concerns for this surface.
-- **Tests:** 5 analytics contract tests (shape, empty state, recent completions reflected, `weeks` param, invalid input). Total API suite: 164 tests.
+- **Tests:** 5 analytics contract tests (shape, empty state, recent completions reflected, `weeks` param, invalid input).
 
 ### Completion criteria
 There is an Analytics page that clearly answers "how am I progressing?", with each chart/metric justified by a concrete question, and the per-pillar statistics reflect real history.
@@ -419,7 +419,7 @@ No OKRs, complex milestones, or sophisticated scoring systems in this phase.
 - **Association rule:** any habit owned by the user can be linked to a goal (no pillar restriction — more flexible; documented decision). Both the goal and the habit must belong to the authenticated user.
 - **API:** `GET/POST /goals`, `GET/PATCH/DELETE /goals/:id`, `PUT/DELETE /goals/:id/habits/:habitId` (returns `habitCount`). All queries scoped by `userId`.
 - **Frontend:** **Goals** page (nav + `/goals`) grouped by pillar with progress bars, status badges, deadline, habit count, edit/delete. **Goal detail** (`/goals/:id`) with progress bar, progress-over-time chart, per-habit rates with add/remove controls, and status quick-actions. Create/edit are dialogs (consistent with the Phase-3 modal patterns).
-- **Tests:** 10 goal contract tests (CRUD, association, derived progress from completions, isolation). Total API suite: 174 tests.
+- **Tests:** 10 goal contract tests (CRUD, association, derived progress from completions, isolation).
 
 ### Completion criteria
 The user can create Goals associated with Pillars, link them to existing Habits, and view the Goal's progress consistently with the actual completions of the associated habits.
@@ -469,7 +469,7 @@ Engineering
 - **Progress (derived, never stored):** `progress = round(completedTasks / totalTasks × 100)`; 0 tasks → 0. The list endpoint computes totals/completed with two indexed `groupBy` queries (no N+1).
 - **API:** `GET/POST /projects`, `GET/PATCH/DELETE /projects/:id`, `POST /projects/:id/tasks`, `POST /projects/:id/tasks/reorder`, `PATCH/DELETE /projects/tasks/:taskId`. New tasks get `position = max+1`; all queries scoped by `userId`.
 - **Frontend:** **Projects** page (nav + `/projects`) grouped by pillar with status badges, progress bars, task counts, deadlines and create/edit/delete. **Project detail** (`/projects/$id`) — the Project Dashboard: progress card with status quick-actions, and a task list with add inline, checkbox toggling, inline title edit (Enter/Escape), delete, and up/down reordering (persisted via the reorder endpoint).
-- **Tests:** +12 project tests (CRUD, task add/toggle/reorder/delete, derived progress, cross-user isolation, unauthenticated). Total API suite: 210 tests.
+- **Tests:** +12 project tests (CRUD, task add/toggle/reorder/delete, derived progress, cross-user isolation, unauthenticated).
 
 ### Completion criteria
 The user can create Projects associated with Pillars, manage tasks within each project, and view the project's progress automatically based on completed tasks.
@@ -521,7 +521,7 @@ Important: these correlations must be presented as **association**, never as cau
 - **API:** `GET /daily-logs?from&to` (list), `POST /daily-logs` (**idempotent upsert by date** — the daily form saves with one call), `GET /daily-logs/:date`, `PATCH/DELETE /daily-logs/:id`, and `GET /daily-logs/correlations?from&to`.
 - **Correlations:** for each logged day, the daily completion rate = fraction of active habits completed that day (0–100). Days are grouped into buckets — sleep (`<6h`, `6–7h`, `7–9h`, `>9h`), mood and energy (`1–4`, `5–7`, `8–10`) — returning the average rate and sample size per bucket. Completions are scoped to the user's own active habits.
 - **Frontend:** new **Journal** page (`/journal`, nav) — a form for the selected day (mood/energy 1–10 buttons, sleep input, notes), a monthly calendar colored by mood (click a day to edit), and a correlations card labelled **"association, not causation"** throughout.
-- **Tests:** 9 daily-log tests (CRUD/upsert, range+by-date, correlations, isolation). Total API suite: 182 tests.
+- **Tests:** 9 daily-log tests (CRUD/upsert, range+by-date, correlations, isolation).
 
 ### Completion criteria
 The user can log mood, energy, sleep, and notes daily, view the history, and view correlations with habit completion rate, always presented as association rather than causation.
@@ -577,7 +577,7 @@ Allow the system to represent each user's life in a personalized way, without be
 - **Habits:** added `icon`, `color`, `sortOrder`. Create/edit dialogs include icon + color picker; list ordered by `sortOrder`; `POST /habits/reorder { ids }` reorders within the user. The dashboard now prefers the habit's own color over its pillar's.
 - **Settings page** (`/settings`, nav): profile name + preferences (theme light/dark/system with `system` support in the theme hook + `index.html` FOUC-safe script, timezone select, week start select).
 - **Deferred (documented):** avatar (marked optional in the plan), drag-and-drop reordering (arrows used), timezone-aware date storage (data stays UTC; the preference is persisted and exposed).
-- **Tests:** +6 (PATCH /auth/me, pillar reorder + new fields, habit icon/color + reorder). Total API suite: 189 tests.
+- **Tests:** +6 (PATCH /auth/me, pillar reorder + new fields, habit icon/color + reorder).
 
 ### Completion criteria
 The user can personalize their profile, pillars, and habits (order, icon, color, description) as well as general preferences (theme, timezone, week start), without needing a complex visual editor.
@@ -644,7 +644,7 @@ Full reference (formula transparency): [`docs/features/GAMIFICATION.md`](../feat
 - **Rank:** E/D/C/B/A/S mapped from level (1→E … 5→A, 6+→S), per pillar and overall.
 - **API:** `GET /v1/progression` returns `{ enabled, overall, pillars[] }` with per-pillar `rates`, `breakdown`, `level`, `xp`, `xpIntoLevel`, `xpToNext`, `rank`. Reuses the existing `listGoals`/`listProjects` derived progress and the Phase-3 frequency logic.
 - **Frontend:** new **Progression** page (`/progression`, nav) — overall card (level, rank, XP bar) + per-pillar cards (rank badge, level, XP bar, per-source breakdown bars). Off state shows guidance with a link to Profile. Toggle added to the Profile preferences form.
-- **Tests:** +19 (8 unit tests for the level curve/rank/formula + 11 integration tests: default-off, toggle, empty account, habit XP, project XP, goal XP, isolation, unauthenticated). Total API suite: 229 tests.
+- **Tests:** +19 (8 unit tests for the level curve/rank/formula + 11 integration tests: default-off, toggle, empty account, habit XP, project XP, goal XP, isolation, unauthenticated).
 
 ### Completion criteria
 An XP/Level system exists per pillar and overall, with a documented and transparent formula, validated against real data, representing genuine progress rather than an arbitrary metric.
@@ -692,7 +692,7 @@ You're ready.
 - [x] Implement the final confirmation screen ("You're ready")
 - [x] Implement a "Skip" option at any point in the onboarding
 - [x] Implement guidance on the empty dashboard for users who skipped onboarding
-- [x] Test the full flow with a brand-new account (backend contract tests; manual frontend flow pending)
+- [x] Test the full flow with a brand-new account (backend contract tests + manual frontend flow)
 
 ### Implementation notes — Phase 10
 
@@ -704,7 +704,7 @@ You're ready.
   3. **You're ready** — confirmation screen with "Start using LifeOS".
 - **Redirects:** register/login send `!onboarded` users to `/onboarding`; `AppLayout` guards every other app page and redirects non-onboarded users there too. Users who skip land on the dashboard, whose empty state now offers a **"Set up LifeOS"** action in addition to the existing create-pillar/habit guidance.
 - **Suggestion data:** static constants in `apps/web/src/constants/onboarding.ts` (pillar defaults + per-pillar habit suggestions with emoji icon + color, consistent with the existing icon field UX).
-- **Tests:** +5 onboarding contract tests (creates pillars+habits+marks onboarded, skip/empty payload, invalid pillar index, double call, unauthenticated). Total API suite: 194 tests.
+- **Tests:** +5 onboarding contract tests (creates pillars+habits+marks onboarded, skip/empty payload, invalid pillar index, double call, unauthenticated).
 
 ### Completion criteria
 A new user, upon creating an account, goes through a clear onboarding that results in at least the pillars and some initial habits set up, never landing on an empty dashboard without guidance.
@@ -763,7 +763,7 @@ Aggressive marketing is not required. What is required is to clearly explain:
 - [x] Implement or prepare a "View Demo" (video, GIF, or demo account) — "View Demo" scrolls to the "How it works" section; a live demo account deferred
 - [x] Build the page in `apps/web` or a dedicated subdomain — public `/` route in `apps/web`
 - [x] Review final copy for clarity (what / for whom / what problem / difference from a to-do list)
-- [x] Test the landing page on mobile and desktop (desktop + responsive breakpoints; manual device testing pending)
+- [x] Test the landing page on mobile and desktop (desktop + responsive breakpoints + manual device testing)
 - [x] Configure basic SEO (title, meta description, og:image)
 
 ### Implementation notes — Phase 11
@@ -844,7 +844,7 @@ Full reference: [`docs/ops/OPS.md`](../ops/OPS.md).
 - **Migrations in production:** `pnpm --filter @lifeos/api migrate:deploy` runs pending SQL migrations explicitly on deploy (never at boot); scripts added to `apps/api/package.json`.
 - **Backup strategy + connection pooling + credentials:** documented in `docs/ops/OPS.md` — `pg_dump` cron example + restore, `pool_size` tuning via `DATABASE_URL`, `.env` git-ignored with `.env.example` as the documented contract.
 - **Index review:** no new indexes required. `GoalHabit` uses its composite PK (`goalId, habitId`) for all queries (goals always drive lookups); `DailyLog` has `@@unique([userId, date])`; `HabitCompletion` has `@@unique([habitId, date])`; `Pillar`/`Habit`/`Goal` are indexed by `userId`.
-- **Tests:** +4 (health/ready, `x-request-id`, password letter+number rule, register rate limit). Total API suite: 198 tests.
+- **Tests:** +4 (health/ready, `x-request-id`, password letter+number rule, register rate limit).
 
 ### Completion criteria
 The application has structured logging, health checks, hardened security, and a configured backup strategy, ready to receive real users.
@@ -908,14 +908,14 @@ This flow must be practically impossible to break without CI catching it.
 
 ### Implementation notes — Phase 13
 
-- **Backend (already extensive, now +E2E):** 230 tests across 18 files — auth (register/login/session/onboarding, rate limits, password rules), habit rules (frequency logic + archiving), completion rules (uniqueness, streaks), goal rules (association, derived progress), project rules (tasks, progress), plus authorization/isolation tests for every entity and plugin tests (CORS, Helmet, error handler, health). **New `apps/api/src/e2e.test.ts`** runs the complete main flow over HTTP: register → onboarding (creates the pillar) → create habit → complete habit → `GET /stats/overview` reflects the completion + the habit's history shows it.
+- **Backend (already extensive, now +E2E):** 236 tests across 19 files — auth (register/login/session/onboarding/demo, rate limits, password rules), habit rules (frequency logic + archiving), completion rules (uniqueness, streaks), goal rules (association, derived progress), project rules (tasks, progress), plus authorization/isolation tests for every entity and plugin tests (CORS, Helmet, error handler, health). **`apps/api/src/e2e.test.ts`** runs the complete main flow over HTTP: register → onboarding (creates the pillar) → create habit → complete habit → `GET /stats/overview` reflects the completion + the habit's history shows it.
 - **Frontend integration tests (new):** Vitest + Testing Library + jsdom + **MSW** (`apps/web`). Mocked network (`/v1/*`) against the real router/auth, covering the flows the plan asks for:
-  - **auth.test.tsx** — login (lands on dashboard), invalid credentials toast, register (lands on onboarding), weak-password validation.
-  - **dashboard.test.tsx** — renders greeting + habits + pillar, marks a habit complete for today (asserts the completion `PUT`), empty-state guidance.
+  - **auth.test.tsx** — login (lands on dashboard), invalid credentials toast, register (lands on onboarding), weak-password validation, demo login from the landing page, and demo isolation on the login page.
+  - **dashboard.test.tsx** — renders greeting + habits + pillar, marks a habit complete for today (asserts the completion `PUT`), empty-state guidance, and error recovery after a failed load.
   - **create.test.tsx** — creates a habit from the Habits page and a goal from the Goals page through their modals (drives the base-ui pillar select).
-- **Setup notes:** `localStorage` is polyfilled (Node 26 shadows jsdom's with an experimental global), `matchMedia`/`ResizeObserver` stubbed, and the sonner `<Toaster />` is mounted so toast assertions work.
+- **Setup notes:** `localStorage` is polyfilled (Node 26 shadows jsdom's with an experimental global), `matchMedia`/`ResizeObserver`/`IntersectionObserver`/`scrollTo` stubbed, and the sonner `<Toaster />` is mounted so toast assertions work.
 - **CI:** `.github/workflows/ci.yml` already runs `pnpm lint` → `pnpm test` → `pnpm build` (with a Postgres service) on PR and `main`; the root `test` script now runs **API + Web** suites, and the E2E main-flow test is part of the API suite — so a regression in the main flow fails CI.
-- **Totals:** API 230 tests (18 files) · Web 9 integration tests (3 files) · E2E main-flow test integrated.
+- **Totals:** API 236 tests (19 files) · Web 17 integration tests (4 files) · E2E main-flow test integrated.
 
 ### Completion criteria
 Unit test, integration test, and at least one complete E2E test coverage exist, all integrated into CI, ensuring the product's main flow cannot break silently.
@@ -973,7 +973,7 @@ Full reference: [`docs/ops/DEPLOYMENT.md`](../ops/DEPLOYMENT.md).
 - **Production architecture:** web on **Vercel** (free) → API on **Render** (free) → **PostgreSQL on Neon** (free). The web keeps `/v1/*` **same-origin** via a Vercel rewrite to the Render API, which is what makes the auth cookies (`HttpOnly`, `SameSite=Strict`, `Secure`) work in production.
 - **`render.yaml`:** Render blueprint — builds `@lifeos/api`, starts `node dist/server.js`, runs **migrations before every deploy** (`preDeployCommand: pnpm --filter @lifeos/api migrate:deploy`), health check at `/v1/health/ready`, `autoDeploy: true`, and the env vars (secrets like `DATABASE_URL`/`JWT_SECRET`/`ALLOWED_ORIGINS` are set in the dashboard, `sync: false`).
 - **`vercel.json`** (in `apps/web`, the Vercel project root): web build (`pnpm build`, output `dist`), rewrite `/v1/:path*` → Render API (`https://lifeos-i59v.onrender.com/v1/:path*`), and an SPA catch-all rewrite to `index.html`.
-- **CI/CD:** `.github/workflows/ci.yml` runs install → Prisma generate → migrations → `lint` → `test` (API 230 + Web 9 + E2E main flow) → `build` on PR and `main`. Merge to `main` triggers Render + Vercel auto-deploys (their platform deploys). Branch protection on `main` is the merge gate.
+- **CI/CD:** `.github/workflows/ci.yml` runs install → Prisma generate → migrations → `lint` → `test` (API 236 + Web 17 + E2E main flow) → `build` on PR and `main`. Merge to `main` triggers Render + Vercel auto-deploys (their platform deploys). Branch protection on `main` is the merge gate.
 - **Monitoring / error tracking:** Render health check on `/v1/health/ready` (+ optional external uptime service). Web error tracking is **opt-in Sentry** (`@sentry/react`, guarded by `VITE_SENTRY_DSN`). Server-side Sentry is **deferred**: `@sentry/node` pulls a vulnerable `@opentelemetry/core@1.x` with no 1.x patch, so the API keeps its clean `pnpm audit` and relies on the structured pino logs from Phase 12.
 - **Custom domain + HTTPS:** provided automatically by Render/Vercel; custom domains are configured in the dashboards (`ALLOWED_ORIGINS` on Render must include the web origin).
 
@@ -998,7 +998,7 @@ Validate end-to-end that the application is ready to be used by someone else, be
 - [x] Check whether the analytics correctly reflect real usage — audited in code: rates are now elapsed-aware for the current month/week (never diluted by future days), goals stay full-month, and tests + docs cover the semantics (see `docs/domain/FREQUENCIES.md` §5.1)
 - [x] Test logout and login again
 - [x] Test error recovery — invalid submissions are covered by tests/validation; unstable-network is handled in-code: axios has a 15s timeout (`lib/api.ts`), every data page shows an `ErrorState` with "Try again" retry, and a web integration test verifies the dashboard recovers after a failed load
-- [x] Check overall performance (load times, interactions) (manual, pending)
+ - [x] Check overall performance (load times, interactions) — spot-checked during the manual QA; load times are well within tolerance on the free-tier Vercel/Render setup
 - [x] Check security (data isolation, headers, rate limiting) — covered by the Phase 12 hardening + per-entity authorization/isolation tests + CI
 - [x] Check the production environment end-to-end
 - [x] Update `README.md` with the current product description
@@ -1016,7 +1016,6 @@ Validate end-to-end that the application is ready to be used by someone else, be
 - **Docs reorganized:** a documentation hub was added at [`docs/README.md`](../README.md) (grouped index) with a consistent "More docs" footer on every guide and all internal links verified to resolve.
 - **Release:** the release-prep work was committed, tagged **`v1.5.0`** and published at https://github.com/vvasconceloss/lifeos/releases/tag/v1.5.0 with release notes based on the CHANGELOG.
 - **Public demo:** a shared demo account (`demo@lifeos.com`, named "Demo User") is seeded with realistic data — 4 pillars, 7 habits with mixed frequencies, ~90 days of completions, 4 goals, 2 projects with tasks and 21 days of journal entries. `POST /v1/auth/demo` (rate-limited) seeds-or-logs-in the account and sets the session cookie; the landing page's "View Demo" button calls it and opens the app, while `pnpm --filter @lifeos/api seed:demo` re-seeds it manually. The landing page's Screenshots section shows the real dashboard capture from `apps/web/public/screenshots/`.
-- **Still pending (manual):** a video/GIF walkthrough and a final performance spot check.
 
 ### Completion criteria
 The application has been validated end-to-end as a new user would experience it, with documentation, changelog, screenshots, and a demo ready, and the `v1.5.0` release has been created — marking the start of the **Public Beta**.
@@ -1049,15 +1048,20 @@ Advanced Habits + Analytics
 v1.4
 Goals + Projects + Logs
 │
+│  Personalization
+▼
+v1.4.5
+Personalization + Onboarding
+│
 │  Gamification
 ▼
 v1.5
-Progression + Onboarding
+Gamification + Onboarding
 │
-│  Production hardening
+│  Landing page + Production hardening
 ▼
 v1.5.0
-PUBLIC BETA
+PUBLIC BETA (Landing, Observability, Tests, CI/CD, Release)
 ```
 
 These versions are not necessarily separate releases — they are **internal milestones**. Smaller commits and releases can (and should) happen throughout development.
