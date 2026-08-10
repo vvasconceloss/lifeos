@@ -56,7 +56,27 @@ class ResizeObserverMock {
 }
 
 if (typeof window.ResizeObserver === 'undefined') {
-  window.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+  window.ResizeObserver = ResizeObserverMock as unknown as typeof window.ResizeObserver;
+}
+
+class IntersectionObserverMock {
+  root = null;
+  rootMargin = '';
+  thresholds: number[] = [];
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
+}
+
+if (typeof window.IntersectionObserver === 'undefined') {
+  window.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
+}
+
+if (typeof window.scrollTo === 'undefined') {
+  window.scrollTo = (() => undefined) as typeof window.scrollTo;
 }
 
 beforeAll(() => {

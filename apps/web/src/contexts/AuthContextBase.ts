@@ -10,6 +10,7 @@ export type AuthContextValue = {
   loading: boolean;
   register: (data: RegisterData) => Promise<User>;
   login: (data: LoginData) => Promise<User>;
+  demoLogin: () => Promise<User>;
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
 }

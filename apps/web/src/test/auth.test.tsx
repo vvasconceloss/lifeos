@@ -89,4 +89,21 @@ describe('Authentication flows', () => {
 
     expect((await screen.findAllByText(/at least 8 characters/i)).length).toBeGreaterThan(0);
   });
+
+  it('logs into the public demo account from the landing page', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get('/v1/auth/me', () => HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })),
+      http.post('/v1/auth/demo', () =>
+        HttpResponse.json({ user: loggedInUser, token: 'jwt' }),
+      ),
+    );
+
+    renderApp('/');
+
+    const demoButtons = await screen.findAllByRole('button', { name: /View Demo/i });
+    await user.click(demoButtons[0]!);
+
+    expect(await screen.findByText('Welcome to LifeOS')).toBeInTheDocument();
+  });
 });
