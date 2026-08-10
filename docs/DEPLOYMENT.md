@@ -71,6 +71,17 @@ The Vercel project's **Root Directory is `apps/web`** and its `vercel.json` alre
   `pool_size=5` is safe).
 - Migrations run automatically on Render deploys (`preDeployCommand`). Never run them from CI.
 
+## Public demo account
+
+The landing page's "View Demo" button logs straight into a shared demo account
+(`demo@lifeos.com`). It is created on demand by `POST /v1/auth/demo` (rate-limited) and seeded
+with realistic data (pillars, habits, completions, goals, projects, journal entries).
+
+- Re-seed it manually with: `pnpm --filter @lifeos/api seed:demo`
+- To refresh the demo data on every deploy, add `seed:demo` to the Render `preDeployCommand`
+  (e.g. `pnpm --filter @lifeos/api migrate:deploy && pnpm --filter @lifeos/api seed:demo`).
+- `DEMO_RATE_LIMIT_MAX` / `DEMO_RATE_LIMIT_WINDOW` tune the login rate limit (default 10/min).
+
 ## CI/CD flow
 
 ```text
