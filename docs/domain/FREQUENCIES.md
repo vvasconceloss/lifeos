@@ -197,7 +197,7 @@ model Habit {
   userId        String
   pillarId      String
   frequency     HabitFrequency @default(DAILY)
-  daysOfWeek    Int[]?         // WEEKLY_DAYS: 0=Sun..6=Sat
+  daysOfWeek    Int[] @default([])  // WEEKLY_DAYS: 0=Sun..6=Sat
   timesPerWeek  Int?           // TIMES_PER_WEEK: 1..7
   timesPerMonth Int?           // TIMES_PER_MONTH: 1..31
   isActive      Boolean        @default(true)

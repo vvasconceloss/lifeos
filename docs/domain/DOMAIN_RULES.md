@@ -122,7 +122,7 @@ User (1) ──── (N) DailyLog
 9. **Description** — Optional, free text, max 1000 characters.
 10. **Ordering** — `sortOrder` controls display order (Phase 8), persisted via `POST /habits/reorder`.
 11. **Pillar integrity** — The foreign key from `Habit.pillarId` to `Pillar` is `Restrict`: a pillar cannot be deleted while it still has habits (see Pillar rule 3).
-12. **Goal linking** — A habit can be linked to any number of goals owned by the user, regardless of whether the goal is in the same pillar (documented decision, Phase 5).
+12. **Goal linking** — A habit can be linked to any number of goals owned by the user, but only to goals of the **same pillar** (a habit from a different pillar is rejected with 400).
 
 ---
 
@@ -169,7 +169,7 @@ User (1) ──── (N) DailyLog
 2. **Pillar association** — A goal must reference an existing pillar owned by the user (`Restrict` FK).
 3. **Status transitions** — Transitions are manual via `PATCH`. `completedAt` is set when the goal becomes `COMPLETED` and cleared otherwise. No auto-completion.
 4. **Progress is derived** — `progress` is never stored. It is the average completion rate of the linked habits (see Phase 5 notes); zero linked habits → 0.
-5. **Habit linking** — `GoalHabit` is an N:N join table (composite PK `goalId + habitId`). Linking is idempotent; a habit must belong to the authenticated user. Removing a link is immediate.
+5. **Habit linking** — `GoalHabit` is an N:N join table (composite PK `goalId + habitId`). Linking is idempotent and restricted to habits of the **same pillar** as the goal; a habit must belong to the authenticated user. Removing a link is immediate.
 
 ---
 
