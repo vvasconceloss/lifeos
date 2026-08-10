@@ -15,6 +15,7 @@ import { completionRoutes } from './modules/completions/completion.routes';
 import { statsRoutes } from './modules/stats/stats.routes';
 import { goalRoutes } from './modules/goals/goal.routes';
 import { projectRoutes } from './modules/projects/project.routes';
+import { progressionRoutes } from './modules/progression/progression.routes';
 import { dailyLogRoutes } from './modules/daily-logs/daily-log.routes';
 
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -60,6 +61,7 @@ export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstan
   await fastify.register(statsRoutes, { prefix: '/v1' });
   await fastify.register(goalRoutes, { prefix: '/v1/goals' });
   await fastify.register(projectRoutes, { prefix: '/v1/projects' });
+  await fastify.register(progressionRoutes, { prefix: '/v1/progression' });
   await fastify.register(dailyLogRoutes, { prefix: '/v1/daily-logs' });
 
   return fastify;
