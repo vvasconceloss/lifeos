@@ -2,22 +2,6 @@
 
 All notable changes to LifeOS.
 
-## Unreleased
-
-### Fixed
-
-- **Analytics scale:** completion/success rates for the **current month** are now computed over
-  the elapsed days only (`[month start → today]`), so a fully-on-track month reports 100% mid-month
-  instead of being diluted by future days. Applied to `/stats/overview`, `/stats/monthly`,
-  `/stats/analytics` (current week/month) and the dashboard success rate. Per-habit "goal" numbers
-  (grid/mobile "X/goal") keep the full month as the target. Semantics documented in
-  `docs/domain/FREQUENCIES.md` §5.1.
-- **Dashboard/Statistics consistency:** the dashboard "monthly progress" is now capped at 100,
-  matching the Statistics page, so a rate can never show above 100%.
-- **Daily completions chart:** the whole line now reflects the month's progress — colored green
-  (≥80% of the expected completions so far), amber (≥50%) or red (below) — so the chart reads as a
-  single progress signal instead of per-day noise.
-
 ## v1.5.0 — Public Beta (2026-08)
 
 The v1.5 release turns the v1.0 MVP into an intermediate product ready for other people to use.
@@ -47,6 +31,10 @@ integration, frontend integration, and an E2E main-flow test) running in CI.
   ranks with a "How ranks work" legend. The nav item only appears when enabled.
 - **Professional UX** — skeletons, standardized empty/error states, destructive-action confirmations,
   mobile-first dashboard (today checklist + scrollable heatmap), accessible keyboard navigation.
+- **Public landing page** — a public `/` route explaining what LifeOS is, who it is for, what problem
+  it solves and why it's different from a to-do list, with a "Get Started" CTA and SEO/OG tags.
+- **Public demo account** — a shared demo account (`demo@lifeos.com`) seeded with realistic data,
+  reachable via `POST /v1/auth/demo` and one-click from the landing page's "View Demo" button.
 
 ### Observability, security & operations
 
@@ -56,14 +44,29 @@ integration, frontend integration, and an E2E main-flow test) running in CI.
 - Rate limiting on global, login and register endpoints; password rules (min 8 chars, letter +
   number); secure cookies; CORS allow-list; Helmet; CSRF protection.
 - Dependency audit kept clean (`pnpm audit` → 0 vulnerabilities).
-- Production docs: `docs/ops/OPS.md`, `docs/ops/DEPLOYMENT.md`, `docs/features/GAMIFICATION.md`, `docs/domain/FREQUENCIES.md`.
+- Production docs: `docs/ops/OPS.md`, `docs/ops/DEPLOYMENT.md`, `docs/features/GAMIFICATION.md`,
+  `docs/domain/FREQUENCIES.md`, and a documentation hub at `docs/README.md`.
+
+### Fixed
+
+- **Analytics scale:** completion/success rates for the **current month** are now computed over
+  the elapsed days only (`[month start → today]`), so a fully-on-track month reports 100% mid-month
+  instead of being diluted by future days. Applied to `/stats/overview`, `/stats/monthly`,
+  `/stats/analytics` (current week/month) and the dashboard success rate. Per-habit "goal" numbers
+  (grid/mobile "X/goal") keep the full month as the target. Semantics documented in
+  `docs/domain/FREQUENCIES.md` §5.1.
+- **Dashboard/Statistics consistency:** the dashboard "monthly progress" is now capped at 100,
+  matching the Statistics page, so a rate can never show above 100%.
+- **Daily completions chart:** the whole line now reflects the month's progress — colored green
+  (≥80% of the expected completions so far), amber (≥50%) or red (below) — so the chart reads as a
+  single progress signal instead of per-day noise.
 
 ### Testing & CI/CD
 
-- API suite: **236 tests** (auth, habits/frequency, completions/streaks, goals, projects,
+- API suite: **238 tests** (auth, habits/frequency, completions/streaks, goals, projects,
   progression, daily logs, stats, isolation, plugins, demo account) including an **E2E main-flow test**
   (register → create pillar → create habit → complete habit → dashboard reflects progress).
-- Frontend integration suite: **17 tests** (Vitest + Testing Library + MSW) covering login, register,
+- Frontend integration suite: **19 tests** (Vitest + Testing Library + MSW) covering login, register,
   dashboard view, completing a habit, creating a habit/goal, the demo login and demo isolation.
 - GitHub Actions CI: lint → test → build on PR and `main` (with a Postgres service container).
 - Deployment: API on **Render** (`render.yaml`, migrations run pre-deploy), web on **Vercel**
