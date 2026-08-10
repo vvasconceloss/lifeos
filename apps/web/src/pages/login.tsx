@@ -65,7 +65,7 @@ export default function LoginPage() {
 
     try {
       const u = await login({ email: email.trim(), password });
-      navigate({ to: u.onboarded ? "/onboarding" : "/app" });
+      navigate({ to: u.onboarded ? "/app" : "/onboarding" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         toast.error("Invalid email or password");

@@ -114,6 +114,7 @@ export function useDashboard() {
           ? [...prev, { habitId, date: `${date}T00:00:00.000Z` }]
           : prev.filter((c) => !(c.habitId === habitId && c.date.startsWith(date))),
       );
+      toast.error("Couldn't update the completion. Please try again.");
     } finally { setTogglingId(null); }
   }
 

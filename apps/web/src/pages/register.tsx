@@ -123,7 +123,7 @@ export default function RegisterPage() {
         password,
         ...(name.trim() ? { name: name.trim() } : {}),
       });
-      navigate({ to: u.onboarded ? "/onboarding" : "/app" });
+      navigate({ to: u.onboarded ? "/app" : "/onboarding" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
         toast.error("This email is already registered");
