@@ -12,6 +12,11 @@ All notable changes to LifeOS.
   `/stats/analytics` (current week/month) and the dashboard success rate. Per-habit "goal" numbers
   (grid/mobile "X/goal") keep the full month as the target. Semantics documented in
   `docs/domain/FREQUENCIES.md` §5.1.
+- **Dashboard/Statistics consistency:** the dashboard "monthly progress" is now capped at 100,
+  matching the Statistics page, so a rate can never show above 100%.
+- **Daily completions chart:** the whole line now reflects the month's progress — colored green
+  (≥80% of the expected completions so far), amber (≥50%) or red (below) — so the chart reads as a
+  single progress signal instead of per-day noise.
 
 ## v1.5.0 — Public Beta (2026-08)
 

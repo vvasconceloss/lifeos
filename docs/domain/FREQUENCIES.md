@@ -126,6 +126,8 @@ today — never the future days of that period:
   **full month** as the target — they answer "progress toward this month's goal", while
   rates answer "how well am I doing so far". So on day 9 of a fully-on-track daily
   habit you see `9/31` (goal) together with a `100%` rate (performance so far).
+- The dashboard **monthly progress** uses the same `completionRate` (capped at 100) as the
+  Statistics page, so exceeding a volume target never shows above 100% anywhere.
 
 This keeps the metrics consistent with real usage: a mid-month completion rate is never
 diluted by days that have not happened yet.

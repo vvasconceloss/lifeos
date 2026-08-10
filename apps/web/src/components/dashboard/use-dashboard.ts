@@ -129,7 +129,7 @@ export function useDashboard() {
       expectedForMonthUpto(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month, elapsedDay),
     0,
   );
-  const successRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+  const successRate = totalPossible > 0 ? Math.min(100, Math.round((totalCompleted / totalPossible) * 100)) : 0;
 
   const habitProgress: HabitProgress[] = activeHabits.map((h) => ({
     habitId: h.id,
