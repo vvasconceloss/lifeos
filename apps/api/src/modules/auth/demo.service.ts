@@ -81,15 +81,26 @@ async function seedData(userId: string): Promise<void> {
 
   const [health, eng, knowledge, relationships] = created;
 
-  const habitSpecs = [
-    { name: "Morning run", icon: "🏃", color: "#ef4444", pillarId: health!.id, frequency: "DAILY" as const },
-    { name: "Drink 2L of water", icon: "💧", color: "#06b6d4", pillarId: health!.id, frequency: "DAILY" as const },
-    { name: "Meditate 10 minutes", icon: "🧘", color: "#10b981", pillarId: health!.id, frequency: "WEEKLY_DAYS" as const, daysOfWeek: [1, 2, 3, 4, 5] },
-    { name: "Code for 1 hour", icon: "⌨️", color: "#3b82f6", pillarId: eng!.id, frequency: "TIMES_PER_WEEK" as const, timesPerWeek: 5 },
-    { name: "Review or refactor code", icon: "🔧", color: "#f59e0b", pillarId: eng!.id, frequency: "WEEKLY_DAYS" as const, daysOfWeek: [2, 4, 6] },
-    { name: "Read for 20 minutes", icon: "📖", color: "#8b5cf6", pillarId: knowledge!.id, frequency: "DAILY" as const },
-    { name: "Call a friend or family", icon: "📞", color: "#ec4899", pillarId: relationships!.id, frequency: "TIMES_PER_MONTH" as const, timesPerMonth: 10 },
-  ] as const;
+  interface HabitSpec {
+    name: string;
+    icon: string;
+    color: string;
+    pillarId: string;
+    frequency: "DAILY" | "WEEKLY_DAYS" | "TIMES_PER_WEEK" | "TIMES_PER_MONTH";
+    daysOfWeek?: number[];
+    timesPerWeek?: number;
+    timesPerMonth?: number;
+  }
+
+  const habitSpecs: HabitSpec[] = [
+    { name: "Morning run", icon: "🏃", color: "#ef4444", pillarId: health!.id, frequency: "DAILY" },
+    { name: "Drink 2L of water", icon: "💧", color: "#06b6d4", pillarId: health!.id, frequency: "DAILY" },
+    { name: "Meditate 10 minutes", icon: "🧘", color: "#10b981", pillarId: health!.id, frequency: "WEEKLY_DAYS", daysOfWeek: [1, 2, 3, 4, 5] },
+    { name: "Code for 1 hour", icon: "⌨️", color: "#3b82f6", pillarId: eng!.id, frequency: "TIMES_PER_WEEK", timesPerWeek: 5 },
+    { name: "Review or refactor code", icon: "🔧", color: "#f59e0b", pillarId: eng!.id, frequency: "WEEKLY_DAYS", daysOfWeek: [2, 4, 6] },
+    { name: "Read for 20 minutes", icon: "📖", color: "#8b5cf6", pillarId: knowledge!.id, frequency: "DAILY" },
+    { name: "Call a friend or family", icon: "📞", color: "#ec4899", pillarId: relationships!.id, frequency: "TIMES_PER_MONTH", timesPerMonth: 10 },
+  ];
 
   const habits = [];
   for (let i = 0; i < habitSpecs.length; i++) {
