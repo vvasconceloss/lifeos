@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { expectedForMonth } from "@/lib/frequency";
+import { expectedForMonth, expectedForMonthUpto } from "@/lib/frequency";
 import { isUnauthorizedError } from "@/lib/errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Completion, Habit, HabitProgress, Pillar, HabitsGrouped } from "./types";
@@ -23,6 +23,14 @@ export function useDashboard() {
   const month = targetDate.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  // Days of the displayed month that have actually elapsed (past months = full month).
+  const elapsedDay =
+    year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth() + 1)
+      ? 0
+      : year === now.getFullYear() && month === now.getMonth() + 1
+        ? now.getDate()
+        : daysInMonth;
 
   const monthDays = useMemo(() => Array.from({ length: daysInMonth }, (_, i) => {
     const d = i + 1;
@@ -116,7 +124,9 @@ export function useDashboard() {
 
   const totalCompleted = completions.length;
   const totalPossible = activeHabits.reduce(
-    (s, h) => s + expectedForMonth(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month),
+    (s, h) =>
+      s +
+      expectedForMonthUpto(h.frequency, h.daysOfWeek, h.timesPerWeek, h.timesPerMonth, year, month, elapsedDay),
     0,
   );
   const successRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;

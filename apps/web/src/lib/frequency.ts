@@ -58,3 +58,37 @@ export function expectedForMonth(
       return timesPerMonth ?? daysInMonth;
   }
 }
+
+/** Expected completions up to a given day of the month (for the current, in-progress month). */
+export function expectedForMonthUpto(
+  frequency: HabitFrequency,
+  daysOfWeek: number[],
+  timesPerWeek: number | null,
+  timesPerMonth: number | null,
+  year: number,
+  month: number,
+  uptoDay: number,
+): number {
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const end = Math.min(Math.max(uptoDay, 0), daysInMonth);
+  if (end === 0) return 0;
+
+  switch (frequency) {
+    case "DAILY":
+      return end;
+    case "WEEKLY_DAYS": {
+      let count = 0;
+      for (let d = 1; d <= end; d++) {
+        const weekday = new Date(Date.UTC(year, month - 1, d)).getUTCDay();
+        if (daysOfWeek.includes(weekday)) count++;
+      }
+      return count;
+    }
+    case "TIMES_PER_WEEK":
+      return Math.round(((timesPerWeek ?? 1) * end) / 7);
+    case "TIMES_PER_MONTH": {
+      const target = timesPerMonth ?? daysInMonth;
+      return end >= daysInMonth ? target : Math.round((target * end) / 30);
+    }
+  }
+}
