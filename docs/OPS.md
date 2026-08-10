@@ -105,3 +105,7 @@ Full production setup (Render API, Vercel web, Neon Postgres, env vars, CI/CD an
 5. Build + deploy the web static bundle (`pnpm --filter @lifeos/web build`)
 6. Verify `GET /v1/health/ready` → `{ status: "ok", db: "ok" }`
 7. Smoke test: register → onboarding → create a habit → mark completion
+
+---
+
+_More docs: [Documentation index](README.md) · [Deployment](DEPLOYMENT.md) · [LifeOS README](../README.md)_

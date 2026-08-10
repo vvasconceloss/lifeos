@@ -18,6 +18,7 @@ function getCsrfToken(): string | null {
 export const api = axios.create({
   baseURL: "/v1",
   withCredentials: true,
+  timeout: 15000,
   headers: { "Content-Type": "application/json" },
 });
 

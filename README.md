@@ -2,21 +2,34 @@
 
 > LifeOS is a system for observing and intentionally improving your life.
 
-A habit-tracking web app built with **Node.js**, **TypeScript**, **React** and **PostgreSQL**.
+A web app for tracking habits, goals and projects, understanding how your days actually go, and
+slowly building a life you can measure, understand and improve.
 
-The v1.0 MVP is complete and deployed. Development continues toward **v1.5 (Public Beta / intermediate product)** — see [`docs/1.5_PLAN.md`](docs/1.5_PLAN.md) for the roadmap and [`docs/DOMAIN_RULES.md`](docs/DOMAIN_RULES.md) for the data model and business rules.
+Built with **Node.js**, **TypeScript**, **React** and **PostgreSQL**.
+
+**v1.5 (Public Beta) is released** — see [`docs/README.md`](docs/README.md) as the documentation
+entry point (roadmap, domain rules, frequencies, gamification, ops, deployment), the
+[`CHANGELOG.md`](CHANGELOG.md) for the release history, and
+[`docs/1.5_PLAN.md`](docs/1.5_PLAN.md) for the phase-by-phase roadmap.
 
 ---
 
 ## Features
 
-- User accounts with authentication
-- Pillars to organize life areas
-- Habit CRUD with monthly goals and archiving
-- Mark/unmark habits as completed per day (idempotent, unique per day)
-- Monthly dashboard grid with inline completion toggling and progress
-- Statistics: completion rate, streaks and pillar aggregation
-- Annual activity heatmap (GitHub-style)
+- **Pillars** — organize your life into areas (Health, Engineering, Relationships, …) with icons,
+  colors and descriptions.
+- **Habits** — flexible frequencies (daily, specific days, X times per week/month), icons, colors,
+  archiving and an individual history calendar with current/best streaks.
+- **Goals** — outcomes linked to supporting habits, with progress derived from real completions.
+- **Projects & Tasks** — structured work with a task checklist; progress updates automatically.
+- **Daily Journal** — log mood, energy, sleep and notes; see how they correlate with your
+  completion rate (association, not causation).
+- **Analytics** — Insights (trends, consistency, focus areas) and Statistics (monthly summary,
+  per-pillar, heatmap).
+- **Onboarding** — a guided first-run flow with default areas and suggested habits (skippable).
+- **Gamification** — optional XP/levels/ranks derived transparently from real progress (off by
+  default).
+- **Personalization** — theme (light/dark/system), timezone, week-start, profile.
 
 ---
 
@@ -26,7 +39,9 @@ The v1.0 MVP is complete and deployed. Development continues toward **v1.5 (Publ
 - React + TypeScript + Vite (Web)
 - PostgreSQL + Prisma (data layer)
 - Zod (shared validation between API and Web)
+- Vitest + Testing Library + MSW (tests), Sentry (web error tracking, opt-in)
 - pnpm workspaces (monorepo)
+- Deployed on Render (API) + Vercel (web) + Neon (PostgreSQL)
 
 ---
 
@@ -36,17 +51,19 @@ The v1.0 MVP is complete and deployed. Development continues toward **v1.5 (Publ
 lifeos/
 │
 ├── apps/
-│   ├── api/            # Fastify API (modules: auth, pillars, habits, completions, stats)
+│   ├── api/            # Fastify API (modules: auth, pillars, habits, completions, goals,
+│   │                   #   projects, daily-logs, stats, progression)
 │   │   ├── src/
-│   │   ├── prisma/     # schema + migrations
-│   │   └── Dockerfile  # via root Dockerfile
+│   │   └── prisma/     # schema + migrations
 │   └── web/            # React + Vite SPA
-│       └── vercel.json # /v1 proxy + SPA fallback
+│       └── vercel.json # /v1 proxy to the API + SPA fallback
 │
 ├── packages/
 │   └── shared/         # shared zod schemas and types
 │
-├── .github/workflows/  # CI + keep-alive
+├── docs/               # roadmap, domain rules, frequencies, gamification, ops, deployment
+├── .github/workflows/  # CI + Render keep-alive
+├── render.yaml         # Render blueprint (API)
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
 ```
@@ -96,7 +113,7 @@ pnpm --filter @lifeos/web dev
 
 ```bash
 pnpm lint     # eslint across api, web and shared
-pnpm test     # API tests (requires a running PostgreSQL)
+pnpm test     # API tests (230, requires PostgreSQL) + Web integration tests (9)
 pnpm build    # typecheck/build api and web
 ```
 
@@ -104,7 +121,10 @@ pnpm build    # typecheck/build api and web
 
 ## CI
 
-`.github/workflows/ci.yml` runs install, Prisma generate + migrations, lint, tests and build on every pull request and push to `main`, using a Postgres service container.
+`.github/workflows/ci.yml` runs install, Prisma generate + migrations, lint, tests and build on
+every pull request and push to `main`, using a Postgres service container. The API suite includes an
+E2E main-flow test (register → create pillar → create habit → complete habit → dashboard reflects
+progress).
 
 ---
 
@@ -115,52 +135,17 @@ Production architecture:
 ```
 Browser → https://<app-domain>/v1/*  →  (rewrite)  →  https://<api-domain>/v1/*
             https://<app-domain>/*   →  SPA index.html
-API (Docker) → managed PostgreSQL
 ```
 
-The frontend calls the API through a **same-origin `/v1` rewrite** on the static host, so cookies remain same-site (`SameSite=Strict`, `Secure`) with no CORS or cross-site cookie handling.
+- **PostgreSQL — Neon** (free): managed Postgres with point-in-time restore.
+- **API — Render** (free): `render.yaml` builds `@lifeos/api`, starts `node dist/server.js`, and runs
+  `prisma migrate deploy` before each deploy. Health check at `/v1/health/ready`. A GitHub Actions
+  keep-alive pings `/v1/health` to prevent the free instance from sleeping.
+- **Web — Vercel** (free): Root Directory `apps/web`, `pnpm build`, output `dist`. The
+  `apps/web/vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for
+  client-side routes (same-origin, so auth cookies stay `SameSite=Strict` and `Secure`).
 
-### 1. PostgreSQL — Neon (free)
-
-1. Create a project at neon.tech and copy the connection string as `DATABASE_URL`.
-2. Apply migrations once:
-   ```bash
-   DATABASE_URL="postgresql://..." pnpm db:migrate
-   ```
-3. Backups: Neon free tier provides point-in-time restore.
-
-### 2. API — Render (free web service)
-
-1. Create a new **Web Service** pointing at the repository.
-2. **Docker** deploy (the root `Dockerfile` handles install, Prisma generate and start).
-3. Environment variables:
-   | Variable | Value |
-   |---|---|
-   | `DATABASE_URL` | Neon connection string |
-   | `JWT_SECRET` | long random secret (`openssl rand -hex 32`) |
-   | `ALLOWED_ORIGINS` | `https://<app-domain>` |
-   | `NODE_ENV` | `production` |
-   | `PORT` | auto-injected by Render |
-4. The container applies migrations (`prisma migrate deploy`) on start.
-5. Keep the free instance awake (it sleeps after ~15 min of inactivity) with `.github/workflows/keep-alive.yml`, which pings `/v1/health` every 10 minutes.
-
-### 3. Frontend — Vercel (free)
-
-1. Import the repository; set **Root Directory** to `apps/web` (framework preset: Vite).
-2. Build command: `pnpm build`; Output directory: `dist`.
-3. **Install command** — pin the pnpm version for consistency:
-   ```
-   npm install -g pnpm@11.3.0 && pnpm install --frozen-lockfile
-   ```
-4. The `vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for client-side routes.
-5. Update the API domain in `apps/web/vercel.json` (currently `https://lifeos-i59v.onrender.com`) if it differs.
-
-### Production verification checklist
-
-- Register → login → create pillar → create habit → mark a completion
-- Dashboard, statistics and heatmap render with real data
-- Cookie is `HttpOnly`, `Secure`, `SameSite=Strict` over HTTPS
-- Migrations applied; database backups confirmed
+Full environment variables, first-deploy and rollback steps: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ---
 

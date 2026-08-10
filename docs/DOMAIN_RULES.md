@@ -158,3 +158,7 @@ These scenarios were validated during Phase 1 to confirm the rules are consisten
 6. **Optional description** — Creating a habit with only a name succeeds. The `description` field is `null` in the database.
 7. **Unmark past completion** — A completion from 30 days ago can be unmarked without restriction.
 8. **Email uniqueness** — Registering with an existing email returns an error. Only the first registration succeeds.
+
+---
+
+_More docs: [Documentation index](README.md) · [Habit frequencies](FREQUENCIES.md) · [LifeOS README](../README.md)_

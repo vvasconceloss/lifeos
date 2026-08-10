@@ -107,3 +107,7 @@ Render auto-deploys API (migrations first)  +  Vercel auto-deploys web
    complete habit → dashboard updates; log out and back in (cookies).
 5. **Rollback:** both Render and Vercel keep previous deploys — use "Rollback to this deploy" in
    their dashboards if a bad release ships.
+
+---
+
+_More docs: [Documentation index](README.md) · [Operations](OPS.md) · [LifeOS README](../README.md)_

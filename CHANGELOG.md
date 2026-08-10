@@ -1,0 +1,66 @@
+# Changelog
+
+All notable changes to LifeOS.
+
+## v1.5.0 — Public Beta (2026-08)
+
+The v1.5 release turns the v1.0 MVP into an intermediate product ready for other people to use.
+Every phase was validated end-to-end (desktop + mobile) and covered by automated tests (API unit +
+integration, frontend integration, and an E2E main-flow test) running in CI.
+
+### New features
+
+- **Habit frequencies** — habits can be `Daily`, specific `days of the week`, `X times per week`, or
+  `X times per month`. Expected completions, completion rates and current/best streaks are computed
+  per frequency; habits get an individual history + monthly calendar page (`/habits/:id`).
+- **Analytics 2.0** — a dedicated **Insights** page (`/insights`) with weekly trend, consistency,
+  daily average, completion-rate-over-time and per-pillar focus; **Statistics** (`/statistics`) keeps
+  the monthly summary, per-pillar stats, top habits and the activity heatmap.
+- **Goals** — outcomes associated with a pillar and linked to supporting habits; progress is derived
+  from the habits' completion rates, with progress-over-time on the goal detail page.
+- **Projects & Tasks** — structured work per pillar with a task checklist; project progress is
+  derived from completed tasks, with task reordering and inline editing.
+- **Daily Journal / Life Logs** — log mood, energy, sleep and notes per day; monthly mood calendar;
+  correlations with completion rate presented as *association, not causation*.
+- **Onboarding** — first-login detection with a 3-step wizard (areas → first habits → ready),
+  default pillar/habit suggestions and a skip path; empty-state guidance for skipped users.
+- **Personalization** — profile page (`/profile`) with name, theme (light/dark/system), timezone and
+  week-start; pillar/habit icons, colors, descriptions and reordering.
+- **Gamification / Progression** — optional (off by default) XP/levels/ranks derived transparently
+  from habit completion, goal progress, project progress and consistency; per-pillar and overall
+  ranks with a "How ranks work" legend. The nav item only appears when enabled.
+- **Professional UX** — skeletons, standardized empty/error states, destructive-action confirmations,
+  mobile-first dashboard (today checklist + scrollable heatmap), accessible keyboard navigation.
+
+### Observability, security & operations
+
+- Structured JSON logging (pino) with request IDs (`x-request-id`) and redacted secrets.
+- Health checks: `/v1/health` (liveness) and `/v1/health/ready` (database readiness).
+- Graceful shutdown (`SIGTERM`/`SIGINT` closes Fastify + Prisma).
+- Rate limiting on global, login and register endpoints; password rules (min 8 chars, letter +
+  number); secure cookies; CORS allow-list; Helmet; CSRF protection.
+- Dependency audit kept clean (`pnpm audit` → 0 vulnerabilities).
+- Production docs: `docs/OPS.md`, `docs/DEPLOYMENT.md`, `docs/GAMIFICATION.md`, `docs/FREQUENCIES.md`.
+
+### Testing & CI/CD
+
+- API suite: **230 tests** (auth, habits/frequency, completions/streaks, goals, projects,
+  progression, daily logs, stats, isolation, plugins) including an **E2E main-flow test**
+  (register → create pillar → create habit → complete habit → dashboard reflects progress).
+- Frontend integration suite: **9 tests** (Vitest + Testing Library + MSW) covering login, register,
+  dashboard view, completing a habit, and creating a habit/goal.
+- GitHub Actions CI: lint → test → build on PR and `main` (with a Postgres service container).
+- Deployment: API on **Render** (`render.yaml`, migrations run pre-deploy), web on **Vercel**
+  (`apps/web/vercel.json`, Root Directory `apps/web`), **PostgreSQL on Neon**.
+
+## v1.0.0 — MVP (2026-07)
+
+The original MVP that proved the concept: a functional personal habit tracker.
+
+- User accounts (register, login, cookie session).
+- **Pillars** to organize life areas.
+- **Habit** CRUD with monthly goals and archiving.
+- Daily completion toggling (idempotent, unique per habit + day).
+- Monthly dashboard grid with inline toggling and progress.
+- Monthly statistics (completion rate, streaks, per-pillar aggregation) and a GitHub-style yearly
+  activity heatmap.

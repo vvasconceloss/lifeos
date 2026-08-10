@@ -1,6 +1,6 @@
 # LifeOS — Habit Frequencies & Rich History
 
-> Formal reference document for the habit frequency model (Phase 3 of `docs/1.5_PLAN.md`).
+> Formal reference document for the habit frequency model (Phase 3 of [`1.5_PLAN.md`](1.5_PLAN.md)).
 > Approved before any database schema change. This document defines the semantics of
 > **expected completions**, **actual completions**, **completion rate**, and **streaks**
 > for every supported frequency type, and describes the data model, migration, API and
@@ -327,3 +327,7 @@ No data loss: every existing habit maps deterministically to `DAILY` or
   generic "any-day" streaks are intentionally not used.
 - No changes to the completion endpoints (`PUT/DELETE …/completions/:date`); marking
   remains day-based and idempotent.
+
+---
+
+_More docs: [Documentation index](README.md) · [Domain rules](DOMAIN_RULES.md) · [LifeOS README](../README.md)_

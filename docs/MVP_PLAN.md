@@ -117,7 +117,7 @@ No goals, levels, or metrics at this stage.
 
 ### Tasks
 - [x] Document the entity diagram (User → Pillar → Habit → Completion)
-- [x] Write the business rules for each entity into a reference document (`/docs/domain-rules.md`)
+- [x] Write the business rules for each entity into a reference document ([`docs/DOMAIN_RULES.md`](DOMAIN_RULES.md))
 - [x] Validate with mental test cases (e.g., "can I mark the same habit twice on the same day?")
 - [x] Confirm the `@@unique([habitId, date])` constraint is planned in the Prisma schema
 - [x] Review and approve the model before moving to Phase 2
@@ -910,3 +910,7 @@ M10 — CI                            [DONE]
 M11 — Deployment                     [DONE]
 M12 — MVP Release                    [DONE]
 ```
+
+---
+
+_More docs: [Documentation index](README.md) · [v1.5 plan](1.5_PLAN.md) · [LifeOS README](../README.md)_

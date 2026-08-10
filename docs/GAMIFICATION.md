@@ -73,3 +73,7 @@ Applied per pillar and overall.
   source rates) and `breakdown` (the XP contribution of each source).
 - XP is **derived on read** — nothing is stored, so it is always in sync with the current data and
   auditable.
+
+---
+
+_More docs: [Documentation index](README.md) · [LifeOS README](../README.md) · [CHANGELOG](../CHANGELOG.md)_

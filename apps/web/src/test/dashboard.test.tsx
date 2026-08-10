@@ -81,4 +81,29 @@ describe('Dashboard', () => {
     expect(await screen.findByText('Welcome to LifeOS')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Create pillar/i })).toBeInTheDocument();
   });
+
+  it('recovers from a failed load with the retry action', async () => {
+    const user = userEvent.setup();
+    let shouldFail = true;
+    server.use(
+      http.get('/v1/pillars', () => HttpResponse.json({ pillars: [pillar] })),
+      http.get('/v1/habits', () => {
+        if (shouldFail) {
+          shouldFail = false;
+          return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        }
+        return HttpResponse.json({ habits: [habit] });
+      }),
+      http.get('/v1/completions', () => HttpResponse.json({ completions: [] })),
+    );
+
+    renderApp('/app');
+
+    expect(await screen.findByRole('button', { name: /Try again/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Try again/i }));
+
+    const names = await screen.findAllByText('Morning run');
+    expect(names.length).toBeGreaterThan(0);
+  });
 });
