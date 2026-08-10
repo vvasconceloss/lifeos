@@ -146,7 +146,7 @@ export default function SettingsHabitsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-lg px-6 py-6">
+        <main className="mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
               Habits
@@ -174,6 +174,7 @@ export default function SettingsHabitsPage() {
             <ErrorState onRetry={reload} />
           ) : displayedHabits.length === 0 ? (
             <EmptyState
+              className="flex-1"
               icon={<ListChecks className="size-8" />}
               title={showArchived ? "No habits yet" : "No active habits"}
               description={
@@ -184,7 +185,7 @@ export default function SettingsHabitsPage() {
               action={<NewHabitModal pillars={pillars} onCreated={handleCreated} />}
             />
           ) : (
-            <div className="space-y-5">
+            <div className="flex min-h-0 flex-1 flex-col space-y-5">
               {ungroupedHabits.length > 0 && (
                 <div>
                   <ul className="space-y-2">

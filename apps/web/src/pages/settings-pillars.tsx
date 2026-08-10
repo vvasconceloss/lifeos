@@ -88,7 +88,7 @@ export default function SettingsPillarsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-lg px-6 py-6">
+        <main className="mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
               Pillars
@@ -103,13 +103,14 @@ export default function SettingsPillarsPage() {
             <ErrorState onRetry={reload} />
           ) : pillars.length === 0 ? (
             <EmptyState
+              className="flex-1"
               icon={<Layers className="size-8" />}
               title="No pillars yet"
               description="Create your first pillar to start organizing your life."
               action={<NewPillarModal onCreated={handleCreated} />}
             />
           ) : (
-            <ul className="space-y-2">
+            <ul className="flex min-h-0 flex-1 flex-col space-y-2">
               {pillars.map((pillar, index) => (
                 <PillarCard
                   key={pillar.id}

@@ -79,7 +79,7 @@ export default function GoalsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto w-full max-w-3xl px-6 py-6">
+        <main className="mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">Goals</h2>
             <NewGoalModal pillars={pillars} onCreated={handleCreated} />
@@ -92,13 +92,14 @@ export default function GoalsPage() {
             <ErrorState onRetry={reload} />
           ) : goals.length === 0 ? (
             <EmptyState
+              className="flex-1"
               icon={<Target className="size-8" />}
               title="No goals yet"
               description="Define an outcome you want to achieve and link the habits that support it."
               action={<NewGoalModal pillars={pillars} onCreated={handleCreated} />}
             />
           ) : (
-            <div className="space-y-5">
+            <div className="flex min-h-0 flex-1 flex-col space-y-5">
               {ungrouped.length > 0 && (
                 <div>
                   <h3 className="mb-2 text-sm font-semibold text-foreground/70">Other</h3>
