@@ -1,6 +1,6 @@
 # LifeOS — Gamification / Progression
 
-Reference for the XP/Level/Rank system (Phase 9 of [`1.5_PLAN.md`](1.5_PLAN.md)).
+Reference for the XP/Level/Rank system (Phase 9 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
 
 ## Principle
 
@@ -76,4 +76,4 @@ Applied per pillar and overall.
 
 ---
 
-_More docs: [Documentation index](../README.md) · [LifeOS README](../README.md) · [CHANGELOG](../CHANGELOG.md)_
+_More docs: [Documentation index](../README.md) · [LifeOS README](../README.md) · [CHANGELOG](../../CHANGELOG.md)_

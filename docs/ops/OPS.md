@@ -1,6 +1,6 @@
 # LifeOS — Operations Guide
 
-Production-hardening reference for running the LifeOS API and web app (Phase 12 of [`1.5_PLAN.md`](1.5_PLAN.md)).
+Production-hardening reference for running the LifeOS API and web app (Phase 12 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
 
 ## Architecture
 

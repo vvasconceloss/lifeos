@@ -1,6 +1,6 @@
 # LifeOS — Habit Frequencies & Rich History
 
-> Formal reference document for the habit frequency model (Phase 3 of [`1.5_PLAN.md`](1.5_PLAN.md)).
+> Formal reference document for the habit frequency model (Phase 3 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
 > Approved before any database schema change. This document defines the semantics of
 > **expected completions**, **actual completions**, **completion rate**, and **streaks**
 > for every supported frequency type, and describes the data model, migration, API and
