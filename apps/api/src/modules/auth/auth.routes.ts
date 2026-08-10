@@ -4,6 +4,7 @@ import { validateInput } from '../../lib/validation';
 import { onboardingBodySchema, registerBodySchema, loginBodySchema, updateMeBodySchema } from './auth.schemas';
 import { createUser, authenticate, getUserById, updateUser, AUTH_ERRORS } from './auth.service';
 import { completeOnboarding } from './onboarding.service';
+import { seedDemoUser, getDemoUserResponse, DEMO_EMAIL } from './demo.service';
 
 const cookieOptions = {
   httpOnly: true,
@@ -82,6 +83,25 @@ export async function authRoutes(fastify: FastifyInstance) {
         }
         throw error;
       }
+    },
+  );
+
+  fastify.post(
+    '/demo',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.DEMO_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.DEMO_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = await seedDemoUser();
+      const token = await setAuthCookie(reply, { sub: id, email: DEMO_EMAIL });
+      const user = await getDemoUserResponse();
+
+      return reply.status(200).send({ user, token });
     },
   );
 
