@@ -76,4 +76,4 @@ Applied per pillar and overall.
 
 ---
 
-_More docs: [Documentation index](README.md) · [LifeOS README](../README.md) · [CHANGELOG](../CHANGELOG.md)_
+_More docs: [Documentation index](../README.md) · [LifeOS README](../README.md) · [CHANGELOG](../CHANGELOG.md)_

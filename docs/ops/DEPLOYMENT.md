@@ -121,4 +121,4 @@ Render auto-deploys API (migrations first)  +  Vercel auto-deploys web
 
 ---
 
-_More docs: [Documentation index](README.md) · [Operations](OPS.md) · [LifeOS README](../README.md)_
+_More docs: [Documentation index](../README.md) · [Operations](../ops/OPS.md) · [LifeOS README](../README.md)_

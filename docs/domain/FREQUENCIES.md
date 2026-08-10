@@ -349,4 +349,4 @@ No data loss: every existing habit maps deterministically to `DAILY` or
 
 ---
 
-_More docs: [Documentation index](README.md) · [Domain rules](DOMAIN_RULES.md) · [LifeOS README](../README.md)_
+_More docs: [Documentation index](../README.md) · [Domain rules](../domain/DOMAIN_RULES.md) · [LifeOS README](../README.md)_

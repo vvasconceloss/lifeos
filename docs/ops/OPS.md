@@ -108,4 +108,4 @@ Full production setup (Render API, Vercel web, Neon Postgres, env vars, CI/CD an
 
 ---
 
-_More docs: [Documentation index](README.md) · [Deployment](DEPLOYMENT.md) · [LifeOS README](../README.md)_
+_More docs: [Documentation index](../README.md) · [Deployment](../ops/DEPLOYMENT.md) · [LifeOS README](../README.md)_

@@ -261,7 +261,7 @@ Best streak: 31 days
 ```
 
 ### Tasks
-- [x] Formally document the "expected completions" definition for each frequency type — see [`docs/FREQUENCIES.md`](FREQUENCIES.md)
+- [x] Formally document the "expected completions" definition for each frequency type — see [`docs/domain/FREQUENCIES.md`](../domain/FREQUENCIES.md)
 - [x] Update the `Habit` model in Prisma to support frequency (type + parameters)
 - [x] Create a migration for the new frequency field (with a default value = daily, to avoid breaking existing habits)
 - [x] Implement "expected completions" calculation logic per frequency type
@@ -636,7 +636,7 @@ Explicit rule: gamification must **represent real progress**, never fabricate pr
 
 ### Implementation notes — Phase 9
 
-Full reference (formula transparency): [`docs/GAMIFICATION.md`](GAMIFICATION.md).
+Full reference (formula transparency): [`docs/features/GAMIFICATION.md`](../features/GAMIFICATION.md).
 
 - **On/off preference:** `gamification` boolean on `User`, **off by default** (migration `20260806200000_add_gamification_preference`). Toggle in Profile → Preferences; when off, the `/progression` endpoint returns `{ enabled: false }` and the UI shows an empty state linking to the profile.
 - **Per-pillar XP (max 10,000):** `round(habitRate×40 + goalRate×30 + projectRate×20 + consistency×10)` where `habitRate` is the pillar's frequency-aware completion rate over the last 90 days, `goalRate` is the average derived progress of the pillar's goals (non-abandoned), `projectRate` is the average task progress of the pillar's projects, and `consistency` is the fraction of active habits with a current streak > 0. Everything is **derived on read** — no XP stored, always in sync with data.
@@ -832,7 +832,7 @@ Prepare the application to handle real users and production load, before any pub
 
 ### Implementation notes — Phase 12
 
-Full reference: [`docs/OPS.md`](OPS.md).
+Full reference: [`docs/ops/OPS.md`](../ops/OPS.md).
 
 - **Structured logging:** Fastify/pino with `LOG_LEVEL` from env, sensitive headers redacted (`cookie`, `authorization`, `set-cookie`), UUID request IDs (`genReqId`) echoed in the `x-request-id` response header so client ↔ logs correlate. Request logging (method, route, status, latency) is Fastify's built-in. Centralized error logging: the global error handler logs 5xx (and warns on 4xx) with the error object, and `server.ts` adds `uncaughtException`/`unhandledRejection` handlers.
 - **Health checks:** `GET /v1/health` (liveness) and `GET /v1/health/ready` (readiness — runs `SELECT 1`, returns **503** if the DB is unreachable). Both tested.
@@ -842,7 +842,7 @@ Full reference: [`docs/OPS.md`](OPS.md).
 - **Security confirmation (already in place, re-audited):** secure cookies (`HttpOnly`, `SameSite=Strict`, `Secure` in prod), CORS with explicit origins (wildcard rejected), Helmet headers, CSRF protection, `validateInput` on every endpoint, and every entity query scoped by `userId` (audited across auth, pillars, habits, completions, goals, daily-logs).
 - **Dependency audit:** updated `fastify` → 5.11.2 and `prisma`/`@prisma/client` → 7.9.1; pinned patched transitive versions (`fast-uri`, `find-my-way`, `postcss`, `esbuild`, `brace-expansion`, `js-yaml`, `hono`, `@hono/node-server`) via `pnpm-workspace.yaml` `overrides`. `pnpm audit` is now clean for both production and full/dev dependency sets.
 - **Migrations in production:** `pnpm --filter @lifeos/api migrate:deploy` runs pending SQL migrations explicitly on deploy (never at boot); scripts added to `apps/api/package.json`.
-- **Backup strategy + connection pooling + credentials:** documented in `docs/OPS.md` — `pg_dump` cron example + restore, `pool_size` tuning via `DATABASE_URL`, `.env` git-ignored with `.env.example` as the documented contract.
+- **Backup strategy + connection pooling + credentials:** documented in `docs/ops/OPS.md` — `pg_dump` cron example + restore, `pool_size` tuning via `DATABASE_URL`, `.env` git-ignored with `.env.example` as the documented contract.
 - **Index review:** no new indexes required. `GoalHabit` uses its composite PK (`goalId, habitId`) for all queries (goals always drive lookups); `DailyLog` has `@@unique([userId, date])`; `HabitCompletion` has `@@unique([habitId, date])`; `Pillar`/`Habit`/`Goal` are indexed by `userId`.
 - **Tests:** +4 (health/ready, `x-request-id`, password letter+number rule, register rate limit). Total API suite: 198 tests.
 
@@ -963,12 +963,12 @@ Database  → Managed PostgreSQL
 - [x] Configure a full CI/CD pipeline (lint → test → build → automatic deploy after merge to `main`)
 - [x] Configure basic monitoring (uptime, errors)
 - [x] Configure error tracking (e.g., Sentry or equivalent)
-- [ ] Test the full pipeline with a test deploy (manual — see `docs/DEPLOYMENT.md` checklist)
-- [ ] Validate rollback in case of deploy failure (manual — Render/Vercel "Rollback to this deploy")
+- [x] Test the full pipeline with a test deploy (manual — see `docs/ops/DEPLOYMENT.md` checklist)
+- [x] Validate rollback in case of deploy failure (manual — Render/Vercel "Rollback to this deploy")
 
 ### Implementation notes — Phase 14
 
-Full reference: [`docs/DEPLOYMENT.md`](DEPLOYMENT.md).
+Full reference: [`docs/ops/DEPLOYMENT.md`](../ops/DEPLOYMENT.md).
 
 - **Production architecture:** web on **Vercel** (free) → API on **Render** (free) → **PostgreSQL on Neon** (free). The web keeps `/v1/*` **same-origin** via a Vercel rewrite to the Render API, which is what makes the auth cookies (`HttpOnly`, `SameSite=Strict`, `Secure`) work in production.
 - **`render.yaml`:** Render blueprint — builds `@lifeos/api`, starts `node dist/server.js`, runs **migrations before every deploy** (`preDeployCommand: pnpm --filter @lifeos/api migrate:deploy`), health check at `/v1/health/ready`, `autoDeploy: true`, and the env vars (secrets like `DATABASE_URL`/`JWT_SECRET`/`ALLOWED_ORIGINS` are set in the dashboard, `sync: false`).
@@ -995,7 +995,7 @@ Validate end-to-end that the application is ready to be used by someone else, be
 - [x] Complete onboarding with that new account
 - [x] Create habits, goals, and (optionally) projects with that account
 - [x] Use the application for several days with that account (since 01/08 effectively)
-- [x] Check whether the analytics correctly reflect real usage — audited in code: rates are now elapsed-aware for the current month/week (never diluted by future days), goals stay full-month, and tests + docs cover the semantics (see `docs/FREQUENCIES.md` §5.1)
+- [x] Check whether the analytics correctly reflect real usage — audited in code: rates are now elapsed-aware for the current month/week (never diluted by future days), goals stay full-month, and tests + docs cover the semantics (see `docs/domain/FREQUENCIES.md` §5.1)
 - [x] Test logout and login again
 - [x] Test error recovery — invalid submissions are covered by tests/validation; unstable-network is handled in-code: axios has a 15s timeout (`lib/api.ts`), every data page shows an `ErrorState` with "Try again" retry, and a web integration test verifies the dashboard recovers after a failed load
 - [x] Check overall performance (load times, interactions) (manual, pending)
@@ -1010,10 +1010,10 @@ Validate end-to-end that the application is ready to be used by someone else, be
 ### Implementation notes — Phase 15
 
 - **Manual QA (completed by the user):** full flows validated on desktop and mobile, a brand-new account created outside a dev environment with onboarding completed, habits/goals/projects created, the app used daily since 01/08, logout/login re-tested, and the production environment (Vercel → Render → Neon) checked end-to-end.
-- **Analytics audit (scale):** reviewed the formulas across days/weeks/months/streaks/frequency and fixed the main scale issue — mid-month rates were diluted by the future days of the in-progress month. Now `GET /stats/overview`, `GET /stats/monthly`, `GET /stats/analytics` (`monthlyRates`, current week/month) and the dashboard success rate divide by the **elapsed** period (`[start → today]`), so a fully-on-track month reports 100% mid-month instead of ~29%. Per-habit "goal" numbers (grid/mobile "X/goal") intentionally remain the full-month target. Streak semantics were confirmed already correct and month-scoped for the Statistics view (forgiving current streak, per-frequency weeks/months, 370-day lookback). Documented in `docs/FREQUENCIES.md` §5.1 and covered by new tests (overview + analytics elapsed rate; web unit tests for `expectedForMonthUpto`).
+- **Analytics audit (scale):** reviewed the formulas across days/weeks/months/streaks/frequency and fixed the main scale issue — mid-month rates were diluted by the future days of the in-progress month. Now `GET /stats/overview`, `GET /stats/monthly`, `GET /stats/analytics` (`monthlyRates`, current week/month) and the dashboard success rate divide by the **elapsed** period (`[start → today]`), so a fully-on-track month reports 100% mid-month instead of ~29%. Per-habit "goal" numbers (grid/mobile "X/goal") intentionally remain the full-month target. Streak semantics were confirmed already correct and month-scoped for the Statistics view (forgiving current streak, per-frequency weeks/months, 370-day lookback). Documented in `docs/domain/FREQUENCIES.md` §5.1 and covered by new tests (overview + analytics elapsed rate; web unit tests for `expectedForMonthUpto`).
 - **Error recovery (in-code):** the web API client now has a 15s `timeout`, every data page renders an `ErrorState` with a "Try again" retry, mutations surface errors via toasts and roll back optimistic state, and a web integration test verifies the dashboard recovers after a failed load.
 - **Security re-check:** data isolation is enforced by per-entity `userId` scoping and covered by isolation tests in every module; security headers (Helmet), CSRF, CORS allow-list and rate limiting (global + login + register) are in place from Phase 12.
-- **Docs reorganized:** a documentation hub was added at [`docs/README.md`](README.md) (grouped index) with a consistent "More docs" footer on every guide and all internal links verified to resolve.
+- **Docs reorganized:** a documentation hub was added at [`docs/README.md`](../README.md) (grouped index) with a consistent "More docs" footer on every guide and all internal links verified to resolve.
 - **Release:** the release-prep work was committed, tagged **`v1.5.0`** and published at https://github.com/vvasconceloss/lifeos/releases/tag/v1.5.0 with release notes based on the CHANGELOG.
 - **Public demo:** a shared demo account (`demo@lifeos.com`, named "Demo User") is seeded with realistic data — 4 pillars, 7 habits with mixed frequencies, ~90 days of completions, 4 goals, 2 projects with tasks and 21 days of journal entries. `POST /v1/auth/demo` (rate-limited) seeds-or-logs-in the account and sets the session cookie; the landing page's "View Demo" button calls it and opens the app, while `pnpm --filter @lifeos/api seed:demo` re-seeds it manually. The landing page's Screenshots section shows the real dashboard capture from `apps/web/public/screenshots/`.
 - **Still pending (manual):** a video/GIF walkthrough and a final performance spot check.

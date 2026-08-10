@@ -161,4 +161,4 @@ These scenarios were validated during Phase 1 to confirm the rules are consisten
 
 ---
 
-_More docs: [Documentation index](README.md) · [Habit frequencies](FREQUENCIES.md) · [LifeOS README](../README.md)_
+_More docs: [Documentation index](../README.md) · [Habit frequencies](../domain/FREQUENCIES.md) · [LifeOS README](../README.md)_
