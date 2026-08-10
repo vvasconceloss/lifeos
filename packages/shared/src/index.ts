@@ -6,4 +6,5 @@ export * from "./schemas/stats";
 export * from "./schemas/common";
 export * from "./schemas/goals";
 export * from "./schemas/projects";
+export * from "./schemas/progression";
 export * from "./schemas/daily-logs";

@@ -59,6 +59,7 @@ export const updateMeBodySchema = z.object({
   weekStart: z.number().int().min(0).max(6).optional(),
   theme: z.enum(["light", "dark", "system"]).optional(),
   onboarded: z.boolean().optional(),
+  gamification: z.boolean().optional(),
 });
 
 export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;
@@ -71,6 +72,7 @@ export interface UserResponse {
   weekStart: number;
   theme: string;
   onboarded: boolean;
+  gamification: boolean;
   createdAt: Date;
 }
 

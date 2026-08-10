@@ -20,6 +20,7 @@ export function toUserResponse(user: {
   weekStart: number;
   theme: string;
   onboarded: boolean;
+  gamification: boolean;
   createdAt: Date;
 }): UserResponse {
   return {
@@ -30,6 +31,7 @@ export function toUserResponse(user: {
     weekStart: user.weekStart,
     theme: user.theme,
     onboarded: user.onboarded,
+    gamification: user.gamification,
     createdAt: user.createdAt,
   };
 }
@@ -103,6 +105,7 @@ export async function updateUser(
       ...(data.weekStart !== undefined && { weekStart: data.weekStart }),
       ...(data.theme !== undefined && { theme: data.theme }),
       ...(data.onboarded !== undefined && { onboarded: data.onboarded }),
+      ...(data.gamification !== undefined && { gamification: data.gamification }),
     },
   });
 
