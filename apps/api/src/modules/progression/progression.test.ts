@@ -190,6 +190,45 @@ describe('GET /v1/progression', () => {
     await app.close();
   });
 
+  it('excludes abandoned goals from goal XP', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Knowledge');
+    await enableGamification(app, cookie);
+
+    const goalRes = await app.inject({
+      method: 'POST',
+      url: '/v1/goals',
+      headers: { cookie },
+      payload: { title: 'Read more', pillarId },
+    });
+    const goalId = goalRes.json().goal.id;
+    const habitId = await createHabit(app, cookie, 'Read', pillarId);
+    await app.inject({
+      method: 'PUT',
+      url: `/v1/goals/${goalId}/habits/${habitId}`,
+      headers: { cookie },
+    });
+    await markCompletion(app, cookie, habitId, utcDateKey(new Date()));
+
+    const before = await getProgression(app, cookie);
+    expect(before.pillars[0].breakdown.goals).toBeGreaterThan(0);
+
+    await app.inject({
+      method: 'PATCH',
+      url: `/v1/goals/${goalId}`,
+      headers: { cookie },
+      payload: { status: 'ABANDONED' },
+    });
+
+    const after = await getProgression(app, cookie);
+    const pillar = after.pillars[0];
+    expect(pillar.rates.goals).toBe(0);
+    expect(pillar.breakdown.goals).toBe(0);
+
+    await app.close();
+  });
+
   it('scopes progression to the authenticated user', async () => {
     const app = await buildApp({ csrf: false });
     const cookieA = await registerAndGetCookie(app, uniqueEmail());

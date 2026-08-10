@@ -226,6 +226,33 @@ describe('Goal habit association', () => {
 
     await app.close();
   });
+
+  it('computes progress since the habit was linked, not since its creation', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    await markCompletion(app, cookie, habitId, utcDateKey(new Date(Date.now() - 86400000)));
+
+    const add = await app.inject({
+      method: 'PUT',
+      url: `/v1/goals/${goalId}/habits/${habitId}`,
+      headers: { cookie },
+    });
+    expect(add.statusCode).toBe(200);
+
+    const detail = await app.inject({
+      method: 'GET',
+      url: `/v1/goals/${goalId}`,
+      headers: { cookie },
+    });
+
+    expect(detail.json().goal.progress).toBe(0);
+
+    await app.close();
+  });
 });
 
 describe('Goal isolation', () => {

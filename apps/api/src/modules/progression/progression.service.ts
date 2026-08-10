@@ -123,7 +123,7 @@ export async function getProgression(userId: string): Promise<ProgressionRespons
       ? Math.round((activeStreaks / pillarHabits.length) * 100)
       : 0;
 
-    const pillarGoals = goals.filter((g) => g.pillarId === pillar.id);
+    const pillarGoals = goals.filter((g) => g.pillarId === pillar.id && g.status !== "ABANDONED");
     const goalRate = pillarGoals.length > 0
       ? Math.round(pillarGoals.reduce((sum, g) => sum + g.progress, 0) / pillarGoals.length)
       : 0;
