@@ -11,7 +11,7 @@ All notable changes to LifeOS.
   instead of being diluted by future days. Applied to `/stats/overview`, `/stats/monthly`,
   `/stats/analytics` (current week/month) and the dashboard success rate. Per-habit "goal" numbers
   (grid/mobile "X/goal") keep the full month as the target. Semantics documented in
-  `docs/FREQUENCIES.md` §5.1.
+  `docs/domain/FREQUENCIES.md` §5.1.
 
 ## v1.5.0 — Public Beta (2026-08)
 
@@ -51,7 +51,7 @@ integration, frontend integration, and an E2E main-flow test) running in CI.
 - Rate limiting on global, login and register endpoints; password rules (min 8 chars, letter +
   number); secure cookies; CORS allow-list; Helmet; CSRF protection.
 - Dependency audit kept clean (`pnpm audit` → 0 vulnerabilities).
-- Production docs: `docs/OPS.md`, `docs/DEPLOYMENT.md`, `docs/GAMIFICATION.md`, `docs/FREQUENCIES.md`.
+- Production docs: `docs/ops/OPS.md`, `docs/ops/DEPLOYMENT.md`, `docs/features/GAMIFICATION.md`, `docs/domain/FREQUENCIES.md`.
 
 ### Testing & CI/CD
 

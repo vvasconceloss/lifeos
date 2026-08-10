@@ -1,5 +1,5 @@
 # Render blueprint for the LifeOS API (free plan).
-# Docs: docs/DEPLOYMENT.md
+# Docs: docs/ops/DEPLOYMENT.md
 # Note: the PostgreSQL database is hosted externally on Neon — its connection
 # string is provided as the DATABASE_URL env var (no `databases` block here).
 services:

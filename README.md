@@ -27,7 +27,7 @@ slowly building a life you can measure, understand and improve.
 **v1.5 (Public Beta) is released** — see [`docs/README.md`](docs/README.md) as the documentation
 entry point (roadmap, domain rules, frequencies, gamification, ops, deployment), the
 [`CHANGELOG.md`](CHANGELOG.md) for the release history, and
-[`docs/1.5_PLAN.md`](docs/1.5_PLAN.md) for the phase-by-phase roadmap.
+[`docs/roadmap/ROADMAP.md`](docs/roadmap/ROADMAP.md) for the phase-by-phase roadmap.
 
 ---
 
@@ -171,7 +171,7 @@ Browser → https://<app-domain>/v1/*  →  (rewrite)  →  https://<api-domain>
   `apps/web/vercel.json` rewrites `/v1/*` to the API domain and falls back to `index.html` for
   client-side routes (same-origin, so auth cookies stay `SameSite=Strict` and `Secure`).
 
-Full environment variables, first-deploy and rollback steps: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Full environment variables, first-deploy and rollback steps: [`docs/ops/DEPLOYMENT.md`](docs/ops/DEPLOYMENT.md).
 
 ---
 
