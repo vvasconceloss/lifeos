@@ -33,7 +33,7 @@ function toneBarClass(score: number | null): string {
   if (score == null) return "bg-border/60";
   if (score <= 2) return "bg-red-500";
   if (score <= 4) return "bg-orange-500";
-  if (score <= 6) return "bg-amber-500";
+  if (score <= 7) return "bg-amber-500";
   if (score <= 8) return "bg-emerald-500";
   return "bg-emerald-600";
 }
@@ -271,10 +271,13 @@ function StateCard({
 
 function CorrelationRow({ label, days }: { label: string; days: number }) {
   return (
-    <div className="flex items-center justify-between gap-2 text-xs">
-      <span className="font-medium text-foreground">{label}</span>
-      <span className="tabular-nums text-foreground/60">
-        {days} day{days === 1 ? "" : "s"}
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <span className="text-2xl font-bold tabular-nums leading-none text-foreground">
+        {days}
+        <span className="ml-1 text-xs font-medium text-foreground/50">
+          day{days === 1 ? "" : "s"}
+        </span>
       </span>
     </div>
   );
@@ -282,14 +285,14 @@ function CorrelationRow({ label, days }: { label: string; days: number }) {
 
 function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations }) {
   const groups = [
-    { title: "Sleep", icon: <BedDouble className="size-4" />, rows: correlations.sleep },
     { title: "Mood", icon: <Smile className="size-4" />, rows: correlations.mood },
     { title: "Energy", icon: <Zap className="size-4" />, rows: correlations.energy },
+    { title: "Sleep", icon: <BedDouble className="size-4" />, rows: correlations.sleep },
   ];
   const hasData = groups.some((g) => g.rows.length > 0);
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+    <div data-testid="logged-days-by-state" className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <span className="text-xs font-medium text-foreground/60">Your logged days by state</span>
       {!hasData ? (
         <p className="mt-3 text-sm text-foreground/60">
@@ -297,11 +300,11 @@ function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations
           buckets.
         </p>
       ) : (
-        <div className="mt-4 grid gap-5 md:grid-cols-3">
+        <div className="mt-4 grid gap-6 md:grid-cols-3">
           {groups.map((g) =>
             g.rows.length > 0 ? (
-              <div key={g.title} className="flex flex-col gap-2.5">
-                <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+              <div key={g.title} className="flex flex-col gap-3">
+                <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                   <span className="text-foreground/50">{g.icon}</span>
                   {g.title}
                 </span>

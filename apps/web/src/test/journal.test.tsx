@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { server } from './server';
 import { renderApp } from './utils';
@@ -47,10 +47,11 @@ describe('Journal', () => {
 
     renderApp('/journal');
 
-    expect(await screen.findByText('Your logged days by state')).toBeInTheDocument();
-    expect(screen.getByText('12 days')).toBeInTheDocument();
-    expect(screen.getByText('9 days')).toBeInTheDocument();
-    expect(screen.getByText('6 days')).toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    const card = await screen.findByTestId('logged-days-by-state');
+    expect(within(card).getByText('Your logged days by state')).toBeInTheDocument();
+    expect(within(card).getByText('9')).toBeInTheDocument();
+    expect(within(card).getByText('6')).toBeInTheDocument();
+    expect(within(card).getByText('12')).toBeInTheDocument();
+    expect(within(card).queryByText(/%/)).not.toBeInTheDocument();
   });
 });
