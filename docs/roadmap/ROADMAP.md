@@ -419,7 +419,7 @@ No OKRs, complex milestones, or sophisticated scoring systems in this phase.
 - **Association rule:** only habits of the **same pillar** as the goal can be linked (enforced with a 400). Both the goal and the habit must belong to the authenticated user.
 - **API:** `GET/POST /goals`, `GET/PATCH/DELETE /goals/:id`, `PUT/DELETE /goals/:id/habits/:habitId` (returns `habitCount`). All queries scoped by `userId`.
 - **Frontend:** **Goals** page (nav + `/goals`) grouped by pillar with progress bars, status badges, deadline, habit count, edit/delete. **Goal detail** (`/goals/:id`) with progress bar, progress-over-time chart, per-habit rates with add/remove controls, and status quick-actions. Create/edit are dialogs (consistent with the Phase-3 modal patterns).
-- **Tests:** 10 goal contract tests (CRUD, association, derived progress from completions, isolation).
+- **Tests:** 12 goal contract tests (CRUD, association, derived progress from completions, isolation).
 
 ### Completion criteria
 The user can create Goals associated with Pillars, link them to existing Habits, and view the Goal's progress consistently with the actual completions of the associated habits.
@@ -520,8 +520,8 @@ Important: these correlations must be presented as **association**, never as cau
 - **Model:** `DailyLog` (userId, date, mood 1–10, energy 1–10, sleepHours float, notes) with `@@unique([userId, date])`. Migration `20260805210000_add_daily_log`.
 - **API:** `GET /daily-logs?from&to` (list), `POST /daily-logs` (**idempotent upsert by date** — the daily form saves with one call), `GET /daily-logs/:date`, `PATCH/DELETE /daily-logs/:id`, and `GET /daily-logs/correlations?from&to`.
 - **Correlations:** for each logged day, the daily completion rate = fraction of active habits completed that day (0–100). Days are grouped into buckets — sleep (`<6h`, `6–7h`, `7–9h`, `>9h`), mood and energy (`1–4`, `5–7`, `8–10`) — returning the average rate and sample size per bucket. Completions are scoped to the user's own active habits.
-- **Frontend:** new **Journal** page (`/journal`, nav) — a form for the selected day (mood/energy 1–10 buttons, sleep in **hours + minutes**, notes), a monthly calendar colored by mood (click a day to edit), and a **"Your logged days by state"** card showing how many days fell in each sleep (`<6h`, `6–7h`, `7–9h`, `>9h`) and mood/energy (`1–4`, `5–7`, `8–10`) bucket. The card deliberately shows the day distribution rather than percentages — the per-bucket completion-rate averages stay server-side.
-- **Tests:** 9 daily-log tests (CRUD/upsert, range+by-date, correlations, isolation).
+- **Frontend:** new **Journal** page (`/journal`, nav) — a form for the selected day (mood/energy 1–10 buttons, sleep in **hours + minutes**, notes), a monthly calendar colored by **mood &amp; energy** (click a day to edit), and a **"Your logged days by state"** card showing how many days fell in each sleep (`<6h`, `6–7h`, `7–9h`, `>9h`) and mood/energy (`1–4`, `5–7`, `8–10`) bucket. The card deliberately shows the day distribution rather than percentages — the per-bucket completion-rate averages stay server-side.
+- **Tests:** 8 daily-log tests (CRUD/upsert, range+by-date, correlations, isolation).
 
 ### Completion criteria
 The user can log mood, energy, sleep, and notes daily, view the history, and see how their logged days are distributed across state buckets (computed from the same data as the correlations endpoint).
@@ -644,7 +644,7 @@ Full reference (formula transparency): [`docs/features/GAMIFICATION.md`](../feat
 - **Rank:** E/D/C/B/A/S mapped from level (1→E … 5→A, 6+→S), per pillar and overall.
 - **API:** `GET /v1/progression` returns `{ progression: { enabled, overall, pillars[] } }` with per-pillar `rates`, `breakdown`, `level`, `xp`, `xpIntoLevel`, `xpToNext`, `rank`. Reuses the existing `listGoals`/`listProjects` derived progress and the Phase-3 frequency logic.
 - **Frontend:** new **Progression** page (`/progression`, nav) — overall card (level, rank, XP bar) + per-pillar cards (rank badge, level, XP bar, per-source breakdown bars). Off state shows guidance with a link to Profile. Toggle added to the Profile preferences form.
-- **Tests:** +19 (10 unit tests for the level curve/rank/formula + 9 integration tests: default-off, toggle, empty account, habit XP, project XP, goal XP, abandoned goals excluded, isolation, unauthenticated).
+- **Tests:** +20 (10 unit tests for the level curve/rank/formula + 10 integration tests: default-off, toggle, empty account, habit XP, project XP, goal XP, abandoned goals excluded, isolation, unauthenticated).
 
 ### Completion criteria
 An XP/Level system exists per pillar and overall, with a documented and transparent formula, validated against real data, representing genuine progress rather than an arbitrary metric.
@@ -915,7 +915,7 @@ This flow must be practically impossible to break without CI catching it.
   - **create.test.tsx** — creates a habit from the Habits page and a goal from the Goals page through their modals (drives the base-ui pillar select).
 - **Setup notes:** `localStorage` is polyfilled (Node 26 shadows jsdom's with an experimental global), `matchMedia`/`ResizeObserver`/`IntersectionObserver`/`scrollTo` stubbed, and the sonner `<Toaster />` is mounted so toast assertions work.
 - **CI:** `.github/workflows/ci.yml` already runs `pnpm lint` → `pnpm test` → `pnpm build` (with a Postgres service) on PR and `main`; the root `test` script now runs **API + Web** suites, and the E2E main-flow test is part of the API suite — so a regression in the main flow fails CI.
-- **Totals:** API 238 tests (19 files) · Web 19 integration tests (5 files) · E2E main-flow test integrated.
+- **Totals:** API 238 tests (19 files) · Web 20 integration tests (5 files) · E2E main-flow test integrated.
 
 ### Completion criteria
 Unit test, integration test, and at least one complete E2E test coverage exist, all integrated into CI, ensuring the product's main flow cannot break silently.
@@ -973,7 +973,7 @@ Full reference: [`docs/ops/DEPLOYMENT.md`](../ops/DEPLOYMENT.md).
 - **Production architecture:** web on **Vercel** (free) → API on **Render** (free) → **PostgreSQL on Neon** (free). The web keeps `/v1/*` **same-origin** via a Vercel rewrite to the Render API, which is what makes the auth cookies (`HttpOnly`, `SameSite=Strict`, `Secure`) work in production.
 - **`render.yaml`:** Render blueprint — builds `@lifeos/api`, starts `node dist/server.js`, runs **migrations before every deploy** (`preDeployCommand: pnpm --filter @lifeos/api migrate:deploy`), health check at `/v1/health/ready`, `autoDeploy: true`, and the env vars (secrets like `DATABASE_URL`/`JWT_SECRET`/`ALLOWED_ORIGINS` are set in the dashboard, `sync: false`).
 - **`vercel.json`** (in `apps/web`, the Vercel project root): web build (`pnpm build`, output `dist`), rewrite `/v1/:path*` → Render API (`https://lifeos-i59v.onrender.com/v1/:path*`), and an SPA catch-all rewrite to `index.html`.
-- **CI/CD:** `.github/workflows/ci.yml` runs install → Prisma generate → migrations → `lint` → `test` (API 238 + Web 19 + E2E main flow) → `build` on PR and `main`. Merge to `main` triggers Render + Vercel auto-deploys (their platform deploys). Branch protection on `main` is the merge gate.
+- **CI/CD:** `.github/workflows/ci.yml` runs install → Prisma generate → migrations → `lint` → `test` (API 238 + Web 20 + E2E main flow) → `build` on PR and `main`. Merge to `main` triggers Render + Vercel auto-deploys (their platform deploys). Branch protection on `main` is the merge gate.
 - **Monitoring / error tracking:** Render health check on `/v1/health/ready` (+ optional external uptime service). Web error tracking is **opt-in Sentry** (`@sentry/react`, guarded by `VITE_SENTRY_DSN`). Server-side Sentry is **deferred**: `@sentry/node` pulls a vulnerable `@opentelemetry/core@1.x` with no 1.x patch, so the API keeps its clean `pnpm audit` and relies on the structured pino logs from Phase 12.
 - **Custom domain + HTTPS:** provided automatically by Render/Vercel; custom domains are configured in the dashboards (`ALLOWED_ORIGINS` on Render must include the web origin).
 

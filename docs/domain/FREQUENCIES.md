@@ -334,7 +334,7 @@ No data loss: every existing habit maps deterministically to `DAILY` or
 - `GET /habits/:id/history` returns the day map + aggregates + comparison, scoped to
   the authenticated user.
 - `GET /stats/habits/:id` respects frequency for rate/streaks.
-- Existing suite must remain green (the 123 API tests).
+- Existing suite must remain green (the rest of the API suite).
 
 ---
 
