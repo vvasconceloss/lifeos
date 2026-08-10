@@ -48,6 +48,16 @@ async function getWeekStart(userId: string): Promise<number> {
   return user?.weekStart ?? 1;
 }
 
+function utcMidnight(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+/** Effective end of a period for rate computations — never beyond today. */
+function elapsedEnd(from: Date, to: Date, today: Date): Date {
+  if (today < from) return from;
+  return today < to ? today : to;
+}
+
 function computeHabitStats(
   habit: {
     id: string;
@@ -62,6 +72,7 @@ function computeHabitStats(
   from: Date,
   to: Date,
   weekStart = 1,
+  rateTo = to,
 ): HabitStats {
   const freq = frequencyParams(habit);
   const fromKey = toDateKey(from);
@@ -71,7 +82,7 @@ function computeHabitStats(
   return {
     habitId: habit.id,
     habitName: habit.name,
-    completionRate: completionRate(monthKeys.size, expectedCompletions(freq, from, to)),
+    completionRate: completionRate(monthKeys.size, expectedCompletions(freq, from, rateTo)),
     currentStreak: getCurrentStreakForFrequency(freq, completedKeys, reference, weekStart),
     bestStreak: getBestStreakForFrequency(freq, monthKeys, weekStart),
   };
@@ -109,6 +120,7 @@ export async function getHabitStats(
 
   const reference = getMonthReference(year, month);
   const { from, to } = getMonthRange(year, month);
+  const rateTo = elapsedEnd(from, to, utcMidnight(new Date()));
   const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
   const weekStart = await getWeekStart(userId);
 
@@ -125,6 +137,7 @@ export async function getHabitStats(
     from,
     to,
     weekStart,
+    rateTo,
   );
 }
 
@@ -152,13 +165,14 @@ export async function getPillarStats(
 
   const habitIds = pillars.flatMap((p) => p.habits.map((h) => h.id));
   const { from, to } = getMonthRange(year, month);
+  const rateTo = elapsedEnd(from, to, utcMidnight(new Date()));
 
   const completions =
     habitIds.length > 0
       ? await prisma.habitCompletion.findMany({
           where: {
             habitId: { in: habitIds },
-            date: { gte: from, lte: to },
+            date: { gte: from, lte: rateTo },
           },
           select: { habitId: true },
         })
@@ -174,7 +188,7 @@ export async function getPillarStats(
     let total = 0;
     for (const habit of pillar.habits) {
       completed += completedByHabit.get(habit.id) ?? 0;
-      total += expectedCompletions(frequencyParams(habit), from, to);
+      total += expectedCompletions(frequencyParams(habit), from, rateTo);
     }
     return {
       pillarId: pillar.id,
@@ -195,6 +209,7 @@ export async function getOverview(
 ): Promise<StatsOverview> {
   const { from, to } = getMonthRange(year, month);
   const reference = getMonthReference(year, month);
+  const rateTo = elapsedEnd(from, to, utcMidnight(new Date()));
   const lookbackStart = addDays(reference, -STREAK_LOOKBACK_DAYS);
   const fromKey = toDateKey(from);
   const toKey = toDateKey(to);
@@ -241,6 +256,7 @@ export async function getOverview(
       from,
       to,
       weekStart,
+      rateTo,
     ),
   );
 
@@ -254,7 +270,7 @@ export async function getOverview(
     let total = 0;
     for (const h of habits) {
       if (h.pillarId !== pillar.id) continue;
-      total += expectedCompletions(frequencyParams(h), from, to);
+      total += expectedCompletions(frequencyParams(h), from, rateTo);
       completed += countKeysInRange(completedByHabit.get(h.id) ?? new Set(), fromKey, toKey);
     }
     return {
@@ -275,16 +291,12 @@ export async function getOverview(
     dailyCounts.push({ date: dateStr, count: completedByDay.get(dateStr) ?? 0 });
   }
 
-  const habitProgress = habits.map((h) => ({
-    habitId: h.id,
-    habitName: h.name,
-    completed: countKeysInRange(completedByHabit.get(h.id) ?? new Set(), fromKey, toKey),
-    goal: expectedCompletions(frequencyParams(h), from, to),
-  }));
-
   const totalCompletions = dailyCounts.reduce((s, d) => s + d.count, 0);
-  const totalPossible = habitProgress.reduce((s, h) => s + h.goal, 0);
-  const successRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
+  const totalPossible = habits.reduce(
+    (s, h) => s + expectedCompletions(frequencyParams(h), from, rateTo),
+    0,
+  );
+  const successRate = completionRate(totalCompletions, totalPossible);
 
   return { year, month, totalCompletions, successRate, pillarStats, habitStats };
 }
@@ -295,6 +307,7 @@ export async function getMonthlyStats(
   month: number,
 ): Promise<MonthlyStats> {
   const { from, to } = getMonthRange(year, month);
+  const rateTo = elapsedEnd(from, to, utcMidnight(new Date()));
   const daysInMonth = getDaysInMonth(year, month);
 
   const habits = await prisma.habit.findMany({
@@ -342,10 +355,10 @@ export async function getMonthlyStats(
 
   const totalCompletions = completions.length;
   const totalPossible = habits.reduce(
-    (sum, h) => sum + expectedCompletions(frequencyParams(h), from, to),
+    (sum, h) => sum + expectedCompletions(frequencyParams(h), from, rateTo),
     0,
   );
-  const successRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
+  const successRate = completionRate(totalCompletions, totalPossible);
 
   return { dailyCounts, habitProgress, totalCompletions, successRate };
 }
@@ -488,16 +501,17 @@ export async function getAnalytics(userId: string, weeks: number): Promise<Analy
   }
 
   const monthlyRates = months.map(({ start, end, label }) => {
+    const effectiveEnd = elapsedEnd(start, end, today);
     let completed = 0;
     let expected = 0;
     for (const h of habits) {
-      expected += expectedCompletions(freqOf(h), start, end);
-      completed += countInRange(completedByHabit.get(h.id), start, end);
+      expected += expectedCompletions(freqOf(h), start, effectiveEnd);
+      completed += countInRange(completedByHabit.get(h.id), start, effectiveEnd);
     }
     return {
       label,
       from: toDateKey(start),
-      to: toDateKey(end),
+      to: toDateKey(effectiveEnd),
       rate: completionRate(completed, expected),
       completed,
       expected,

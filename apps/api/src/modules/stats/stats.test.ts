@@ -317,6 +317,41 @@ describe('GET /v1/stats/overview', () => {
     await app.close();
   });
 
+  it('computes the current-month rate over the elapsed days only', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+    for (let day = 1; day <= now.getUTCDate(); day++) {
+      const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      await markCompletion(app, cookie, habitId, key);
+    }
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/overview',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const { stats } = response.json();
+    expect(stats.totalCompletions).toBe(now.getUTCDate());
+    expect(stats.successRate).toBe(100);
+    expect(stats.pillarStats[0]).toMatchObject({
+      pillarName: 'Health',
+      completed: now.getUTCDate(),
+      total: now.getUTCDate(),
+      completionRate: 100,
+    });
+    expect(stats.habitStats[0].completionRate).toBe(100);
+
+    await app.close();
+  });
+
   it('rejects unauthenticated requests', async () => {
     const app = await buildApp({ csrf: false });
 

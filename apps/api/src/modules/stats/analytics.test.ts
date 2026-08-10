@@ -81,6 +81,39 @@ describe('GET /v1/stats/analytics', () => {
     await app.close();
   });
 
+  it('reflects elapsed performance in the current-month rate', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const pillarId = await createPillar(app, cookie, 'Health');
+    const habitId = await createHabit(app, cookie, 'Run', pillarId);
+
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+    for (let day = 1; day <= now.getUTCDate(); day++) {
+      const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      await markCompletion(app, cookie, habitId, key);
+    }
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/stats/analytics',
+      headers: { cookie },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const { stats } = response.json();
+    const currentMonth = stats.monthlyRates[stats.monthlyRates.length - 1];
+    expect(currentMonth.completed).toBe(now.getUTCDate());
+    expect(currentMonth.expected).toBe(now.getUTCDate());
+    expect(currentMonth.rate).toBe(100);
+    expect(currentMonth.to).toBe(
+      `${year}-${String(month).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`,
+    );
+
+    await app.close();
+  });
+
   it('honours the weeks query parameter', async () => {
     const app = await buildApp({ csrf: false });
     const cookie = await registerAndGetCookie(app, uniqueEmail());
