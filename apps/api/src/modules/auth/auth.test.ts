@@ -480,4 +480,54 @@ describe('GET /v1/auth/me', () => {
 
     await app.close();
   });
+
+  it('rejects an expired token', async () => {
+    const app = await buildApp({ csrf: false });
+    const email = uniqueEmail();
+
+    await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email, password: 'test1234' },
+    });
+
+    const expired = app.jwt.sign({
+      sub: 'user-1',
+      email,
+      exp: Math.floor(Date.now() / 1000) - 60,
+    } as { sub: string; email: string; exp: number });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/auth/me',
+      headers: { cookie: `token=${expired}` },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({ error: 'Unauthorized' });
+
+    await app.close();
+  });
+
+  it('sets a session cookie and token that expire in 30 days', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: uniqueEmail(), password: 'test1234' },
+    });
+
+    const tokenCookie = response.cookies.find((c) => c.name === 'token');
+    expect(tokenCookie).toBeDefined();
+    expect(tokenCookie!.maxAge).toBe(30 * 24 * 60 * 60);
+
+    const exp = JSON.parse(
+      Buffer.from(tokenCookie!.value.split('.')[1]!, 'base64url').toString('utf8'),
+    ).exp as number;
+    expect(exp).toBeGreaterThan(Math.floor(Date.now() / 1000) + 29 * 24 * 60 * 60);
+    expect(exp).toBeLessThan(Math.floor(Date.now() / 1000) + 31 * 24 * 60 * 60);
+
+    await app.close();
+  });
 });

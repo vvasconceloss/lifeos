@@ -6,18 +6,22 @@ import { createUser, authenticate, getUserById, updateUser, DEMO_EMAIL, AUTH_ERR
 import { completeOnboarding } from './onboarding.service';
 import { seedDemoUser, getDemoUserResponse } from './demo.service';
 
+const SESSION_TTL_DAYS = 30;
+const SESSION_TTL_SECONDS = SESSION_TTL_DAYS * 24 * 60 * 60;
+
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   path: '/',
+  maxAge: SESSION_TTL_SECONDS,
 };
 
 async function setAuthCookie(
   reply: FastifyReply,
   payload: { sub: string; email: string },
 ): Promise<string> {
-  const token = await reply.jwtSign(payload);
+  const token = await reply.jwtSign(payload, { expiresIn: `${SESSION_TTL_DAYS}d` });
   reply.setCookie('token', token, cookieOptions);
   return token;
 }
