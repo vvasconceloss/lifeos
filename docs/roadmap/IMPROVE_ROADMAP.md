@@ -1,0 +1,765 @@
+# LifeOS — Improve ROADMAP (Portfolio Hardening)
+
+> This is not a new functional version of the product — it's a cycle of **hardening, quality, and engineering maturity**, without adding new product features.
+> Each phase includes: **objective**, **description/specs**, and **completion tasks** (checklist).
+
+---
+
+## Table of Contents
+
+- [Phase 1 — Security Audit and Isolation](#phase-1--security-audit-and-isolation)
+- [Phase 2 — Error Contract and Domain Testing](#phase-2--error-contract-and-domain-testing)
+- [Phase 3 — Test Coverage and Critical E2E](#phase-3--test-coverage-and-critical-e2e)
+- [Phase 4 — Architecture Documentation (ADRs, Diagram, ERD)](#phase-4--architecture-documentation-adrs-diagram-erd)
+- [Phase 5 — API Contract and Database Review](#phase-5--api-contract-and-database-review)
+- [Phase 6 — Code Quality and Boundaries](#phase-6--code-quality-and-boundaries)
+- [Phase 7 — CI/CD Hardening and Production](#phase-7--cicd-hardening-and-production)
+- [Phase 8 — Frontend Quality](#phase-8--frontend-quality)
+- [Phase 9 — Product Polish](#phase-9--product-polish)
+- [Phase 10 — GitHub Professionalization and Closure](#phase-10--github-professionalization-and-closure)
+
+---
+
+## Phase 1 — Security Audit and Isolation
+
+### Objective
+Systematically confirm, with tests, that LifeOS is protected against the most common vulnerabilities and that data isolation between users (multi-tenant) is guaranteed across all entities — not just assumed because of the documentation.
+
+### Specs — Areas to audit
+```text
+Authentication
+Authorization
+IDOR
+CSRF
+XSS
+SQL injection
+CORS
+Rate limiting
+Password policy
+Cookie configuration
+Secrets
+Error leakage
+Input validation
+Mass assignment
+User isolation
+Dependency vulnerabilities
+```
+
+### Specs — Critical isolation rule
+```text
+User A → /habits/{habitOfUserB}
+```
+This kind of access must be systematically impossible, not just "accidentally correct" because queries happen to be scoped by `userId`.
+
+### Specs — Authorization testing pattern
+It's not enough to test the happy path:
+```text
+user creates habit → 201
+```
+Cross-user access must be explicitly tested:
+```text
+User A creates habit
+User B attempts GET habit A     → 404
+User B attempts PATCH habit A   → 404
+User B attempts DELETE habit A  → 404
+```
+Applied to: Habits, Completions, Goals, Projects, Daily Logs, Pillars.
+
+### Tasks
+- [ ] Review authentication (login flow, session expiration, JWT)
+- [ ] Review authorization on all protected routes
+- [ ] Systematically test IDOR scenarios across all entities
+- [ ] Confirm CSRF protection on all mutable endpoints
+- [ ] Review XSS protection (input sanitization, output escaping)
+- [ ] Confirm all queries use Prisma safely (no SQL injection via poorly built raw queries)
+- [ ] Review production CORS configuration
+- [ ] Confirm rate limiting on sensitive endpoints (login, register)
+- [ ] Review and document the password policy (minimum requirements)
+- [ ] Review cookie configuration (Secure, HttpOnly, SameSite)
+- [ ] Audit secrets management (no secrets in versioned code)
+- [ ] Confirm error responses don't leak internal details (stack traces, queries, etc.)
+- [ ] Review input validation on all endpoints (protection against mass assignment)
+- [ ] Write isolation tests (cross-user access) for Habits
+- [ ] Write isolation tests for Completions
+- [ ] Write isolation tests for Goals
+- [ ] Write isolation tests for Projects
+- [ ] Write isolation tests for Daily Logs
+- [ ] Write isolation tests for Pillars
+- [ ] Run a dependency audit (`npm audit` or equivalent) and resolve known vulnerabilities
+
+### Completion criteria
+A complete, documented security checklist exists, and all cross-user isolation tests pass for every entity in the system.
+
+---
+
+## Phase 2 — Error Contract and Domain Testing
+
+### Objective
+Standardize the error response format across the entire API and create robust tests for the most complex business rules of the domain (frequencies, streaks, completion rates, goals, projects).
+
+### Specs — Standardized error contract
+
+```json
+{
+  "error": {
+    "code": "HABIT_NOT_FOUND",
+    "message": "Habit not found"
+  }
+}
+```
+
+Status code mapping:
+```text
+400 → validation error
+401 → unauthenticated
+403 → forbidden
+404 → resource not found
+409 → conflict
+429 → rate limited
+500 → internal error
+```
+
+### Specs — Domain tests (table-driven)
+Non-trivial rules to cover: daily frequency, specific days, X times per week, X times per month, streaks, completion rates, derived goals, project progress, gamification.
+
+Conceptual example:
+```text
+frequency       expected       completed       rate
+daily           10             8               80%
+weekly x3       6              5               83.3%
+monthly x10     10             10              100%
+```
+
+### Tasks
+- [ ] Formally define the JSON schema for the error contract (`code` + `message`, and optional fields like `details`)
+- [ ] Map all existing error scenarios to the new contract
+- [ ] Refactor the `error-handler` plugin to ensure consistency across all endpoints
+- [ ] Write tests for each status code category (400/401/403/404/409/429/500)
+- [ ] Document the error contract (for internal use and future API docs)
+- [ ] Create table-driven tests for completion rate calculation (daily frequency)
+- [ ] Create table-driven tests for completion rate calculation (specific days of the week)
+- [ ] Create table-driven tests for completion rate calculation (X times per week)
+- [ ] Create table-driven tests for completion rate calculation (X times per month)
+- [ ] Create tests for current streak and best streak across different scenarios
+- [ ] Create tests for Goal progress calculation derived from habits
+- [ ] Create tests for Project progress calculation derived from tasks
+- [ ] Create tests for gamification/XP rules (if applicable)
+
+### Completion criteria
+All endpoints respond with the same standardized error format, and the most complex domain rules have table-driven tests covering multiple scenarios (not just the happy path).
+
+---
+
+## Phase 3 — Test Coverage and Critical E2E
+
+### Objective
+Measure and guarantee significant coverage of critical code, and expand E2E tests to cover complete flows and infrastructure failure scenarios — not just the happy path.
+
+### Specs — Coverage thresholds
+```text
+Statements: 85%
+Branches:   80%
+Functions:  85%
+Lines:      85%
+```
+Do not chase 100% — full coverage often encourages low-value tests. The focus is meaningful coverage of business rules.
+
+### Specs — Main E2E flow (expanded)
+```text
+Register
+ ↓
+Onboarding
+ ↓
+Create habit
+ ↓
+Complete habit
+ ↓
+Dashboard
+ ↓
+Statistics
+ ↓
+Goal progress
+```
+
+### Specs — Isolation E2E flow
+```text
+Register A
+Register B
+ ↓
+Create private data
+ ↓
+Attempt cross-user access
+ ↓
+Must fail
+```
+
+### Specs — Infrastructure failure scenarios to test
+```text
+database unavailable
+malformed DATABASE_URL
+expired JWT
+invalid JWT
+missing cookie
+malformed JSON
+duplicate email
+invalid frequency
+invalid dates
+nonexistent resource
+rate limit exceeded
+```
+
+### Tasks
+- [ ] Set up a coverage tool (e.g., Vitest/Jest coverage) on the backend
+- [ ] Set up a coverage tool on the frontend
+- [ ] Define coverage thresholds (statements/branches/functions/lines)
+- [ ] Integrate threshold checking into CI (fail the build if below threshold)
+- [ ] Identify and cover test gaps in critical code (services, domain rules)
+- [ ] Expand the main E2E flow: register → onboarding → create habit → complete habit → dashboard → statistics → goal progress
+- [ ] Implement the cross-user isolation E2E flow (register A/B → cross-user access must fail)
+- [ ] Write a failure test for database unavailable
+- [ ] Write a failure test for expired JWT
+- [ ] Write a failure test for invalid JWT
+- [ ] Write a failure test for missing cookie
+- [ ] Write a failure test for malformed JSON
+- [ ] Write a failure test for duplicate email
+- [ ] Write a failure test for invalid frequency
+- [ ] Write a failure test for invalid dates
+- [ ] Write a failure test for nonexistent resource
+- [ ] Write a failure test for rate limit exceeded
+
+### Completion criteria
+The coverage report confirms the defined thresholds are met, the critical E2E flows (including cross-user isolation) pass consistently, and there is test coverage for infrastructure failure scenarios, not just the happy path.
+
+---
+
+## Phase 4 — Architecture Documentation (ADRs, Diagram, ERD)
+
+### Objective
+Formally document the architectural decisions already made, turning "I used X" into "I made a well-reasoned technical decision," and create visual architecture and data-model diagrams.
+
+### Specs — ADRs to create
+
+```text
+docs/architecture/
+├── 001-monorepo.md
+├── 002-api-architecture.md
+├── 003-authentication.md
+├── 004-shared-validation.md
+├── 005-database.md
+└── 006-deployment.md
+```
+
+Each ADR must answer:
+```text
+Context
+Problem
+Decision
+Alternatives considered
+Trade-offs
+Consequences
+```
+
+Example:
+> We decided to use HTTP-only cookies instead of storing the JWT in localStorage because...
+
+### Specs — Architecture diagram
+
+```text
+                    ┌──────────────┐
+                    │   Browser    │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ React / Vite │
+                    └──────┬───────┘
+                           │ HTTPS
+                           ▼
+                    ┌──────────────┐
+                    │   Fastify    │
+                    │     API      │
+                    └──────┬───────┘
+                           │
+                    ┌──────▼───────┐
+                    │    Prisma    │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ PostgreSQL   │
+                    └──────────────┘
+```
+Also include: authentication, shared Zod, CI, and the hosting services used (e.g., Vercel, Render, Neon).
+
+### Specs — ERD (data model)
+
+```text
+User
+ ├── Pillars
+ │    ├── Habits
+ │    │    └── Completions
+ │    ├── Goals
+ │    └── Projects
+ │         └── Tasks
+ └── DailyLogs
+```
+
+### Tasks
+- [ ] Write ADR 001 — Monorepo (context, decision, alternatives, trade-offs)
+- [ ] Write ADR 002 — API Architecture
+- [ ] Write ADR 003 — Authentication (JWT + httpOnly cookie)
+- [ ] Write ADR 004 — Shared Validation (Zod shared between frontend/backend)
+- [ ] Write ADR 005 — Database (PostgreSQL + Prisma)
+- [ ] Write ADR 006 — Deployment (chosen production architecture)
+- [ ] Create the full architecture diagram (with auth, validation, CI, and hosting)
+- [ ] Embed the architecture diagram in `README.md`
+- [ ] Create the full data model ERD (User → Pillars → Habits/Goals/Projects → Completions/Tasks, DailyLogs)
+- [ ] Embed the ERD in the documentation (README or `docs/architecture/`)
+- [ ] Review whether the ADRs faithfully reflect the decisions actually made in the code
+
+### Completion criteria
+There are at least 6 complete ADRs documenting the core architectural decisions, a visual architecture diagram, and a data-model ERD, both accessible from `README.md`.
+
+---
+
+## Phase 5 — API Contract and Database Review
+
+### Objective
+Formally document the API contract (OpenAPI) and perform a systematic review of the database (indexes, constraints, cascade behavior, pagination), ensuring performance decisions are justified rather than accidental.
+
+### Specs — OpenAPI specification
+
+```text
+GET    /v1/habits
+POST   /v1/habits
+PATCH  /v1/habits/:id
+DELETE /v1/habits/:id
+
+POST   /v1/auth/login
+POST   /v1/auth/register
+...
+```
+
+Must include: schemas, request bodies, responses, status codes, authentication, error responses. Ideally accessible in the development environment.
+
+### Specs — Database review
+Systematically verify:
+```text
+indexes
+unique constraints
+foreign keys
+cascade behavior
+nullable fields
+transaction boundaries
+query efficiency
+N+1
+pagination
+ordering
+migration safety
+```
+
+Special attention to frequent queries:
+```text
+WHERE userId = ?
+WHERE habitId = ? AND date = ?
+```
+These must have adequate indexes.
+
+### Specs — Pagination
+For endpoints with potentially large lists:
+```text
+GET /habits
+GET /projects
+GET /daily-logs
+```
+Consider `?page=1&limit=20` or cursor pagination when appropriate. Do not add pagination artificially to small tables — justify the decision in writing.
+
+### Tasks
+- [ ] Choose the tool/format to generate the OpenAPI specification (e.g., auto-generated via Zod/Fastify or written manually)
+- [ ] Document all `auth` endpoints in the OpenAPI specification
+- [ ] Document all `pillars` endpoints in the specification
+- [ ] Document all `habits` and `completions` endpoints in the specification
+- [ ] Document all `goals` endpoints in the specification
+- [ ] Document all `projects` and `tasks` endpoints in the specification
+- [ ] Document all `daily-logs` endpoints in the specification
+- [ ] Document the error contract (Phase 2) in the OpenAPI specification
+- [ ] Expose the OpenAPI documentation in the development environment (e.g., Swagger UI)
+- [ ] Review existing indexes against the application's most frequent queries
+- [ ] Add missing indexes for queries by `userId` and critical combinations (e.g., `habitId` + `date`)
+- [ ] Review existing unique constraints and confirm they cover all required business rules
+- [ ] Review cascade behavior on all foreign keys
+- [ ] Review nullable fields and justify each one
+- [ ] Review transaction boundaries in multi-table operations
+- [ ] Identify and fix existing N+1 queries
+- [ ] Decide and justify, endpoint by endpoint, whether pagination is needed
+- [ ] Implement pagination on endpoints where the need is justified
+- [ ] Review the safety of existing migrations (reversibility, production impact)
+
+### Completion criteria
+A complete, accessible OpenAPI specification exists covering all endpoints, and a documented database review exists, with indexes added where necessary and pagination decisions explicitly justified.
+
+---
+
+## Phase 6 — Code Quality and Boundaries
+
+### Objective
+Ensure TypeScript is genuinely type-safe, that the modular architecture is consistent throughout the project, and that clear boundaries exist between HTTP, validation, domain logic, and persistence.
+
+### Specs — TypeScript review
+Look for and eliminate/justify:
+```text
+any
+unnecessary casts
+as
+non-null assertions (!)
+duplicated types
+duplicated business logic
+overly broad types
+unsafe external input
+inconsistent return types
+```
+Goal: genuinely type-safe TypeScript, not JavaScript with TypeScript on top.
+
+### Specs — Module convention
+```text
+module/
+├── routes
+├── service
+├── schemas
+├── tests
+└── types
+```
+Confirm all modules follow this convention, with no unjustified exceptions.
+
+### Specs — Accidental complexity
+Look for:
+```text
+functions > ~50 lines
+giant React components
+services doing too many things
+hooks mixing responsibilities
+duplicated queries
+UI logic containing domain rules
+```
+Not a rigid mathematical rule — a design review.
+
+### Specs — Explicit boundaries
+```text
+HTTP
+ ↓
+Validation
+ ↓
+Application/service
+ ↓
+Domain logic
+ ↓
+Persistence
+```
+Rule: a question like "how is completion rate calculated?" should not depend on Fastify, HTTP, or React.
+
+### Tasks
+- [ ] Do a full sweep for uses of `any` and replace/justify each occurrence
+- [ ] Sweep for unnecessary casts (`as`) and remove them where possible
+- [ ] Sweep for non-null assertions (`!`) and replace with safe checks
+- [ ] Identify and eliminate duplicated types (consolidate into `packages/shared`)
+- [ ] Identify and eliminate duplicated business logic between modules
+- [ ] Review overly broad types (e.g., `object`, `Record<string, any>`) and narrow them
+- [ ] Review validation of unsafe external inputs (ensure Zod at all boundaries)
+- [ ] Standardize inconsistent return types between similar services
+- [ ] Audit all modules and confirm they follow the `routes/service/schemas/tests/types` convention
+- [ ] Fix or justify exceptions to the module convention
+- [ ] Identify functions over ~50 lines and evaluate the need for refactoring
+- [ ] Identify excessively large React components and evaluate the need for splitting
+- [ ] Identify services that accumulate too many responsibilities and evaluate separation
+- [ ] Identify hooks mixing responsibilities and evaluate separation
+- [ ] Extract domain logic "hidden" in UI components into the service layer
+- [ ] Document the HTTP → Validation → Service → Domain → Persistence boundaries (even informally, in `docs/architecture/007-layering.md`)
+
+### Completion criteria
+A full sweep of `any`/`as`/`!` has been done with explicit justification for the remaining cases, all modules follow the defined structural convention, and domain logic can be explained and tested without depending on HTTP, Fastify, or React.
+
+---
+
+## Phase 7 — CI/CD Hardening and Production
+
+### Objective
+Elevate the existing CI/CD pipeline (install → Prisma generate → migrations → lint → test → build) into a more robust pipeline, with deployment verification and evidence of operational responsibility.
+
+### Specs — Target pipeline
+
+```text
+PR
+ │
+ ├── lint
+ ├── typecheck
+ ├── unit tests
+ ├── integration tests
+ ├── E2E
+ ├── build
+ └── dependency audit
+       │
+       ▼
+    merge
+       │
+       ▼
+   deployment
+       │
+       ├── migration
+       ├── health check
+       └── smoke test
+```
+
+Highlights: coverage threshold, E2E in CI, build artifacts, deployment verification, documented rollback.
+
+### Specs — Backup/restore
+Practically demonstrate:
+```text
+backup
+ ↓
+destroy database
+ ↓
+restore
+ ↓
+verify integrity
+```
+
+### Specs — Disaster recovery (lightweight document)
+```text
+RTO: X
+RPO: Y
+
+Database failure:
+1. ...
+2. ...
+3. ...
+
+Application failure:
+1. ...
+2. ...
+```
+Doesn't need to be enterprise-grade, but should demonstrate production-minded thinking.
+
+### Tasks
+- [ ] Add a dedicated `typecheck` step to CI (separate from lint)
+- [ ] Add a dedicated `unit tests` step to CI
+- [ ] Add a dedicated `integration tests` step to CI
+- [ ] Integrate the E2E tests (Phase 3) into the CI pipeline
+- [ ] Add a `dependency audit` step (e.g., `npm audit`) to CI
+- [ ] Integrate the coverage threshold check (Phase 3) into CI
+- [ ] Configure build artifact generation in the pipeline
+- [ ] Configure automatic migration execution on deployment
+- [ ] Configure an automatic post-deploy health check
+- [ ] Configure an automatic post-deploy smoke test
+- [ ] Document the rollback process in case of deployment failure
+- [ ] Run a practical test of backup → destroy → restore → integrity verification of the database
+- [ ] Document the steps and result of the backup/restore test
+- [ ] Write a lightweight disaster recovery document (RTO/RPO, database failure, application failure)
+
+### Completion criteria
+The CI/CD pipeline covers lint, typecheck, unit tests, integration tests, E2E, build, and dependency audit before merge, deployment includes automatic verification (health check + smoke test), and there is documented evidence of a real backup/restore test, plus a lightweight disaster recovery document.
+
+---
+
+## Phase 8 — Frontend Quality
+
+### Objective
+Ensure accessibility, real responsiveness, consistent UI states, and measurable basic performance across the entire frontend.
+
+### Specs — Accessibility
+Verify:
+```text
+keyboard navigation
+focus states
+semantic HTML
+labels
+ARIA
+contrast
+dialogs
+screen reader
+form errors
+```
+
+### Specs — Required UI states
+Every important operation must cover:
+```text
+Loading
+Empty
+Success
+Error
+Retry
+Disabled
+Optimistic/pending
+```
+Especially: login, register, habit creation, completion, goal creation, project/task manipulation.
+
+### Specs — Real responsiveness
+Test at concrete breakpoints:
+```text
+320px
+375px
+768px
+1024px
+1440px
+```
+Fix overflow, inadequate touch targets, or broken layouts.
+
+### Specs — Basic performance
+Use Lighthouse/PageSpeed and analyze:
+```text
+initial bundle
+lazy loading
+image optimization
+unnecessary renders
+API waterfall
+database queries
+frontend caching
+```
+No premature optimization — the goal is to find measurable problems.
+
+### Tasks
+- [ ] Audit keyboard navigation across all main flows
+- [ ] Audit visible focus states on all interactive elements
+- [ ] Review the use of semantic HTML across all main pages
+- [ ] Review labels on all forms
+- [ ] Audit ARIA usage where needed (dialogs, alerts, live regions)
+- [ ] Verify color contrast (text/background) across the design system
+- [ ] Audit dialog/modal behavior (focus trap, escape to close)
+- [ ] Test main flows with a basic screen reader
+- [ ] Review form error messages for clarity and correct field association
+- [ ] Audit and standardize the loading state in login/register/habit creation/completion/goal creation/project-task manipulation
+- [ ] Audit and standardize the empty state in the same areas
+- [ ] Audit and standardize the error state with a retry option in the same areas
+- [ ] Audit and standardize disabled states during async operations
+- [ ] Audit optimistic/pending updates where they make sense (e.g., marking a habit)
+- [ ] Test the application at 320px and fix issues found
+- [ ] Test the application at 375px and fix issues found
+- [ ] Test the application at 768px and fix issues found
+- [ ] Test the application at 1024px and fix issues found
+- [ ] Test the application at 1440px and fix issues found
+- [ ] Run Lighthouse/PageSpeed on the main pages and document the results
+- [ ] Analyze and optimize the initial bundle if necessary
+- [ ] Implement lazy loading where it makes sense
+- [ ] Optimize images (format, size, lazy loading)
+- [ ] Identify and fix unnecessary re-renders in critical components
+- [ ] Identify and fix API waterfalls (sequential requests that could be parallel)
+
+### Completion criteria
+A documented accessibility audit exists with fixed issues, all required UI states are implemented in critical operations, the application has been validated and fixed across at least 5 breakpoints, and a performance report (Lighthouse/PageSpeed) exists with measurable optimizations applied.
+
+---
+
+## Phase 9 — Product Polish
+
+### Objective
+Add a final layer of product maturity: conceptually measure onboarding, and (optionally) add lightweight feedback and operational transparency mechanisms — without falling into overengineering.
+
+### Specs — Onboarding funnel (conceptual)
+```text
+Landing
+ ↓
+Demo
+ ↓
+Register
+ ↓
+Onboarding completed
+ ↓
+First habit
+ ↓
+First completion
+ ↓
+7-day retention
+```
+Even without external analytics, these events can be defined conceptually (and optionally instrumented). This turns the project from "I built an app" into "I built and evaluated a product."
+
+### Specs — Feedback mechanism (optional, lightweight)
+```text
+Report a bug
+Suggest a feature
+```
+No need to build a full system — it can simply be GitHub Issues with templates (directly tied to Phase 10).
+
+### Specs — Status page (optional)
+```text
+LifeOS Status
+
+Web              Operational
+API              Operational
+Database         Operational
+Last deployment  ...
+```
+For a personal project, this can be overengineering — only implement it if the goal is to demonstrate operational thinking.
+
+### Tasks
+- [ ] Define and document the onboarding funnel conceptually (landing → demo → register → onboarding → first habit → first completion → 7-day retention)
+- [ ] Evaluate whether it's worth instrumenting any of these events (e.g., simple logging, no external tool)
+- [ ] Document the funnel in the README or in `docs/product/`
+- [ ] Decide whether to implement a feedback mechanism (bug/feature request)
+- [ ] If yes: create a "Report a bug" / "Suggest a feature" link/button pointing to GitHub Issues
+- [ ] Decide whether a public status page is worth implementing (evaluate if it's overengineering for this context)
+- [ ] If yes: implement a simple status page (Web/API/Database/Last deployment)
+
+### Completion criteria
+The onboarding funnel is documented conceptually and serves as evidence of product thinking, and decisions about the feedback mechanism and status page were made consciously (implemented or explicitly discarded with justification, to avoid overengineering).
+
+---
+
+## Phase 10 — GitHub Professionalization and Closure
+
+### Objective
+Give the repository the appearance and behavior of a professional project (even as a solo developer), consolidate releases, and formally close this LifeOS hardening cycle as the main portfolio project.
+
+### Specs — Issue templates and PR template
+
+```text
+.github/
+├── ISSUE_TEMPLATE/
+│   ├── bug.yml
+│   └── feature.yml
+└── pull_request_template.md
+```
+
+### Specs — Releases
+Versioning already exists (`v1.5.0`). Formalize it as real releases:
+```text
+v1.0.0 — MVP
+v1.1.0
+v1.2.0
+v1.5.0 — Public Beta
+```
+Each release with: features, breaking changes, migrations, known issues.
+
+### Specs — Commit history (from now on)
+Do not rewrite the existing history. From this point forward, use the convention:
+```text
+feat:
+fix:
+refactor:
+test:
+docs:
+ci:
+chore:
+```
+with atomically related commits.
+
+### Specs — Branch protection
+Configure `main` to require `CI passing` before merge, even as a solo developer.
+
+### Specs — GitHub Discussions (optional)
+For feature discussions, architecture decisions, and feedback. Not mandatory, but improves the appearance of a public project.
+
+### Tasks
+- [ ] Create `.github/ISSUE_TEMPLATE/bug.yml`
+- [ ] Create `.github/ISSUE_TEMPLATE/feature.yml`
+- [ ] Create `.github/pull_request_template.md`
+- [ ] Review the existing release history and formalize it as GitHub Releases (v1.0.0 through v1.5.0)
+- [ ] Write release notes for each formalized version (features, breaking changes, migrations, known issues)
+- [ ] Create the release for this hardening cycle (e.g., `v1.5.1`) with a changelog focused on quality/security/architecture
+- [ ] Adopt the commit convention (`feat/fix/refactor/test/docs/ci/chore`) from now on
+- [ ] Configure branch protection on `main` requiring CI passing before merge
+- [ ] Evaluate and, if it makes sense, enable GitHub Discussions
+- [ ] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots)
+- [ ] Review whether the repository, as a whole, communicates professionalism to a technical recruiter opening it for the first time
+- [ ] Validate the closure criteria (see "Stop Criteria" section below)
+
+### Completion criteria
+The repository has issue/PR templates, formalized releases with changelogs, active branch protection on `main`, a commit convention in use, and a `README.md` that serves as a complete entry point (architecture, ERD, ADRs, API docs, screenshots) for anyone evaluating the project for the first time.
