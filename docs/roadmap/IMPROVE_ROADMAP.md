@@ -66,29 +66,30 @@ User B attempts DELETE habit A  → 404
 Applied to: Habits, Completions, Goals, Projects, Daily Logs, Pillars.
 
 ### Tasks
-- [ ] Review authentication (login flow, session expiration, JWT)
-- [ ] Review authorization on all protected routes
-- [ ] Systematically test IDOR scenarios across all entities
-- [ ] Confirm CSRF protection on all mutable endpoints
-- [ ] Review XSS protection (input sanitization, output escaping)
-- [ ] Confirm all queries use Prisma safely (no SQL injection via poorly built raw queries)
-- [ ] Review production CORS configuration
-- [ ] Confirm rate limiting on sensitive endpoints (login, register)
-- [ ] Review and document the password policy (minimum requirements)
-- [ ] Review cookie configuration (Secure, HttpOnly, SameSite)
-- [ ] Audit secrets management (no secrets in versioned code)
-- [ ] Confirm error responses don't leak internal details (stack traces, queries, etc.)
-- [ ] Review input validation on all endpoints (protection against mass assignment)
-- [ ] Write isolation tests (cross-user access) for Habits
-- [ ] Write isolation tests for Completions
-- [ ] Write isolation tests for Goals
-- [ ] Write isolation tests for Projects
-- [ ] Write isolation tests for Daily Logs
-- [ ] Write isolation tests for Pillars
-- [ ] Run a dependency audit (`npm audit` or equivalent) and resolve known vulnerabilities
+- [x] Review authentication (login flow, session expiration, JWT) — added 30-day JWT/cookie expiry; expired tokens → 401 (tested)
+- [x] Review authorization on all protected routes — `requireAuth` + `userId`-scoped queries everywhere
+- [x] Systematically test IDOR scenarios across all entities — per-entity cross-user tests → 404 (see `docs/security.md`)
+- [x] Confirm CSRF protection on all mutable endpoints — `@fastify/csrf-protection` globally on state-changing routes
+- [x] Review XSS protection (input sanitization, output escaping) — React escapes all user input; no `dangerouslySetInnerHTML`
+- [x] Confirm all queries use Prisma safely (no SQL injection via poorly built raw queries) — parameterized only; no user-input raw SQL
+- [x] Review production CORS configuration — explicit `ALLOWED_ORIGINS` allow-list, wildcard rejected
+- [x] Confirm rate limiting on sensitive endpoints (login, register) — 5/min and 10/min
+- [x] Review and document the password policy (minimum requirements) — min 8 chars + letter + number (shared Zod)
+- [x] Review cookie configuration (Secure, HttpOnly, SameSite) — `HttpOnly`, `SameSite=Strict`, `Secure` in prod, 30-day `Max-Age`
+- [x] Audit secrets management (no secrets in versioned code) — `.env` ignored; only the intentional public demo credential is committed
+- [x] Confirm error responses don't leak internal details (stack traces, queries, etc.) — generic 5xx, no stack traces
+- [x] Review input validation on all endpoints (protection against mass assignment) — Zod at every boundary, unknown keys stripped
+- [x] Write isolation tests (cross-user access) for Habits — `habit.test.ts`
+- [x] Write isolation tests for Completions — `completion.test.ts`
+- [x] Write isolation tests for Goals — `goal.test.ts`
+- [x] Write isolation tests for Projects — `project.test.ts`
+- [x] Write isolation tests for Daily Logs — `daily-log.test.ts`
+- [x] Write isolation tests for Pillars — `pillar.test.ts`
+- [x] Run a dependency audit (`npm audit` or equivalent) and resolve known vulnerabilities — `pnpm audit --prod` clean
 
 ### Completion criteria
 A complete, documented security checklist exists, and all cross-user isolation tests pass for every entity in the system.
+The full audit result and checklist are documented in [`docs/SECURITY.md`](../SECURITY.md).
 
 ---
 

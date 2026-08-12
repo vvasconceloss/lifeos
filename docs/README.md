@@ -34,6 +34,13 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | [`ops/OPS.md`](ops/OPS.md) | Production hardening: logging, health checks, graceful shutdown, rate limits, security controls, backups, connection pooling. |
 | [`ops/DEPLOYMENT.md`](ops/DEPLOYMENT.md) | How LifeOS is deployed: Vercel (web) → Render (API) → Neon (Postgres), env vars, CI/CD, rollback. |
 
+## Security
+
+| Document | What it is |
+|---|---|
+| [`SECURITY.md`](SECURITY.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
+| [`roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md) | The "Improve" hardening roadmap (security, error contract, coverage, architecture, API/db review, CI/CD, frontend, polish). |
+
 ## Repository conventions
 
 - **Monorepo** with pnpm workspaces: `apps/api` (Fastify), `apps/web` (React + Vite), `packages/shared` (Zod schemas + types shared by both).
