@@ -308,17 +308,17 @@ User
 ```
 
 ### Tasks
-- [ ] Write ADR 001 — Monorepo (context, decision, alternatives, trade-offs)
-- [ ] Write ADR 002 — API Architecture
-- [ ] Write ADR 003 — Authentication (JWT + httpOnly cookie)
-- [ ] Write ADR 004 — Shared Validation (Zod shared between frontend/backend)
-- [ ] Write ADR 005 — Database (PostgreSQL + Prisma)
-- [ ] Write ADR 006 — Deployment (chosen production architecture)
-- [ ] Create the full architecture diagram (with auth, validation, CI, and hosting)
-- [ ] Embed the architecture diagram in `README.md`
-- [ ] Create the full data model ERD (User → Pillars → Habits/Goals/Projects → Completions/Tasks, DailyLogs)
-- [ ] Embed the ERD in the documentation (README or `docs/architecture/`)
-- [ ] Review whether the ADRs faithfully reflect the decisions actually made in the code
+- [x] Write ADR 001 — Monorepo (context, decision, alternatives, trade-offs) — `docs/architecture/001-monorepo.md`
+- [x] Write ADR 002 — API Architecture — `002-api-architecture.md`
+- [x] Write ADR 003 — Authentication (JWT + httpOnly cookie) — `003-authentication.md`
+- [x] Write ADR 004 — Shared Validation (Zod shared between frontend/backend) — `004-shared-validation.md`
+- [x] Write ADR 005 — Database (PostgreSQL + Prisma) — `005-database.md`
+- [x] Write ADR 006 — Deployment (chosen production architecture) — `006-deployment.md`
+- [x] Create the full architecture diagram (with auth, validation, CI, and hosting) — `docs/architecture/008-diagrams.md`
+- [x] Embed the architecture diagram in `README.md` — added an Architecture section
+- [x] Create the full data model ERD (User → Pillars → Habits/Goals/Projects → Completions/Tasks, DailyLogs) — `008-diagrams.md`
+- [x] Embed the ERD in the documentation (README or `docs/architecture/`) — README + `008-diagrams.md`
+- [x] Review whether the ADRs faithfully reflect the decisions actually made in the code — each ADR maps to its code location (plugins, `lib/`, routes, deploy config)
 
 ### Completion criteria
 There are at least 6 complete ADRs documenting the core architectural decisions, a visual architecture diagram, and a data-model ERD, both accessible from `README.md`.

@@ -71,6 +71,41 @@ public demo account (`demo@lifeos.com`) pre-loaded with realistic data.
 
 ---
 
+## Architecture
+
+```text
+Browser (React SPA)
+   │ HTTPS — same origin
+   ▼
+Vercel  — static build · rewrites /v1/*  →  Render
+                                        ▼
+                           Fastify API (Node)
+                           auth · csrf · validation · services · /docs (Swagger UI)
+                                        ▼
+                           Prisma (pg pool · migrations)
+                                        ▼
+                           Neon PostgreSQL (managed)
+```
+
+- **Authentication:** JWT in an HTTP-only cookie (`SameSite=Strict`, `Secure`, 30-day expiry).
+- **Validation:** shared Zod schemas (`packages/shared`) at every boundary.
+- **CI:** GitHub Actions — lint → test (coverage) → build → dependency audit.
+
+Data model (summary):
+
+```text
+User ─┬─ Pillars ── Habits ── HabitCompletions
+      ├─ Goals ── GoalHabit (N:N) ── Habits
+      ├─ Projects ── ProjectTasks
+      └─ DailyLogs
+```
+
+Full diagram, ERD and the architectural decision records (ADRs):
+[`docs/architecture/008-diagrams.md`](docs/architecture/008-diagrams.md) ·
+[ADRs](docs/architecture/001-monorepo.md)
+
+---
+
 ## Project Structure
 
 ```

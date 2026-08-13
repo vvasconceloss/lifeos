@@ -59,6 +59,13 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 
 | Document | What it is |
 |---|---|
+| [`architecture/008-diagrams.md`](architecture/008-diagrams.md) | The full architecture diagram and data-model ERD. |
+| [`architecture/001-monorepo.md`](architecture/001-monorepo.md) | ADR: pnpm monorepo. |
+| [`architecture/002-api-architecture.md`](architecture/002-api-architecture.md) | ADR: Fastify feature modules. |
+| [`architecture/003-authentication.md`](architecture/003-authentication.md) | ADR: JWT in an HTTP-only cookie. |
+| [`architecture/004-shared-validation.md`](architecture/004-shared-validation.md) | ADR: shared Zod validation. |
+| [`architecture/005-database.md`](architecture/005-database.md) | ADR: PostgreSQL + Prisma. |
+| [`architecture/006-deployment.md`](architecture/006-deployment.md) | ADR: Vercel + Render + Neon. |
 | [`architecture/007-layering.md`](architecture/007-layering.md) | The HTTP → Validation → Service → Domain → Persistence boundaries, module convention, and the Phase 6 `any`/`as`/`!` sweep results. |
 
 ## Repository conventions
