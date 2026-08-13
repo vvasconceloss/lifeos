@@ -1,7 +1,11 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { server } from './server';
+
+// Routes are code-split (React.lazy) and pages fetch on mount — give async queries
+// enough time, especially when many test files run in parallel.
+configure({ asyncUtilTimeout: 5000 });
 
 class MemoryStorage {
   private store = new Map<string, string>();
