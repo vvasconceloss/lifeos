@@ -548,23 +548,26 @@ Application failure:
 Doesn't need to be enterprise-grade, but should demonstrate production-minded thinking.
 
 ### Tasks
-- [ ] Add a dedicated `typecheck` step to CI (separate from lint)
-- [ ] Add a dedicated `unit tests` step to CI
-- [ ] Add a dedicated `integration tests` step to CI
-- [ ] Integrate the E2E tests (Phase 3) into the CI pipeline
-- [ ] Add a `dependency audit` step (e.g., `npm audit`) to CI
-- [ ] Integrate the coverage threshold check (Phase 3) into CI
-- [ ] Configure build artifact generation in the pipeline
-- [ ] Configure automatic migration execution on deployment
-- [ ] Configure an automatic post-deploy health check
-- [ ] Configure an automatic post-deploy smoke test
-- [ ] Document the rollback process in case of deployment failure
-- [ ] Run a practical test of backup → destroy → restore → integrity verification of the database
-- [ ] Document the steps and result of the backup/restore test
-- [ ] Write a lightweight disaster recovery document (RTO/RPO, database failure, application failure)
+- [x] Add a dedicated `typecheck` step to CI (separate from lint) — `pnpm typecheck` (api `tsc --noEmit` + web `tsc -b`)
+- [x] Add a dedicated `unit tests` step to CI — `pnpm --filter @lifeos/api test:unit` (`src/lib`)
+- [x] Add a dedicated `integration tests` step to CI — `pnpm --filter @lifeos/api test:integration` (modules + plugins + app)
+- [x] Integrate the E2E tests (Phase 3) into the CI pipeline — `pnpm --filter @lifeos/api test:e2e` (e2e + failure scenarios)
+- [x] Add a `dependency audit` step (e.g., `npm audit`) to CI — `pnpm audit --prod`
+- [x] Integrate the coverage threshold check (Phase 3) into CI — `pnpm test:coverage` (full suite, fails below thresholds)
+- [x] Configure build artifact generation in the pipeline — `pnpm build` step (tsup bundle + web `dist`)
+- [x] Configure automatic migration execution on deployment — Render `preDeployCommand` (`prisma migrate deploy`) + `db:migrate` in CI
+- [x] Configure an automatic post-deploy health check — Render `healthCheckPath: /v1/health/ready`
+- [x] Configure an automatic post-deploy smoke test — `.github/workflows/post-deploy.yml` (health + web after push to `main`)
+- [x] Document the rollback process in case of deployment failure — `docs/ops/DEPLOYMENT.md` (Render/Vercel "Rollback to this deploy")
+- [x] Run a practical test of backup → destroy → restore → integrity verification of the database — executed with `pg_dump`/`psql` (PostgreSQL 17): 1u/1p/1h/1c before and after
+- [x] Document the steps and result of the backup/restore test — `docs/ops/DISASTER_RECOVERY.md`
+- [x] Write a lightweight disaster recovery document (RTO/RPO, database failure, application failure) — `docs/ops/DISASTER_RECOVERY.md`
 
 ### Completion criteria
 The CI/CD pipeline covers lint, typecheck, unit tests, integration tests, E2E, build, and dependency audit before merge, deployment includes automatic verification (health check + smoke test), and there is documented evidence of a real backup/restore test, plus a lightweight disaster recovery document.
+
+- Pipeline: `.github/workflows/ci.yml` + `.github/workflows/post-deploy.yml`
+- DR + backup/restore evidence: [`docs/ops/DISASTER_RECOVERY.md`](../ops/DISASTER_RECOVERY.md)
 
 ---
 

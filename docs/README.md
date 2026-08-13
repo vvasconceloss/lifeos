@@ -33,6 +33,7 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 |---|---|
 | [`ops/OPS.md`](ops/OPS.md) | Production hardening: logging, health checks, graceful shutdown, rate limits, security controls, backups, connection pooling. |
 | [`ops/DEPLOYMENT.md`](ops/DEPLOYMENT.md) | How LifeOS is deployed: Vercel (web) → Render (API) → Neon (Postgres), env vars, CI/CD, rollback. |
+| [`ops/DISASTER_RECOVERY.md`](ops/DISASTER_RECOVERY.md) | RTO/RPO, backup→restore evidence, database/application failure runbooks. |
 
 ## Security
 
