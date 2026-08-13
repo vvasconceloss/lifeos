@@ -132,19 +132,19 @@ monthly x10     10             10              100%
 ```
 
 ### Tasks
-- [ ] Formally define the JSON schema for the error contract (`code` + `message`, and optional fields like `details`)
-- [ ] Map all existing error scenarios to the new contract
-- [ ] Refactor the `error-handler` plugin to ensure consistency across all endpoints
-- [ ] Write tests for each status code category (400/401/403/404/409/429/500)
-- [ ] Document the error contract (for internal use and future API docs)
-- [ ] Create table-driven tests for completion rate calculation (daily frequency)
-- [ ] Create table-driven tests for completion rate calculation (specific days of the week)
-- [ ] Create table-driven tests for completion rate calculation (X times per week)
-- [ ] Create table-driven tests for completion rate calculation (X times per month)
-- [ ] Create tests for current streak and best streak across different scenarios
-- [ ] Create tests for Goal progress calculation derived from habits
-- [ ] Create tests for Project progress calculation derived from tasks
-- [ ] Create tests for gamification/XP rules (if applicable)
+- [x] Formally define the JSON schema for the error contract (`code` + `message`, and optional fields like `details`) — `{ error: { code, message, details? } }`, typed as shared `ApiErrorBody`/`ApiErrorResponse`
+- [x] Map all existing error scenarios to the new contract — central message→code map in `apps/api/src/lib/errors.ts` (`toErrorBody`), default `APP_ERROR`
+- [x] Refactor the `error-handler` plugin to ensure consistency across all endpoints — global handler + `validateInput` + `requireAuth` + rate-limit all emit the new shape
+- [x] Write tests for each status code category (400/401/403/404/409/429/500) — `error-handler.test.ts` (404/500/client), auth (401/409/429), validation (400), not-found (404)
+- [x] Document the error contract (for internal use and future API docs) — [`docs/api/ERROR_CONTRACT.md`](../api/ERROR_CONTRACT.md)
+- [x] Create table-driven tests for completion rate calculation (daily frequency) — `domain-rules.test.ts`
+- [x] Create table-driven tests for completion rate calculation (specific days of the week) — `domain-rules.test.ts`
+- [x] Create table-driven tests for completion rate calculation (X times per week) — `domain-rules.test.ts`
+- [x] Create table-driven tests for completion rate calculation (X times per month) — `domain-rules.test.ts`
+- [x] Create tests for current streak and best streak across different scenarios — `domain-rules.test.ts` (table-driven) + `frequency.test.ts`
+- [x] Create tests for Goal progress calculation derived from habits — `goal.test.ts` ("derives progress from associated habit completions")
+- [x] Create tests for Project progress calculation derived from tasks — `project.test.ts` ("computes progress from completed tasks")
+- [x] Create tests for gamification/XP rules (if applicable) — `progression.lib.test.ts` (formula/curve/rank)
 
 ### Completion criteria
 All endpoints respond with the same standardized error format, and the most complex domain rules have table-driven tests covering multiple scenarios (not just the happy path).

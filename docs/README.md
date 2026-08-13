@@ -41,6 +41,12 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | [`SECURITY.md`](SECURITY.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
 | [`roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md) | The "Improve" hardening roadmap (security, error contract, coverage, architecture, API/db review, CI/CD, frontend, polish). |
 
+## API
+
+| Document | What it is |
+|---|---|
+| [`api/ERROR_CONTRACT.md`](api/ERROR_CONTRACT.md) | The standardized error shape `{ error: { code, message } }`, status mapping and the full code list. |
+
 ## Repository conventions
 
 - **Monorepo** with pnpm workspaces: `apps/api` (Fastify), `apps/web` (React + Vite), `packages/shared` (Zod schemas + types shared by both).
