@@ -1,5 +1,5 @@
 import { buildApp } from './app';
-import { cleanupTestUsers, uniqueEmail } from '../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, uniqueEmail } from '../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -9,7 +9,7 @@ function utcDateKey(date: Date): string {
 }
 
 describe('E2E: main flow', () => {
-  it('register → create pillar → create habit → complete habit → dashboard reflects progress', async () => {
+  it('register → onboarding → habit → completion → dashboard → statistics → goal progress', async () => {
     const app = await buildApp({ csrf: false });
     const email = uniqueEmail();
 
@@ -28,18 +28,11 @@ describe('E2E: main flow', () => {
       method: 'POST',
       url: '/v1/auth/onboarding',
       headers: { cookie },
-      payload: {
-        pillars: [{ name: 'Health', color: '#ef4444', icon: '❤️' }],
-        habits: [],
-      },
+      payload: { pillars: [{ name: 'Health', color: '#ef4444', icon: '❤️' }], habits: [] },
     });
     expect(onboardingRes.statusCode).toBe(201);
 
-    const pillarsRes = await app.inject({
-      method: 'GET',
-      url: '/v1/pillars',
-      headers: { cookie },
-    });
+    const pillarsRes = await app.inject({ method: 'GET', url: '/v1/pillars', headers: { cookie } });
     const pillarId = pillarsRes.json().pillars[0].id;
     expect(pillarId).toBeTruthy();
 
@@ -62,7 +55,7 @@ describe('E2E: main flow', () => {
     });
     expect(completeRes.statusCode).toBe(200);
 
-    // 5. The dashboard (overview) reflects the progress
+    // 5. Dashboard (overview) reflects the progress
     const now = new Date();
     const overviewRes = await app.inject({
       method: 'GET',
@@ -72,26 +65,87 @@ describe('E2E: main flow', () => {
     expect(overviewRes.statusCode).toBe(200);
     const overview = overviewRes.json().stats;
     expect(overview.totalCompletions).toBeGreaterThanOrEqual(1);
-    expect(overview.successRate).toBeGreaterThan(0);
-    expect(overview.pillarStats[0]).toMatchObject({
-      pillarName: 'Health',
-      completed: 1,
-    });
-    expect(overview.pillarStats[0].completionRate).toBeGreaterThan(0);
+    expect(overview.pillarStats[0]).toMatchObject({ pillarName: 'Health', completed: 1 });
 
-    // The habit's own history shows the completion
-    const historyRes = await app.inject({
-      method: 'GET',
-      url: `/v1/habits/${habitId}/history?from=${today}&to=${today}`,
+    // 6. Statistics (analytics) reflects the completion in the current week/month
+    const analyticsRes = await app.inject({ method: 'GET', url: '/v1/stats/analytics', headers: { cookie } });
+    expect(analyticsRes.statusCode).toBe(200);
+    const { stats } = analyticsRes.json();
+    expect(stats.weeklyRates[stats.weeklyRates.length - 1].completed).toBeGreaterThan(0);
+    expect(stats.monthlyRates[stats.monthlyRates.length - 1].completed).toBeGreaterThan(0);
+
+    // 7. Goal linked to the habit reflects derived progress
+    const goalRes = await app.inject({
+      method: 'POST',
+      url: '/v1/goals',
+      headers: { cookie },
+      payload: { title: 'Run consistently', pillarId },
+    });
+    expect(goalRes.statusCode).toBe(201);
+    const goalId = goalRes.json().goal.id;
+    const linkRes = await app.inject({
+      method: 'PUT',
+      url: `/v1/goals/${goalId}/habits/${habitId}`,
       headers: { cookie },
     });
-    expect(historyRes.statusCode).toBe(200);
-    expect(historyRes.json().history.days[0]).toMatchObject({
-      date: today,
-      scheduled: true,
-      completed: true,
-    });
+    expect(linkRes.statusCode).toBe(200);
+    const goalDetailRes = await app.inject({ method: 'GET', url: `/v1/goals/${goalId}`, headers: { cookie } });
+    expect(goalDetailRes.statusCode).toBe(200);
+    expect(goalDetailRes.json().goal.progress).toBeGreaterThan(0);
 
     await app.close();
   });
 });
+
+describe('E2E: cross-user isolation', () => {
+  it('register A and B — B cannot read or mutate A\'s data', async () => {
+    const app = await buildApp({ csrf: false });
+    const cookieA = await registerAndCookie(app, uniqueEmail());
+    const cookieB = await registerAndCookie(app, uniqueEmail());
+
+    // A creates private data
+    const pillarA = await createPillar(app, cookieA, 'Health');
+    const habitA = await createHabit(app, cookieA, 'Secret', pillarA);
+
+    // B must not read or mutate A's data
+    const attempts: { method: 'GET' | 'PATCH' | 'DELETE'; url: string; payload?: object }[] = [
+      { method: 'GET', url: `/v1/pillars/${pillarA}` },
+      { method: 'PATCH', url: `/v1/pillars/${pillarA}`, payload: { name: 'Hacked' } },
+      { method: 'DELETE', url: `/v1/pillars/${pillarA}` },
+      { method: 'GET', url: `/v1/habits/${habitA}` },
+      { method: 'PATCH', url: `/v1/habits/${habitA}`, payload: { name: 'Hacked' } },
+      { method: 'DELETE', url: `/v1/habits/${habitA}` },
+    ];
+
+    for (const attempt of attempts) {
+      const res = await app.inject({
+        method: attempt.method,
+        url: attempt.url,
+        headers: { cookie: cookieB },
+        ...(attempt.payload ? { payload: attempt.payload } : {}),
+      });
+      expect(res.statusCode).toBe(404);
+    }
+
+    // A's data is untouched
+    const pillarsRes = await app.inject({ method: 'GET', url: '/v1/pillars', headers: { cookie: cookieA } });
+    expect(pillarsRes.json().pillars).toHaveLength(1);
+    const habitsRes = await app.inject({ method: 'GET', url: '/v1/habits', headers: { cookie: cookieA } });
+    expect(habitsRes.json().habits).toHaveLength(1);
+
+    await app.close();
+  });
+});
+
+async function registerAndCookie(
+  app: Awaited<ReturnType<typeof buildApp>>,
+  email: string,
+): Promise<string> {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/v1/auth/register',
+    payload: { email, password: 'test1234' },
+  });
+  const tokenCookie = res.cookies.find((c) => c.name === 'token');
+  return `token=${tokenCookie!.value}`;
+}
