@@ -1,0 +1,29 @@
+name: Post-deploy smoke check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the deploy to finish
+        run: sleep 90
+
+      - name: Check API readiness
+        run: |
+          for i in $(seq 1 8); do
+            if curl -fsS https://lifeos-i59v.onrender.com/v1/health/ready | grep -q '"db":"ok"'; then
+              echo "API is healthy"
+              exit 0
+            fi
+            echo "waiting for API... (attempt $i)"
+            sleep 15
+          done
+          echo "API did not become healthy"
+          exit 1
+
+      - name: Check web responds
+        run: curl -fsS -o /dev/null https://lifeos.app/

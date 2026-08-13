@@ -11,8 +11,10 @@
   "main": "index.js",
   "scripts": {
     "lint": "pnpm --filter @lifeos/api lint && pnpm --filter @lifeos/web lint && pnpm --filter @lifeos/shared lint",
+    "typecheck": "pnpm --filter @lifeos/api typecheck && pnpm --filter @lifeos/web typecheck",
     "test": "pnpm --filter @lifeos/api test && pnpm --filter @lifeos/web test",
     "test:coverage": "pnpm --filter @lifeos/api test:coverage && pnpm --filter @lifeos/web test:coverage",
+    "audit": "pnpm audit --prod",
     "build": "pnpm --filter @lifeos/api build && pnpm --filter @lifeos/web build",
     "prisma:generate": "pnpm --filter @lifeos/api exec prisma generate",
     "db:migrate": "pnpm --filter @lifeos/api exec prisma migrate deploy"

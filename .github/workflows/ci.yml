@@ -50,7 +50,25 @@ jobs:
 
       - run: pnpm lint
 
-      - name: Test with coverage (fails below thresholds)
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: API unit tests
+        run: pnpm --filter @lifeos/api test:unit
+
+      - name: API integration tests
+        run: pnpm --filter @lifeos/api test:integration
+
+      - name: API E2E + failure scenarios
+        run: pnpm --filter @lifeos/api test:e2e
+
+      - name: Web tests
+        run: pnpm --filter @lifeos/web test
+
+      - name: Full test suite with coverage (fails below thresholds)
         run: pnpm test:coverage
+
+      - name: Dependency audit
+        run: pnpm audit --prod
 
       - run: pnpm build
