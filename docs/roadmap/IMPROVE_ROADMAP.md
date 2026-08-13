@@ -378,28 +378,31 @@ GET /daily-logs
 Consider `?page=1&limit=20` or cursor pagination when appropriate. Do not add pagination artificially to small tables — justify the decision in writing.
 
 ### Tasks
-- [ ] Choose the tool/format to generate the OpenAPI specification (e.g., auto-generated via Zod/Fastify or written manually)
-- [ ] Document all `auth` endpoints in the OpenAPI specification
-- [ ] Document all `pillars` endpoints in the specification
-- [ ] Document all `habits` and `completions` endpoints in the specification
-- [ ] Document all `goals` endpoints in the specification
-- [ ] Document all `projects` and `tasks` endpoints in the specification
-- [ ] Document all `daily-logs` endpoints in the specification
-- [ ] Document the error contract (Phase 2) in the OpenAPI specification
-- [ ] Expose the OpenAPI documentation in the development environment (e.g., Swagger UI)
-- [ ] Review existing indexes against the application's most frequent queries
-- [ ] Add missing indexes for queries by `userId` and critical combinations (e.g., `habitId` + `date`)
-- [ ] Review existing unique constraints and confirm they cover all required business rules
-- [ ] Review cascade behavior on all foreign keys
-- [ ] Review nullable fields and justify each one
-- [ ] Review transaction boundaries in multi-table operations
-- [ ] Identify and fix existing N+1 queries
-- [ ] Decide and justify, endpoint by endpoint, whether pagination is needed
-- [ ] Implement pagination on endpoints where the need is justified
-- [ ] Review the safety of existing migrations (reversibility, production impact)
+- [x] Choose the tool/format to generate the OpenAPI specification (e.g., auto-generated via Zod/Fastify or written manually) — hand-curated OpenAPI 3.0 in `apps/api/src/openapi.ts`, served via `@fastify/swagger` (static mode)
+- [x] Document all `auth` endpoints in the OpenAPI specification — register/login/demo/logout/me/onboarding
+- [x] Document all `pillars` endpoints in the specification — CRUD + reorder
+- [x] Document all `habits` and `completions` endpoints in the specification — CRUD/archive/history + completions
+- [x] Document all `goals` endpoints in the specification — CRUD + habit association
+- [x] Document all `projects` and `tasks` endpoints in the specification — CRUD + tasks/reorder
+- [x] Document all `daily-logs` endpoints in the specification — list/upsert/by-date/correlations
+- [x] Document the error contract (Phase 2) in the OpenAPI specification — shared `Error` component + standard 400/401/404/409/429 responses
+- [x] Expose the OpenAPI documentation in the development environment (e.g., Swagger UI) — **Swagger UI at `GET /docs` (API host)** (+ `/docs/json`, `/docs/yaml`) via `@fastify/swagger-ui`
+- [x] Review existing indexes against the application's most frequent queries — all covered (see `docs/database-review.md`)
+- [x] Add missing indexes for queries by `userId` and critical combinations (e.g., `habitId` + `date`) — none missing: `userId` indexed per entity; `HabitCompletion` `@@unique([habitId, date])`
+- [x] Review existing unique constraints and confirm they cover all required business rules — email, daily-log (userId,date), completion (habitId,date), goal-habit link
+- [x] Review cascade behavior on all foreign keys — ownership cascades; pillar children `Restrict` (documented)
+- [x] Review nullable fields and justify each one — every nullable column is optional/presentational (documented)
+- [x] Review transaction boundaries in multi-table operations — onboarding/reorder/demo-seed are atomic `$transaction`s
+- [x] Identify and fix existing N+1 queries — none; stats/goals/projects use batched/aggregated queries
+- [x] Decide and justify, endpoint by endpoint, whether pagination is needed — **not paginated**; per-user lists are small and bounded (documented)
+- [x] Implement pagination on endpoints where the need is justified — n/a (no justified need)
+- [x] Review the safety of existing migrations (reversibility, production impact) — additive migrations; backfilled data migration without loss
 
 ### Completion criteria
 A complete, accessible OpenAPI specification exists covering all endpoints, and a documented database review exists, with indexes added where necessary and pagination decisions explicitly justified.
+
+- OpenAPI + Swagger UI: [`docs/api/OPENAPI.md`](../api/OPENAPI.md)
+- Database review: [`docs/DATABASE_REVIEW.md`](../DATABASE_REVIEW.md)
 
 ---
 

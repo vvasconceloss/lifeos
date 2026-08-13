@@ -46,6 +46,8 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | Document | What it is |
 |---|---|
 | [`api/ERROR_CONTRACT.md`](api/ERROR_CONTRACT.md) | The standardized error shape `{ error: { code, message } }`, status mapping and the full code list. |
+| [`api/OPENAPI.md`](api/OPENAPI.md) | The OpenAPI contract and how to browse it in Swagger UI (`GET /docs` on the API host). |
+| [`DATABASE_REVIEW.md`](DATABASE_REVIEW.md) | Database review: indexes, constraints, cascades, nullables, transactions, N+1 and pagination decisions. |
 
 ## Quality assurance
 
