@@ -628,34 +628,32 @@ frontend caching
 No premature optimization — the goal is to find measurable problems.
 
 ### Tasks
-- [ ] Audit keyboard navigation across all main flows
-- [ ] Audit visible focus states on all interactive elements
-- [ ] Review the use of semantic HTML across all main pages
-- [ ] Review labels on all forms
-- [ ] Audit ARIA usage where needed (dialogs, alerts, live regions)
-- [ ] Verify color contrast (text/background) across the design system
-- [ ] Audit dialog/modal behavior (focus trap, escape to close)
-- [ ] Test main flows with a basic screen reader
-- [ ] Review form error messages for clarity and correct field association
-- [ ] Audit and standardize the loading state in login/register/habit creation/completion/goal creation/project-task manipulation
-- [ ] Audit and standardize the empty state in the same areas
-- [ ] Audit and standardize the error state with a retry option in the same areas
-- [ ] Audit and standardize disabled states during async operations
-- [ ] Audit optimistic/pending updates where they make sense (e.g., marking a habit)
-- [ ] Test the application at 320px and fix issues found
-- [ ] Test the application at 375px and fix issues found
-- [ ] Test the application at 768px and fix issues found
-- [ ] Test the application at 1024px and fix issues found
-- [ ] Test the application at 1440px and fix issues found
-- [ ] Run Lighthouse/PageSpeed on the main pages and document the results
-- [ ] Analyze and optimize the initial bundle if necessary
-- [ ] Implement lazy loading where it makes sense
-- [ ] Optimize images (format, size, lazy loading)
-- [ ] Identify and fix unnecessary re-renders in critical components
-- [ ] Identify and fix API waterfalls (sequential requests that could be parallel)
+- [x] Audit keyboard navigation across all main flows — real `<button>`s/links; icon buttons have `aria-label`
+- [x] Audit visible focus states on all interactive elements — focus-visible rings throughout
+- [x] Review the use of semantic HTML across all main pages — headings/lists/`<label>` association
+- [x] Review labels on all forms — every field has a `<Label>`; modals use `aria-describedby`
+- [x] Audit ARIA usage where needed (dialogs, alerts, live regions) — base-ui dialogs, `aria-pressed`, `role="alert"`
+- [x] Verify color contrast (text/background) across the design system — Phase 2 contrast sweep
+- [x] Audit dialog/modal behavior (focus trap, escape to close) — base-ui Dialog/AlertDialog
+- [ ] Test main flows with a basic screen reader (manual, pending)
+- [x] Review form error messages for clarity and correct field association — `role="alert"` + `aria-invalid`/`aria-describedby`
+- [x] Audit and standardize the loading state in login/register/habit creation/completion/goal creation/project-task manipulation — covered (spinners/skeletons/disabled buttons)
+- [x] Audit and standardize the empty state in the same areas — EmptyState on all list pages
+- [x] Audit and standardize the error state with a retry option in the same areas — ErrorState on all 12 data pages
+- [x] Audit and standardize disabled states during async operations — disabled while submitting/deleting
+- [x] Audit optimistic/pending updates where they make sense (e.g., marking a habit) — dashboard toggle rolls back on error
+- [ ] Test the application at 320px / 375px / 768px / 1024px / 1440px and fix issues (manual device testing; mobile-first layouts already in place)
+- [ ] Run Lighthouse/PageSpeed on the main pages and document the results (manual, needs a deployed environment)
+- [x] Analyze and optimize the initial bundle — **route-level code-splitting: 1,406 kB → 278 kB (87 kB gzip)**
+- [x] Implement lazy loading where it makes sense — all 16 pages via `React.lazy`; heavy `recharts` split into its own chunk
+- [ ] Optimize images (format, size, lazy loading) (manual — static screenshots)
+- [ ] Identify and fix unnecessary re-renders in critical components (no obvious issues found; profiling pending)
+- [x] Identify and fix API waterfalls (sequential requests that could be parallel) — main fetches already use `Promise.all` (dashboard, goals, projects, details)
 
 ### Completion criteria
 A documented accessibility audit exists with fixed issues, all required UI states are implemented in critical operations, the application has been validated and fixed across at least 5 breakpoints, and a performance report (Lighthouse/PageSpeed) exists with measurable optimizations applied.
+
+Audit results and bundle measurements: [`docs/qa/FRONTEND_QUALITY.md`](../qa/FRONTEND_QUALITY.md).
 
 ---
 

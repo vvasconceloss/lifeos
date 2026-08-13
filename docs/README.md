@@ -55,6 +55,7 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | Document | What it is |
 |---|---|
 | [`qa/TESTING.md`](qa/TESTING.md) | Coverage tooling + thresholds, the test pyramid (unit/domain, contract, E2E, failure scenarios, frontend) and how to run. |
+| [`qa/FRONTEND_QUALITY.md`](qa/FRONTEND_QUALITY.md) | Frontend audit: accessibility, required UI states, responsiveness, and the bundle/lazy-loading measurements. |
 
 ## Architecture & code quality
 
