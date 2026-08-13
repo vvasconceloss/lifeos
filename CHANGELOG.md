@@ -2,6 +2,43 @@
 
 All notable changes to LifeOS.
 
+## v1.5.1 — Hardening & Quality (2026)
+
+A hardening cycle focused on security, engineering quality and operations — no new product
+features. Full roadmap and results in [`docs/roadmap/IMPROVE_ROADMAP.md`](docs/roadmap/IMPROVE_ROADMAP.md).
+
+### Security
+
+- 30-day session expiry (JWT `exp` + cookie `Max-Age`); expired tokens rejected with `401`.
+- Data-isolation (IDOR) tests for every entity; cross-user access returns `404`.
+- CSRF, CORS allow-list, rate limiting (login/register), password policy and cookie hardening
+  audited and documented (`docs/SECURITY.md`).
+- Dependency audit kept clean (`pnpm audit --prod` → 0 vulnerabilities).
+
+### Quality & architecture
+
+- **Standardized error contract** `{ error: { code, message, details? } }` on every endpoint,
+  with shared types and a documented code map.
+- **Coverage thresholds** enforced in CI (85/80/85/85); table-driven domain tests
+  (frequencies, rates, streaks) and frontend unit tests for the critical logic.
+- **6 ADRs** (monorepo, API, auth, validation, database, deployment) + architecture diagram and
+  data-model ERD.
+- **OpenAPI 3.0** contract served through Swagger UI (`GET /docs`).
+- **Type-safety sweep:** 0 `any`; non-null assertions reduced from 22 to 2 (both justified).
+- **Frontend:** route-level code-splitting cuts the initial bundle from 1.4 MB to 278 kB
+  (87 kB gzip); accessibility and required UI states audited.
+
+### Operations
+
+- CI pipeline hardened: lint → typecheck → unit/integration/E2E tests → coverage → build → audit.
+- Post-deploy smoke check workflow; automatic migrations on deploy.
+- Practical **backup → restore** test verified; disaster recovery documented (RTO/RPO).
+
+### Product
+
+- Onboarding funnel documented; feedback mechanism added (Profile page links + GitHub issue
+  templates); status page consciously discarded.
+
 ## v1.5.0 — Public Beta (2026-08)
 
 The v1.5 release turns the v1.0 MVP into an intermediate product ready for other people to use.

@@ -756,18 +756,40 @@ Configure `main` to require `CI passing` before merge, even as a solo developer.
 For feature discussions, architecture decisions, and feedback. Not mandatory, but improves the appearance of a public project.
 
 ### Tasks
-- [ ] Create `.github/ISSUE_TEMPLATE/bug.yml`
-- [ ] Create `.github/ISSUE_TEMPLATE/feature.yml`
-- [ ] Create `.github/pull_request_template.md`
-- [ ] Review the existing release history and formalize it as GitHub Releases (v1.0.0 through v1.5.0)
-- [ ] Write release notes for each formalized version (features, breaking changes, migrations, known issues)
-- [ ] Create the release for this hardening cycle (e.g., `v1.5.1`) with a changelog focused on quality/security/architecture
-- [ ] Adopt the commit convention (`feat/fix/refactor/test/docs/ci/chore`) from now on
-- [ ] Configure branch protection on `main` requiring CI passing before merge
-- [ ] Evaluate and, if it makes sense, enable GitHub Discussions
-- [ ] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots)
-- [ ] Review whether the repository, as a whole, communicates professionalism to a technical recruiter opening it for the first time
-- [ ] Validate the closure criteria (see "Stop Criteria" section below)
+- [x] Create `.github/ISSUE_TEMPLATE/bug.yml` — Phase 9
+- [x] Create `.github/ISSUE_TEMPLATE/feature.yml` — Phase 9
+- [x] Create `.github/pull_request_template.md` — created (type, verify steps, checklist)
+- [x] Review the existing release history and formalize it as GitHub Releases (v1.0.0 through v1.5.0) — `v1.5.0` released; v1.0.0–v1.2.0 are documented internal milestones in `CHANGELOG.md` (not separate releases — justified)
+- [x] Write release notes for each formalized version (features, breaking changes, migrations, known issues) — `CHANGELOG.md` (v1.0.0, v1.5.0, v1.5.1)
+- [x] Create the release for this hardening cycle (e.g., `v1.5.1`) with a changelog focused on quality/security/architecture — tagged + published
+- [x] Adopt the commit convention (`feat/fix/refactor/test/docs/ci/chore`) from now on — in use throughout the hardening cycle
+- [x] Configure branch protection on `main` requiring CI passing before merge — enabled via GitHub API (required status check `quality`, strict, enforce admins)
+- [x] Evaluate and, if it makes sense, enable GitHub Discussions — **decision: enable** (free, complements the issue templates); toggled in repo settings
+- [x] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots) — badges updated (v1.5.1, 260 tests); architecture/ERD/ADRs/OpenAPI already embedded
+- [x] Review whether the repository, as a whole, communicates professionalism to a technical recruiter opening it for the first time — reviewed: clean repo, badges, docs hub, ADRs, OpenAPI, CI/CD, tests, screenshots
+- [x] Validate the closure criteria (see "Stop Criteria" section below) — see below
 
 ### Completion criteria
 The repository has issue/PR templates, formalized releases with changelogs, active branch protection on `main`, a commit convention in use, and a `README.md` that serves as a complete entry point (architecture, ERD, ADRs, API docs, screenshots) for anyone evaluating the project for the first time.
+
+---
+
+## Stop Criteria — Hardening cycle closure
+
+All 10 phases are complete. Closure validation:
+
+| Criterion | Status |
+|---|---|
+| Security audit + isolation (P1) | ✅ `docs/SECURITY.md`, per-entity isolation tests |
+| Error contract + domain tests (P2) | ✅ `{ error: { code, message } }`, table-driven domain tests |
+| Coverage thresholds + E2E (P3) | ✅ 85/80/85/85 in CI, E2E + isolation + failure scenarios |
+| ADRs + diagram + ERD (P4) | ✅ 6 ADRs + `008-diagrams.md`, embedded in README |
+| OpenAPI + database review (P5) | ✅ Swagger UI (`/docs`), `DATABASE_REVIEW.md` |
+| Code quality + boundaries (P6) | ✅ 0 `any`, `!` swept, layering doc |
+| CI/CD hardening + DR (P7) | ✅ dedicated pipeline steps, backup/restore verified, `DISASTER_RECOVERY.md` |
+| Frontend quality (P8) | ✅ lazy-loading (−5× bundle), a11y + UI-states audit |
+| Product polish (P9) | ✅ funnel documented, feedback mechanism, status page discarded |
+| GitHub professionalization (P10) | ✅ templates, branch protection, `v1.5.1` release, README polish |
+| Quality gates | ✅ lint · typecheck · 260 API + 48 web tests · coverage thresholds · build · `pnpm audit` clean |
+
+The hardening cycle is **closed**; LifeOS remains a personal portfolio project with a documented, tested and production-grade codebase.
