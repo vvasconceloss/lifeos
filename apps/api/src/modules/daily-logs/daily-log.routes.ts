@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
@@ -36,7 +37,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
       const result = await upsertDailyLog(request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { log: result.log };
@@ -66,7 +67,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
       const log = await getDailyLogByDate(request.user.sub, params.date);
 
       if (!log) {
-        return reply.status(404).send({ error: 'Daily log not found' });
+        return reply.status(404).send({ error: toErrorBody('Daily log not found') });
       }
 
       return { log };
@@ -86,7 +87,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
       const result = await updateDailyLog(params.id, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { log: result.log };
@@ -103,7 +104,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
       const result = await deleteDailyLog(params.id, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();

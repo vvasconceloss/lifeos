@@ -68,7 +68,7 @@ describe('PUT /v1/habits/:id/completions/:date', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
-      error: 'Cannot mark future dates',
+      error: { message: 'Cannot mark future dates' },
     });
 
     await app.close();
@@ -160,7 +160,7 @@ describe('DELETE /v1/habits/:id/completions/:date', () => {
 
     expect(response.statusCode).toBe(404);
     expect(response.json()).toMatchObject({
-      error: 'Completion not found',
+      error: { message: 'Completion not found' },
     });
 
     await app.close();
@@ -313,7 +313,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });
@@ -346,7 +346,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });

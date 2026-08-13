@@ -11,7 +11,7 @@ describe('error response format', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.json()).toEqual({ error: 'Not Found' });
+    expect(res.json()).toEqual({ error: { code: 'NOT_FOUND', message: 'Not Found' } });
 
     await app.close();
   });
@@ -29,7 +29,7 @@ describe('error response format', () => {
     });
 
     expect(res.statusCode).toBe(500);
-    expect(res.json()).toEqual({ error: 'Internal Server Error' });
+    expect(res.json()).toEqual({ error: { code: 'INTERNAL_ERROR', message: 'Internal Server Error' } });
     expect(JSON.stringify(res.json())).not.toContain('secret');
 
     await app.close();
@@ -50,7 +50,7 @@ describe('error response format', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.json()).toEqual({ error: 'Bad request thing' });
+    expect(res.json()).toEqual({ error: { code: 'APP_ERROR', message: 'Bad request thing' } });
 
     await app.close();
   });

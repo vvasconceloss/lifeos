@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import type { ApiErrorResponse } from "@lifeos/shared";
 
 const GENERIC_MESSAGE = "Something went wrong. Please try again.";
 
@@ -12,13 +13,19 @@ export function getApiErrorMessage(
   fallback = GENERIC_MESSAGE,
 ): string {
   if (error instanceof AxiosError && error.response) {
-    const data = error.response.data as { error?: unknown };
-    if (
-      typeof data.error === "string" &&
-      data.error.length > 0 &&
-      !GENERIC_API_MESSAGES.has(data.error)
+    const data = error.response.data as Partial<ApiErrorResponse> | { error?: string };
+    const err = data.error;
+
+    if (err && typeof err === "object") {
+      if (err.message.length > 0 && !GENERIC_API_MESSAGES.has(err.message)) {
+        return err.message;
+      }
+    } else if (
+      typeof err === "string" &&
+      err.length > 0 &&
+      !GENERIC_API_MESSAGES.has(err)
     ) {
-      return data.error;
+      return err;
     }
   }
   return fallback;

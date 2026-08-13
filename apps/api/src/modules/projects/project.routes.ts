@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../../plugins/auth';
@@ -46,7 +47,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await createProject(request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(201).send({ project: result.project });
@@ -63,7 +64,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const project = await getProject(params.id, request.user.sub);
 
       if (!project) {
-        return reply.status(404).send({ error: 'Project not found' });
+        return reply.status(404).send({ error: toErrorBody('Project not found') });
       }
 
       return { project };
@@ -83,7 +84,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await updateProject(params.id, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { project: result.project };
@@ -100,7 +101,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await deleteProject(params.id, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();
@@ -120,7 +121,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await addProjectTask(params.id, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(201).send({ task: result.task });
@@ -140,7 +141,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await reorderProjectTasks(params.id, request.user.sub, data.ids);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return result;
@@ -160,7 +161,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await updateProjectTask(params.taskId, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { task: result.task };
@@ -177,7 +178,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
       const result = await deleteProjectTask(params.taskId, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();

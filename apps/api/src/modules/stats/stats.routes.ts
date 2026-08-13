@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
@@ -91,7 +92,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
       );
 
       if (!stats) {
-        return reply.status(404).send({ error: 'Habit not found' });
+        return reply.status(404).send({ error: toErrorBody('Habit not found') });
       }
 
       return { stats };

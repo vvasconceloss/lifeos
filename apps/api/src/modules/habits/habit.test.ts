@@ -45,7 +45,7 @@ describe('POST /v1/habits', () => {
     });
 
     expect(response.statusCode).toBe(404);
-    expect(response.json()).toMatchObject({ error: 'Pillar not found' });
+    expect(response.json()).toMatchObject({ error: { message: 'Pillar not found' } });
 
     await app.close();
   });
@@ -81,7 +81,7 @@ describe('POST /v1/habits', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });
@@ -563,7 +563,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });
@@ -579,7 +579,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });

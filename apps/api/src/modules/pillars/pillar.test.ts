@@ -37,7 +37,7 @@ describe('POST /v1/pillars', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });
@@ -186,7 +186,7 @@ describe('PATCH /v1/pillars/:id', () => {
     });
 
     expect(response.statusCode).toBe(404);
-    expect(response.json()).toMatchObject({ error: 'Pillar not found' });
+    expect(response.json()).toMatchObject({ error: { message: 'Pillar not found' } });
 
     await app.close();
   });
@@ -292,7 +292,7 @@ describe('DELETE /v1/pillars/:id', () => {
 
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
-      error: 'Cannot delete pillar with associated habits. Archive or delete the habits first.',
+      error: { message: 'Cannot delete pillar with associated habits. Archive or delete the habits first.' },
     });
 
     await app.close();
@@ -407,7 +407,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });
@@ -423,7 +423,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });

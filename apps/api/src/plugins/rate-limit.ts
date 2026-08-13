@@ -1,17 +1,18 @@
 import fp from 'fastify-plugin';
 import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance } from 'fastify';
+import { ApiError } from '../lib/errors';
 
 export const rateLimitPlugin = fp(async (fastify: FastifyInstance) => {
   await fastify.register(rateLimit, {
     max: Number(process.env.RATE_LIMIT_MAX ?? 300),
     timeWindow: process.env.RATE_LIMIT_WINDOW ?? '1 minute',
     errorResponseBuilder: (_request, context) => {
-      const error = new Error(
+      return new ApiError(
+        'RATE_LIMIT_EXCEEDED',
         `Rate limit exceeded, retry in ${context.after}`,
-      ) as Error & { statusCode: number };
-      error.statusCode = context.statusCode;
-      return error;
+        context.statusCode,
+      );
     },
   });
 });

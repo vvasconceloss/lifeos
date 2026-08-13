@@ -1,5 +1,6 @@
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import { toErrorBody } from "./errors";
 
 export function validateInput<T>(
   schema: z.ZodType<T>,
@@ -10,8 +11,7 @@ export function validateInput<T>(
 
   if (!parsed.success) {
     reply.status(400).send({
-      error: "Validation failed",
-      details: parsed.error.issues,
+      error: toErrorBody("Validation failed", parsed.error.issues, "VALIDATION_ERROR"),
     });
     return null;
   }

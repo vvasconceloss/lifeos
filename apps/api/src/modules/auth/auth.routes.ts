@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
@@ -31,7 +32,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const user = await getUserById(request.user.sub);
 
     if (!user) {
-      return reply.status(401).send({ error: 'User not found' });
+      return reply.status(401).send({ error: toErrorBody('User not found') });
     }
 
     return { user };
@@ -53,7 +54,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const result = await completeOnboarding(request.user.sub, data);
 
     if ('error' in result) {
-      return reply.status(result.status).send({ error: result.error });
+      return reply.status(result.status).send({ error: toErrorBody(result.error) });
     }
 
     return reply.status(201).send(result);
@@ -83,7 +84,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         return reply.status(201).send({ user, token });
       } catch (error) {
         if (error instanceof Error && error.message === AUTH_ERRORS.EMAIL_ALREADY_EXISTS) {
-          return reply.status(409).send({ error: error.message });
+          return reply.status(409).send({ error: toErrorBody(error.message) });
         }
         throw error;
       }
@@ -138,7 +139,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         return { user, token };
       } catch (error) {
         if (error instanceof Error && error.message === AUTH_ERRORS.INVALID_CREDENTIALS) {
-          return reply.status(401).send({ error: error.message });
+          return reply.status(401).send({ error: toErrorBody(error.message) });
         }
         throw error;
       }

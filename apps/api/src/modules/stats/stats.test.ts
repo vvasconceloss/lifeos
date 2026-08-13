@@ -539,7 +539,7 @@ describe('input validation', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ error: 'Validation failed' });
+    expect(response.json()).toMatchObject({ error: { message: 'Validation failed' } });
 
     await app.close();
   });

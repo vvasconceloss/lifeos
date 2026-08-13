@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
@@ -32,7 +33,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const result = await reorderHabits(request.user.sub, data.ids);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return result;
@@ -57,7 +58,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       );
 
       if (!history) {
-        return reply.status(404).send({ error: 'Habit not found' });
+        return reply.status(404).send({ error: toErrorBody('Habit not found') });
       }
 
       return { history };
@@ -74,7 +75,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const result = await createHabit(request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(201).send(result);
@@ -91,7 +92,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const habit = await getHabit(params.id, request.user.sub);
 
       if (!habit) {
-        return reply.status(404).send({ error: 'Habit not found' });
+        return reply.status(404).send({ error: toErrorBody('Habit not found') });
       }
 
       return { habit };
@@ -111,7 +112,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const result = await updateHabit(params.id, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { habit: result.habit };
@@ -128,7 +129,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const result = await archiveHabit(params.id, request.user.sub);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { habit: result.habit };
@@ -145,7 +146,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
       const result = await deleteHabit(params.id, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();

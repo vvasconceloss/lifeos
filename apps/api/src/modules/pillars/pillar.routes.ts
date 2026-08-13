@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
@@ -24,7 +25,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
       const result = await reorderPillars(request.user.sub, data.ids);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return result;
@@ -64,7 +65,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
       );
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { pillar: result.pillar };
@@ -81,7 +82,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
       const result = await deletePillar(params.id, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();

@@ -1,3 +1,4 @@
+import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { requireAuth } from '../../plugins/auth';
@@ -38,7 +39,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const result = await createGoal(request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(201).send({ goal: result.goal });
@@ -55,7 +56,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const goal = await getGoal(params.id, request.user.sub);
 
       if (!goal) {
-        return reply.status(404).send({ error: 'Goal not found' });
+        return reply.status(404).send({ error: toErrorBody('Goal not found') });
       }
 
       return { goal };
@@ -75,7 +76,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const result = await updateGoal(params.id, request.user.sub, data);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return { goal: result.goal };
@@ -92,7 +93,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const result = await deleteGoal(params.id, request.user.sub);
 
       if (result !== true) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return reply.status(204).send();
@@ -113,7 +114,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const result = await addHabitToGoal(params.id, request.user.sub, params.habitId);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return result;
@@ -134,7 +135,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
       const result = await removeHabitFromGoal(params.id, request.user.sub, params.habitId);
 
       if ('error' in result) {
-        return reply.status(result.status).send({ error: result.error });
+        return reply.status(result.status).send({ error: toErrorBody(result.error) });
       }
 
       return result;

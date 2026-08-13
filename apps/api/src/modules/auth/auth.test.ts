@@ -47,7 +47,7 @@ describe('POST /v1/auth/register', () => {
     });
 
     expect(response.statusCode).toBe(409);
-    expect(response.json()).toMatchObject({ error: 'Email already in use' });
+    expect(response.json()).toMatchObject({ error: { message: 'Email already in use' } });
 
     await app.close();
   });
@@ -63,8 +63,8 @@ describe('POST /v1/auth/register', () => {
 
     expect(response.statusCode).toBe(400);
     const body = response.json();
-    expect(body.error).toBe('Validation failed');
-    expect(body.details).toBeDefined();
+    expect(body.error.message).toBe('Validation failed');
+    expect(body.error.details).toBeDefined();
 
     await app.close();
   });
@@ -85,8 +85,8 @@ describe('POST /v1/auth/register', () => {
 
     expect(noLetter.statusCode).toBe(400);
     expect(noNumber.statusCode).toBe(400);
-    expect(noLetter.json().details[0].message).toContain('at least one letter');
-    expect(noNumber.json().details[0].message).toContain('at least one number');
+    expect(noLetter.json().error.details[0].message).toContain('at least one letter');
+    expect(noNumber.json().error.details[0].message).toContain('at least one number');
 
     await app.close();
   });
@@ -163,7 +163,7 @@ describe('POST /v1/auth/login', () => {
 
     expect(response.statusCode).toBe(401);
     expect(response.json()).toMatchObject({
-      error: 'Invalid email or password',
+      error: { message: 'Invalid email or password' },
     });
 
     await app.close();
@@ -197,7 +197,7 @@ describe('POST /v1/auth/login', () => {
     expect(statuses.slice(0, 3)).toEqual([401, 401, 401]);
     expect(statuses[3]).toBe(429);
     expect(limitedResponse!.json()).toMatchObject({
-      error: expect.stringContaining('Rate limit exceeded'),
+      error: { message: expect.stringContaining('Rate limit exceeded') },
     });
 
     await app.close();
@@ -380,7 +380,7 @@ describe('POST /v1/auth/onboarding', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
-      error: 'A habit references a pillar that was not selected',
+      error: { message: 'A habit references a pillar that was not selected' },
     });
 
     await app.close();
@@ -413,7 +413,7 @@ describe('POST /v1/auth/onboarding', () => {
 
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
-      error: 'User already completed onboarding',
+      error: { message: 'User already completed onboarding' },
     });
 
     await app.close();
@@ -476,7 +476,7 @@ describe('GET /v1/auth/me', () => {
     });
 
     expect(response.statusCode).toBe(401);
-    expect(response.json()).toMatchObject({ error: 'Unauthorized' });
+    expect(response.json()).toMatchObject({ error: { message: 'Unauthorized' } });
 
     await app.close();
   });
@@ -504,7 +504,7 @@ describe('GET /v1/auth/me', () => {
     });
 
     expect(response.statusCode).toBe(401);
-    expect(response.json()).toMatchObject({ error: 'Unauthorized' });
+    expect(response.json()).toMatchObject({ error: { message: 'Unauthorized' } });
 
     await app.close();
   });

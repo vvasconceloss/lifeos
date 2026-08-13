@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export interface ApiErrorBody {
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+export interface ApiErrorResponse {
+  error: ApiErrorBody;
+}
+
 export const dateKeySchema = z
   .string()
   .regex(
