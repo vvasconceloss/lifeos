@@ -55,6 +55,12 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 |---|---|
 | [`qa/TESTING.md`](qa/TESTING.md) | Coverage tooling + thresholds, the test pyramid (unit/domain, contract, E2E, failure scenarios, frontend) and how to run. |
 
+## Architecture & code quality
+
+| Document | What it is |
+|---|---|
+| [`architecture/007-layering.md`](architecture/007-layering.md) | The HTTP → Validation → Service → Domain → Persistence boundaries, module convention, and the Phase 6 `any`/`as`/`!` sweep results. |
+
 ## Repository conventions
 
 - **Monorepo** with pnpm workspaces: `apps/api` (Fastify), `apps/web` (React + Vite), `packages/shared` (Zod schemas + types shared by both).

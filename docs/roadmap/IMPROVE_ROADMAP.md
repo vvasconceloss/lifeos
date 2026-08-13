@@ -464,25 +464,27 @@ Persistence
 Rule: a question like "how is completion rate calculated?" should not depend on Fastify, HTTP, or React.
 
 ### Tasks
-- [ ] Do a full sweep for uses of `any` and replace/justify each occurrence
-- [ ] Sweep for unnecessary casts (`as`) and remove them where possible
-- [ ] Sweep for non-null assertions (`!`) and replace with safe checks
-- [ ] Identify and eliminate duplicated types (consolidate into `packages/shared`)
-- [ ] Identify and eliminate duplicated business logic between modules
-- [ ] Review overly broad types (e.g., `object`, `Record<string, any>`) and narrow them
-- [ ] Review validation of unsafe external inputs (ensure Zod at all boundaries)
-- [ ] Standardize inconsistent return types between similar services
-- [ ] Audit all modules and confirm they follow the `routes/service/schemas/tests/types` convention
-- [ ] Fix or justify exceptions to the module convention
-- [ ] Identify functions over ~50 lines and evaluate the need for refactoring
-- [ ] Identify excessively large React components and evaluate the need for splitting
-- [ ] Identify services that accumulate too many responsibilities and evaluate separation
-- [ ] Identify hooks mixing responsibilities and evaluate separation
-- [ ] Extract domain logic "hidden" in UI components into the service layer
-- [ ] Document the HTTP → Validation → Service → Domain → Persistence boundaries (even informally, in `docs/architecture/007-layering.md`)
+- [x] Do a full sweep for uses of `any` and replace/justify each occurrence — **0 occurrences** in source
+- [x] Sweep for unnecessary casts (`as`) and remove them where possible — inventory documented; remaining casts are boundary/Prisma/plugin-option casts (see `docs/architecture/007-layering.md`)
+- [x] Sweep for non-null assertions (`!`) and replace with safe checks — removed 15 (14 in `demo.service.ts` via a `requireIndex` helper, 1 in `habit-detail.tsx`); 2 justified remain
+- [x] Identify and eliminate duplicated types (consolidate into `packages/shared`) — shared types are the single source; frontend re-declares the JSON wire shape (dates as `string`) as a documented exception
+- [x] Identify and eliminate duplicated business logic between modules — none duplicated; shared `lib/` (frequency/stats/progression) is reused
+- [x] Review overly broad types (e.g., `object`, `Record<string, any>`) and narrow them — `Record<string, …>` only for dictionaries/payloads; no `any`
+- [x] Review validation of unsafe external inputs (ensure Zod at all boundaries) — all bodies/params/query validated via shared Zod + `validateInput`
+- [x] Standardize inconsistent return types between similar services — all services return `{ resource } | { error, status }` or `true | { error, status }`
+- [x] Audit all modules and confirm they follow the `routes/service/schemas/tests/types` convention — all conform
+- [x] Fix or justify exceptions to the module convention — auth carries demo/onboarding services; stats has `utils`; progression has `lib` (all within the convention)
+- [x] Identify functions over ~50 lines and evaluate the need for refactoring — reviewed; largest (`stats.service.getAnalytics`) is cohesive and its math lives in pure `lib/` helpers
+- [x] Identify excessively large React components and evaluate the need for splitting — split into subcomponents where needed (`TaskRow`, `JournalDayCard`, …)
+- [x] Identify services that accumulate too many responsibilities and evaluate separation — none accumulate unrelated domains
+- [x] Identify hooks mixing responsibilities and evaluate separation — hooks are thin (auth/theme/dashboard data)
+- [x] Extract domain logic "hidden" in UI components into the service layer — none found; domain rules live in `lib/`
+- [x] Document the HTTP → Validation → Service → Domain → Persistence boundaries (even informally, in `docs/architecture/007-layering.md`) — created
 
 ### Completion criteria
 A full sweep of `any`/`as`/`!` has been done with explicit justification for the remaining cases, all modules follow the defined structural convention, and domain logic can be explained and tested without depending on HTTP, Fastify, or React.
+
+Full results: [`docs/architecture/007-layering.md`](../architecture/007-layering.md).
 
 ---
 
