@@ -13,21 +13,21 @@ slowly building a life you can measure, understand and improve.
 
 [![CI](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml/badge.svg)](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.5.1-blue.svg)](CHANGELOG.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/tests-258%20passing-22c55e.svg)](CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-260%20passing-22c55e.svg)](CHANGELOG.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-8b5cf6.svg)](https://github.com/vvasconceloss/lifeos/pulls)
 
 </p>
 
 </div>
 
-**v1.5 (Public Beta) is released** — see [`docs/README.md`](docs/README.md) as the documentation
-entry point (roadmap, domain rules, frequencies, gamification, ops, deployment), the
-[`CHANGELOG.md`](CHANGELOG.md) for the release history, and
-[`docs/roadmap/ROADMAP.md`](docs/roadmap/ROADMAP.md) for the phase-by-phase roadmap.
+**v1.5 (Public Beta) is released**, with a v1.5.1 hardening cycle (security, quality, CI/CD) —
+see [`docs/README.md`](docs/README.md) as the documentation entry point (roadmap, domain rules,
+frequencies, gamification, ops, deployment), the [`CHANGELOG.md`](CHANGELOG.md) for the release
+history, and [`docs/roadmap/ROADMAP.md`](docs/roadmap/ROADMAP.md) for the phase-by-phase roadmap.
 
 ---
 
