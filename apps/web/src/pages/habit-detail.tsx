@@ -14,8 +14,9 @@ import { ErrorState } from "@/components/error-state";
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function buildMonthCells(days: HabitHistoryDay[]): (HabitHistoryDay | null)[] {
-  if (days.length === 0) return [];
-  const offset = (days[0]!.weekday + 6) % 7;
+  const first = days[0];
+  if (!first) return [];
+  const offset = (first.weekday + 6) % 7;
   const cells: (HabitHistoryDay | null)[] = Array<null>(offset).fill(null);
   cells.push(...days);
   while (cells.length % 7 !== 0) cells.push(null);

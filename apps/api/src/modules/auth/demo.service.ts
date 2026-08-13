@@ -1,6 +1,12 @@
 import { prisma } from "../../db/client";
 import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_NAME, hashPassword, toUserResponse } from "../auth/auth.service";
 
+function requireIndex<T>(items: readonly T[], index: number, label: string): T {
+  const item = items[index];
+  if (item === undefined) throw new Error(`Missing demo ${label} at index ${index}`);
+  return item;
+}
+
 function utcDateKey(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
@@ -64,22 +70,25 @@ async function seedData(userId: string): Promise<void> {
     { name: "Relationships", icon: "🤝", color: "#ec4899", description: "Family, friends and connection" },
   ] as const;
 
-  const created = [];
-  for (let i = 0; i < pillars.length; i++) {
+  const created: { id: string }[] = [];
+  for (const [i, pillar] of pillars.entries()) {
     const p = await prisma.pillar.create({
       data: {
         userId,
-        name: pillars[i]!.name,
-        icon: pillars[i]!.icon,
-        color: pillars[i]!.color,
-        description: pillars[i]!.description,
+        name: pillar.name,
+        icon: pillar.icon,
+        color: pillar.color,
+        description: pillar.description,
         sortOrder: i,
       },
     });
     created.push(p);
   }
 
-  const [health, eng, knowledge, relationships] = created;
+  const health = requireIndex(created, 0, "health");
+  const eng = requireIndex(created, 1, "engineering");
+  const knowledge = requireIndex(created, 2, "knowledge");
+  const relationships = requireIndex(created, 3, "relationships");
 
   interface HabitSpec {
     name: string;
@@ -93,18 +102,17 @@ async function seedData(userId: string): Promise<void> {
   }
 
   const habitSpecs: HabitSpec[] = [
-    { name: "Morning run", icon: "🏃", color: "#ef4444", pillarId: health!.id, frequency: "DAILY" },
-    { name: "Drink 2L of water", icon: "💧", color: "#06b6d4", pillarId: health!.id, frequency: "DAILY" },
-    { name: "Meditate 10 minutes", icon: "🧘", color: "#10b981", pillarId: health!.id, frequency: "WEEKLY_DAYS", daysOfWeek: [1, 2, 3, 4, 5] },
-    { name: "Code for 1 hour", icon: "⌨️", color: "#3b82f6", pillarId: eng!.id, frequency: "TIMES_PER_WEEK", timesPerWeek: 5 },
-    { name: "Review or refactor code", icon: "🔧", color: "#f59e0b", pillarId: eng!.id, frequency: "WEEKLY_DAYS", daysOfWeek: [2, 4, 6] },
-    { name: "Read for 20 minutes", icon: "📖", color: "#8b5cf6", pillarId: knowledge!.id, frequency: "DAILY" },
-    { name: "Call a friend or family", icon: "📞", color: "#ec4899", pillarId: relationships!.id, frequency: "TIMES_PER_MONTH", timesPerMonth: 10 },
+    { name: "Morning run", icon: "🏃", color: "#ef4444", pillarId: health.id, frequency: "DAILY" },
+    { name: "Drink 2L of water", icon: "💧", color: "#06b6d4", pillarId: health.id, frequency: "DAILY" },
+    { name: "Meditate 10 minutes", icon: "🧘", color: "#10b981", pillarId: health.id, frequency: "WEEKLY_DAYS", daysOfWeek: [1, 2, 3, 4, 5] },
+    { name: "Code for 1 hour", icon: "⌨️", color: "#3b82f6", pillarId: eng.id, frequency: "TIMES_PER_WEEK", timesPerWeek: 5 },
+    { name: "Review or refactor code", icon: "🔧", color: "#f59e0b", pillarId: eng.id, frequency: "WEEKLY_DAYS", daysOfWeek: [2, 4, 6] },
+    { name: "Read for 20 minutes", icon: "📖", color: "#8b5cf6", pillarId: knowledge.id, frequency: "DAILY" },
+    { name: "Call a friend or family", icon: "📞", color: "#ec4899", pillarId: relationships.id, frequency: "TIMES_PER_MONTH", timesPerMonth: 10 },
   ];
 
-  const habits = [];
-  for (let i = 0; i < habitSpecs.length; i++) {
-    const spec = habitSpecs[i]!;
+  const habits: { id: string; name: string }[] = [];
+  for (const [i, spec] of habitSpecs.entries()) {
     const habit = await prisma.habit.create({
       data: {
         userId,
@@ -137,36 +145,38 @@ async function seedData(userId: string): Promise<void> {
   }
 
   // Goals with linked habits.
-  const runHabit = habits[0]!;
-  const readHabit = habits[5]!;
-  const codeHabit = habits[3]!;
-  const callHabit = habits[6]!;
+  const runHabit = requireIndex(habits, 0, "run habit");
+  const readHabit = requireIndex(habits, 5, "read habit");
+  const codeHabit = requireIndex(habits, 3, "code habit");
+  const callHabit = requireIndex(habits, 6, "call habit");
+  const waterHabit = requireIndex(habits, 1, "water habit");
+  const reviewHabit = requireIndex(habits, 4, "review habit");
 
   await prisma.goal.create({
     data: {
       userId,
-      pillarId: health!.id,
+      pillarId: health.id,
       title: "Run a half marathon",
       description: "Build up to a 21 km run over the next months.",
       status: "ACTIVE",
       deadline: new Date(Date.UTC(2026, 9, 15)),
-      habits: { create: [{ habitId: runHabit.id }, { habitId: habits[1]!.id }] },
+      habits: { create: [{ habitId: runHabit.id }, { habitId: waterHabit.id }] },
     },
   });
   await prisma.goal.create({
     data: {
       userId,
-      pillarId: eng!.id,
+      pillarId: eng.id,
       title: "Ship the LifeOS beta",
       description: "Land the public beta release.",
       status: "ACTIVE",
-      habits: { create: [{ habitId: codeHabit.id }, { habitId: habits[4]!.id }] },
+      habits: { create: [{ habitId: codeHabit.id }, { habitId: reviewHabit.id }] },
     },
   });
   await prisma.goal.create({
     data: {
       userId,
-      pillarId: knowledge!.id,
+      pillarId: knowledge.id,
       title: "Read 12 books this year",
       status: "ACTIVE",
       habits: { create: [{ habitId: readHabit.id }] },
@@ -175,7 +185,7 @@ async function seedData(userId: string): Promise<void> {
   await prisma.goal.create({
     data: {
       userId,
-      pillarId: relationships!.id,
+      pillarId: relationships.id,
       title: "Grow a close network",
       status: "COMPLETED",
       completedAt: new Date(),
@@ -187,7 +197,7 @@ async function seedData(userId: string): Promise<void> {
   const shipProject = await prisma.project.create({
     data: {
       userId,
-      pillarId: eng!.id,
+      pillarId: eng.id,
       title: "Deploy the public landing page",
       description: "Vercel + Render + Neon.",
       status: "IN_PROGRESS",
@@ -204,7 +214,7 @@ async function seedData(userId: string): Promise<void> {
   await prisma.project.create({
     data: {
       userId,
-      pillarId: knowledge!.id,
+      pillarId: knowledge.id,
       title: "Write the deployment guide",
       status: "PLANNING",
       tasks: { create: [{ title: "Draft DEPLOYMENT.md", isDone: false, position: 0 }] },
