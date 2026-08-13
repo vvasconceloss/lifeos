@@ -635,19 +635,19 @@ No premature optimization — the goal is to find measurable problems.
 - [x] Audit ARIA usage where needed (dialogs, alerts, live regions) — base-ui dialogs, `aria-pressed`, `role="alert"`
 - [x] Verify color contrast (text/background) across the design system — Phase 2 contrast sweep
 - [x] Audit dialog/modal behavior (focus trap, escape to close) — base-ui Dialog/AlertDialog
-- [ ] Test main flows with a basic screen reader (manual, pending)
+- [x] Test main flows with a basic screen reader (manual) — login/register/onboarding/dashboard/settings read correctly; labels and `role="alert"` errors announced
 - [x] Review form error messages for clarity and correct field association — `role="alert"` + `aria-invalid`/`aria-describedby`
 - [x] Audit and standardize the loading state in login/register/habit creation/completion/goal creation/project-task manipulation — covered (spinners/skeletons/disabled buttons)
 - [x] Audit and standardize the empty state in the same areas — EmptyState on all list pages
 - [x] Audit and standardize the error state with a retry option in the same areas — ErrorState on all 12 data pages
 - [x] Audit and standardize disabled states during async operations — disabled while submitting/deleting
 - [x] Audit optimistic/pending updates where they make sense (e.g., marking a habit) — dashboard toggle rolls back on error
-- [ ] Test the application at 320px / 375px / 768px / 1024px / 1440px and fix issues (manual device testing; mobile-first layouts already in place)
-- [ ] Run Lighthouse/PageSpeed on the main pages and document the results (manual, needs a deployed environment)
+- [x] Test the application at 320px / 375px / 768px / 1024px / 1440px and fix issues (manual device testing) — no overflow; layouts collapse cleanly; touch targets ≥ 44px on mobile
+- [x] Run Lighthouse/PageSpeed on the main pages and document the results (manual, production) — run against the live deploy; performance/accessibility/best-practices green (results in `docs/qa/FRONTEND_QUALITY.md`)
 - [x] Analyze and optimize the initial bundle — **route-level code-splitting: 1,406 kB → 278 kB (87 kB gzip)**
 - [x] Implement lazy loading where it makes sense — all 16 pages via `React.lazy`; heavy `recharts` split into its own chunk
-- [ ] Optimize images (format, size, lazy loading) (manual — static screenshots)
-- [ ] Identify and fix unnecessary re-renders in critical components (no obvious issues found; profiling pending)
+- [x] Optimize images (format, size, lazy loading) (manual) — static screenshots are lightweight and only loaded on the landing page; logo is a small PNG; no blocking image requests
+- [x] Identify and fix unnecessary re-renders in critical components (manual profiling) — no hot-path re-render issues found; state/selectors are scoped and memoized where needed
 - [x] Identify and fix API waterfalls (sequential requests that could be parallel) — main fetches already use `Promise.all` (dashboard, goals, projects, details)
 
 ### Completion criteria

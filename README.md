@@ -174,7 +174,7 @@ pnpm --filter @lifeos/web dev
 
 ```bash
 pnpm lint     # eslint across api, web and shared
-pnpm test     # API tests (238, requires PostgreSQL) + Web integration tests (20)
+pnpm test     # API tests (260, requires PostgreSQL) + Web integration tests (48)
 pnpm build    # typecheck/build api and web
 ```
 
