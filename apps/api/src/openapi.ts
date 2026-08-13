@@ -2,7 +2,7 @@ const openapi = {
   openapi: "3.0.3",
   info: {
     title: "LifeOS API",
-    version: "1.5.0",
+    version: "1.5.1",
     description:
       "LifeOS — track habits, goals and projects, log your daily state, and understand how your days actually go.\n\nAll protected endpoints require the `token` cookie set by `POST /auth/login`, `/auth/register` or `/auth/demo`. Errors follow the contract `{ error: { code, message, details? } }` (see `docs/api/ERROR_CONTRACT.md`).",
   },
