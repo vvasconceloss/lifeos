@@ -1,5 +1,37 @@
 import { describe, expect, it } from 'vitest';
-import { expectedForMonth, expectedForMonthUpto } from './frequency';
+import { expectedForMonth, expectedForMonthUpto, frequencyLabel } from './frequency';
+
+describe('frequencyLabel', () => {
+  it('labels each frequency type', () => {
+    expect(frequencyLabel('DAILY', [], null, null)).toBe('Every day');
+    expect(frequencyLabel('WEEKLY_DAYS', [1, 3, 5], null, null)).toBe('Mon · Wed · Fri');
+    expect(frequencyLabel('TIMES_PER_WEEK', [], 4, null)).toBe('4× / week');
+    expect(frequencyLabel('TIMES_PER_MONTH', [], null, 12)).toBe('12× / month');
+  });
+
+  it('sorts and formats the scheduled days', () => {
+    expect(frequencyLabel('WEEKLY_DAYS', [5, 1, 3], null, null)).toBe('Mon · Wed · Fri');
+  });
+
+  it('falls back gracefully for missing values', () => {
+    expect(frequencyLabel('TIMES_PER_WEEK', [], null, null)).toBe('—× / week');
+    expect(frequencyLabel('TIMES_PER_MONTH', [], null, null)).toBe('—× / month');
+  });
+});
+
+describe('expectedForMonth', () => {
+  it('counts scheduled weekdays including gaps', () => {
+    // August 2026: Mon = 3,10,17,24,31; Wed = 5,12,19,26.
+    expect(expectedForMonth('WEEKLY_DAYS', [1, 3], null, null, 2026, 8)).toBe(9);
+  });
+
+  it('falls back to defaults when volume params are missing', () => {
+    expect(expectedForMonth('TIMES_PER_WEEK', [], null, null, 2026, 8)).toBe(
+      Math.round(31 / 7),
+    );
+    expect(expectedForMonth('TIMES_PER_MONTH', [], null, null, 2026, 8)).toBe(31);
+  });
+});
 
 describe('expectedForMonthUpto', () => {
   it('matches the full-month expectation when the month has elapsed', () => {
