@@ -70,6 +70,12 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | [`architecture/006-deployment.md`](architecture/006-deployment.md) | ADR: Vercel + Render + Neon. |
 | [`architecture/007-layering.md`](architecture/007-layering.md) | The HTTP → Validation → Service → Domain → Persistence boundaries, module convention, and the Phase 6 `any`/`as`/`!` sweep results. |
 
+## Product
+
+| Document | What it is |
+|---|---|
+| [`product/ONBOARDING_FUNNEL.md`](product/ONBOARDING_FUNNEL.md) | The onboarding funnel, the feedback mechanism (GitHub issue templates + in-app links), and the status-page decision. |
+
 ## Repository conventions
 
 - **Monorepo** with pnpm workspaces: `apps/api` (Fastify), `apps/web` (React + Vite), `packages/shared` (Zod schemas + types shared by both).

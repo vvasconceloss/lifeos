@@ -699,13 +699,12 @@ Last deployment  ...
 For a personal project, this can be overengineering — only implement it if the goal is to demonstrate operational thinking.
 
 ### Tasks
-- [ ] Define and document the onboarding funnel conceptually (landing → demo → register → onboarding → first habit → first completion → 7-day retention)
-- [ ] Evaluate whether it's worth instrumenting any of these events (e.g., simple logging, no external tool)
-- [ ] Document the funnel in the README or in `docs/product/`
-- [ ] Decide whether to implement a feedback mechanism (bug/feature request)
-- [ ] If yes: create a "Report a bug" / "Suggest a feature" link/button pointing to GitHub Issues
-- [ ] Decide whether a public status page is worth implementing (evaluate if it's overengineering for this context)
-- [ ] If yes: implement a simple status page (Web/API/Database/Last deployment)
+- [x] Define and document the onboarding funnel conceptually (landing → demo → register → onboarding → first habit → first completion → 7-day retention) — `docs/product/ONBOARDING_FUNNEL.md`
+- [x] Evaluate whether it's worth instrumenting any of these events (e.g., simple logging, no external tool) — decided: **not instrumented yet** (low traffic, no external analytics, events map to existing operations for later cheap logging)
+- [x] Document the funnel in the README or in `docs/product/` — `docs/product/ONBOARDING_FUNNEL.md`
+- [x] Decide whether to implement a feedback mechanism (bug/feature request) — **yes, lightweight**
+- [x] If yes: create a "Report a bug" / "Suggest a feature" link/button pointing to GitHub Issues — Profile page Feedback card + `.github/ISSUE_TEMPLATE/bug.yml` / `feature.yml`
+- [x] Decide whether a public status page is worth implementing (evaluate if it's overengineering for this context) — **discarded**: covered by `/v1/health/ready` + Render health check + post-deploy smoke
 
 ### Completion criteria
 The onboarding funnel is documented conceptually and serves as evidence of product thinking, and decisions about the feedback mechanism and status page were made consciously (implemented or explicitly discarded with justification, to avoid overengineering).
