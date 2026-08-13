@@ -15,5 +15,17 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     globals: true,
     css: false,
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/**', 'src/hooks/**', 'src/contexts/**'],
+      exclude: ['**/*.test.{ts,tsx}'],
+      reporter: ['text', 'json-summary'],
+      thresholds: {
+        statements: 85,
+        branches: 80,
+        functions: 85,
+        lines: 85,
+      },
+    },
   },
 })
