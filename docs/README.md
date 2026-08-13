@@ -47,6 +47,12 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 |---|---|
 | [`api/ERROR_CONTRACT.md`](api/ERROR_CONTRACT.md) | The standardized error shape `{ error: { code, message } }`, status mapping and the full code list. |
 
+## Quality assurance
+
+| Document | What it is |
+|---|---|
+| [`qa/TESTING.md`](qa/TESTING.md) | Coverage tooling + thresholds, the test pyramid (unit/domain, contract, E2E, failure scenarios, frontend) and how to run. |
+
 ## Repository conventions
 
 - **Monorepo** with pnpm workspaces: `apps/api` (Fastify), `apps/web` (React + Vite), `packages/shared` (Zod schemas + types shared by both).

@@ -210,26 +210,28 @@ rate limit exceeded
 ```
 
 ### Tasks
-- [ ] Set up a coverage tool (e.g., Vitest/Jest coverage) on the backend
-- [ ] Set up a coverage tool on the frontend
-- [ ] Define coverage thresholds (statements/branches/functions/lines)
-- [ ] Integrate threshold checking into CI (fail the build if below threshold)
-- [ ] Identify and cover test gaps in critical code (services, domain rules)
-- [ ] Expand the main E2E flow: register → onboarding → create habit → complete habit → dashboard → statistics → goal progress
-- [ ] Implement the cross-user isolation E2E flow (register A/B → cross-user access must fail)
-- [ ] Write a failure test for database unavailable
-- [ ] Write a failure test for expired JWT
-- [ ] Write a failure test for invalid JWT
-- [ ] Write a failure test for missing cookie
-- [ ] Write a failure test for malformed JSON
-- [ ] Write a failure test for duplicate email
-- [ ] Write a failure test for invalid frequency
-- [ ] Write a failure test for invalid dates
-- [ ] Write a failure test for nonexistent resource
-- [ ] Write a failure test for rate limit exceeded
+- [x] Set up a coverage tool (e.g., Vitest/Jest coverage) on the backend — `@vitest/coverage-v8`, `vitest run --coverage`
+- [x] Set up a coverage tool on the frontend — `@vitest/coverage-v8`, scoped to business-critical logic
+- [x] Define coverage thresholds (statements/branches/functions/lines) — 85 / 80 / 85 / 85 in both configs
+- [x] Integrate threshold checking into CI (fail the build if below threshold) — CI runs `pnpm test:coverage` (fails below thresholds)
+- [x] Identify and cover test gaps in critical code (services, domain rules) — added table-driven domain tests, plus unit tests for web `errors`/`api`/`frequencyLabel`/`validation`/`use-theme`/`use-auth`
+- [x] Expand the main E2E flow: register → onboarding → create habit → complete habit → dashboard → statistics → goal progress — `e2e.test.ts`
+- [x] Implement the cross-user isolation E2E flow (register A/B → cross-user access must fail) — `e2e.test.ts`
+- [x] Write a failure test for database unavailable — `/health/ready` → 503 (`failure-scenarios.test.ts`)
+- [x] Write a failure test for expired JWT — `auth.test.ts`
+- [x] Write a failure test for invalid JWT — `failure-scenarios.test.ts`
+- [x] Write a failure test for missing cookie — `failure-scenarios.test.ts`
+- [x] Write a failure test for malformed JSON — `failure-scenarios.test.ts`
+- [x] Write a failure test for duplicate email — `failure-scenarios.test.ts` (+ `auth.test.ts`)
+- [x] Write a failure test for invalid frequency — `habit-frequency.test.ts`
+- [x] Write a failure test for invalid dates — `completion.test.ts` / `daily-log.test.ts`
+- [x] Write a failure test for nonexistent resource — per-module 404 tests
+- [x] Write a failure test for rate limit exceeded — `auth.test.ts` (login/register 429)
 
 ### Completion criteria
 The coverage report confirms the defined thresholds are met, the critical E2E flows (including cross-user isolation) pass consistently, and there is test coverage for infrastructure failure scenarios, not just the happy path.
+
+Full details: [`docs/qa/TESTING.md`](../qa/TESTING.md).
 
 ---
 
