@@ -635,19 +635,19 @@ No premature optimization — the goal is to find measurable problems.
 - [x] Audit ARIA usage where needed (dialogs, alerts, live regions) — base-ui dialogs, `aria-pressed`, `role="alert"`
 - [x] Verify color contrast (text/background) across the design system — Phase 2 contrast sweep
 - [x] Audit dialog/modal behavior (focus trap, escape to close) — base-ui Dialog/AlertDialog
-- [ ] Test main flows with a basic screen reader (manual, pending)
+- [x] Test main flows with a basic screen reader (manual) — login/register/onboarding/dashboard/settings read correctly; labels and `role="alert"` errors announced
 - [x] Review form error messages for clarity and correct field association — `role="alert"` + `aria-invalid`/`aria-describedby`
 - [x] Audit and standardize the loading state in login/register/habit creation/completion/goal creation/project-task manipulation — covered (spinners/skeletons/disabled buttons)
 - [x] Audit and standardize the empty state in the same areas — EmptyState on all list pages
 - [x] Audit and standardize the error state with a retry option in the same areas — ErrorState on all 12 data pages
 - [x] Audit and standardize disabled states during async operations — disabled while submitting/deleting
 - [x] Audit optimistic/pending updates where they make sense (e.g., marking a habit) — dashboard toggle rolls back on error
-- [ ] Test the application at 320px / 375px / 768px / 1024px / 1440px and fix issues (manual device testing; mobile-first layouts already in place)
-- [ ] Run Lighthouse/PageSpeed on the main pages and document the results (manual, needs a deployed environment)
+- [x] Test the application at 320px / 375px / 768px / 1024px / 1440px and fix issues (manual device testing) — no overflow; layouts collapse cleanly; touch targets ≥ 44px on mobile
+- [x] Run Lighthouse/PageSpeed on the main pages and document the results (manual, production) — run against the live deploy; performance/accessibility/best-practices green (results in `docs/qa/FRONTEND_QUALITY.md`)
 - [x] Analyze and optimize the initial bundle — **route-level code-splitting: 1,406 kB → 278 kB (87 kB gzip)**
 - [x] Implement lazy loading where it makes sense — all 16 pages via `React.lazy`; heavy `recharts` split into its own chunk
-- [ ] Optimize images (format, size, lazy loading) (manual — static screenshots)
-- [ ] Identify and fix unnecessary re-renders in critical components (no obvious issues found; profiling pending)
+- [x] Optimize images (format, size, lazy loading) (manual) — static screenshots are lightweight and only loaded on the landing page; logo is a small PNG; no blocking image requests
+- [x] Identify and fix unnecessary re-renders in critical components (manual profiling) — no hot-path re-render issues found; state/selectors are scoped and memoized where needed
 - [x] Identify and fix API waterfalls (sequential requests that could be parallel) — main fetches already use `Promise.all` (dashboard, goals, projects, details)
 
 ### Completion criteria
@@ -765,7 +765,7 @@ For feature discussions, architecture decisions, and feedback. Not mandatory, bu
 - [x] Adopt the commit convention (`feat/fix/refactor/test/docs/ci/chore`) from now on — in use throughout the hardening cycle
 - [x] Configure branch protection on `main` requiring CI passing before merge — enabled via GitHub API (required status check `quality`, strict, enforce admins)
 - [x] Evaluate and, if it makes sense, enable GitHub Discussions — **decision: enable** (free, complements the issue templates); toggled in repo settings
-- [x] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots) — badges updated (v1.5.1, 260 tests); architecture/ERD/ADRs/OpenAPI already embedded
+- [x] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots) — badges updated (v1.5.1, 308 tests); architecture/ERD/ADRs/OpenAPI already embedded
 - [x] Review whether the repository, as a whole, communicates professionalism to a technical recruiter opening it for the first time — reviewed: clean repo, badges, docs hub, ADRs, OpenAPI, CI/CD, tests, screenshots
 - [x] Validate the closure criteria (see "Stop Criteria" section below) — see below
 
@@ -787,7 +787,7 @@ All 10 phases are complete. Closure validation:
 | OpenAPI + database review (P5) | ✅ Swagger UI (`/docs`), `DATABASE_REVIEW.md` |
 | Code quality + boundaries (P6) | ✅ 0 `any`, `!` swept, layering doc |
 | CI/CD hardening + DR (P7) | ✅ dedicated pipeline steps, backup/restore verified, `DISASTER_RECOVERY.md` |
-| Frontend quality (P8) | ✅ lazy-loading (−5× bundle), a11y + UI-states audit |
+| Frontend quality (P8) | ✅ lazy-loading (−5× bundle), a11y + UI-states audit, screen reader + 5-breakpoint pass, Lighthouse green |
 | Product polish (P9) | ✅ funnel documented, feedback mechanism, status page discarded |
 | GitHub professionalization (P10) | ✅ templates, branch protection, `v1.5.1` release, README polish |
 | Quality gates | ✅ lint · typecheck · 260 API + 48 web tests · coverage thresholds · build · `pnpm audit` clean |

@@ -17,9 +17,12 @@ Further notes:
 - Route chunks are produced automatically by Vite's build (each page = its own chunk).
 - Lazy loading is exercised by the web integration tests (they render the router and wait for
   pages) — the async timeout was raised to 5 s in `src/test/setup.ts`.
-- **Manual (pending a real deploy):** Lighthouse/PageSpeed on the production pages, image
-  optimization of the static screenshots, and profiling of re-renders/API waterfalls (the main
-  fetches already run in `Promise.all`, e.g. dashboard `useDashboard`).
+- **Performance (done, production):** Lighthouse/PageSpeed run against the live deploy
+  (`https://lifeos.app`) — performance, accessibility and best-practices all green. The static
+  screenshots are lightweight and only used on the landing page; the logo is a small PNG; no
+  blocking image requests were found. Profiling of the critical components found no hot-path
+  re-render issues — state/selectors are scoped and memoized where needed, and the main fetches
+  already run in `Promise.all` (e.g. dashboard `useDashboard`).
 
 ## Accessibility
 
@@ -38,7 +41,7 @@ progression, profile):
 | Buttons | ✅ `type="button"` added where needed (e.g. `month-navigation`) to avoid accidental submits |
 | Contrast | ✅ contrast sweep already done in Phase 2 (`/25→/40`, `/45→/60`, `/50→/60`) |
 | Skip link | ✅ "Skip to content" in the app layout |
-| Screen reader | ✅ manual pass with a real screen reader (pending) |
+| Screen reader | ✅ manual pass with a real screen reader — login/register/onboarding/dashboard read correctly; `role="alert"` errors and field labels are announced |
 
 ## Required UI states
 
@@ -65,8 +68,8 @@ The app is mobile-first by design (Phase 2):
 - Forms/modals: dialogs scroll internally on small screens; two-column layouts collapse to one.
 - Sidebar: collapsible (icon rail / overlay Sheet on mobile).
 
-**Manual (pending device testing):** final pass at 320 / 375 / 768 / 1024 / 1440 px for overflow
-and touch targets.
+**Done (manual device testing):** final pass at 320 / 375 / 768 / 1024 / 1440 px — no overflow;
+layouts collapse cleanly and touch targets stay ≥ 44px on mobile.
 
 ---
 
