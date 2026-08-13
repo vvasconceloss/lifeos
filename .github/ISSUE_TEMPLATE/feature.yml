@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest an idea for LifeOS
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for suggesting a feature.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: The context or pain point behind the request.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How you imagine this working.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or other approaches you tried.
+    validations:
+      required: false
