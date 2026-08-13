@@ -17,7 +17,7 @@ slowly building a life you can measure, understand and improve.
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/tests-308%20passing-22c55e.svg)](CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-260%20passing-22c55e.svg)](CHANGELOG.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-8b5cf6.svg)](https://github.com/vvasconceloss/lifeos/pulls)
 
 </p>

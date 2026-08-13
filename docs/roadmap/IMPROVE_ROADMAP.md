@@ -765,7 +765,7 @@ For feature discussions, architecture decisions, and feedback. Not mandatory, bu
 - [x] Adopt the commit convention (`feat/fix/refactor/test/docs/ci/chore`) from now on — in use throughout the hardening cycle
 - [x] Configure branch protection on `main` requiring CI passing before merge — enabled via GitHub API (required status check `quality`, strict, enforce admins)
 - [x] Evaluate and, if it makes sense, enable GitHub Discussions — **decision: enable** (free, complements the issue templates); toggled in repo settings
-- [x] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots) — badges updated (v1.5.1, 308 tests); architecture/ERD/ADRs/OpenAPI already embedded
+- [x] Do a final polish of `README.md` (badges, architecture diagram, ERD, links to ADRs, OpenAPI, screenshots) — badges updated (v1.5.1, 260 tests); architecture/ERD/ADRs/OpenAPI already embedded
 - [x] Review whether the repository, as a whole, communicates professionalism to a technical recruiter opening it for the first time — reviewed: clean repo, badges, docs hub, ADRs, OpenAPI, CI/CD, tests, screenshots
 - [x] Validate the closure criteria (see "Stop Criteria" section below) — see below
 
@@ -787,7 +787,7 @@ All 10 phases are complete. Closure validation:
 | OpenAPI + database review (P5) | ✅ Swagger UI (`/docs`), `DATABASE_REVIEW.md` |
 | Code quality + boundaries (P6) | ✅ 0 `any`, `!` swept, layering doc |
 | CI/CD hardening + DR (P7) | ✅ dedicated pipeline steps, backup/restore verified, `DISASTER_RECOVERY.md` |
-| Frontend quality (P8) | ✅ lazy-loading (−5× bundle), a11y + UI-states audit, screen reader + 5-breakpoint pass, Lighthouse green |
+| Frontend quality (P8) | ✅ lazy-loading (−5× bundle), a11y + UI-states audit |
 | Product polish (P9) | ✅ funnel documented, feedback mechanism, status page discarded |
 | GitHub professionalization (P10) | ✅ templates, branch protection, `v1.5.1` release, README polish |
 | Quality gates | ✅ lint · typecheck · 260 API + 48 web tests · coverage thresholds · build · `pnpm audit` clean |
