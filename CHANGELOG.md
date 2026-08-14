@@ -27,7 +27,7 @@ header, the profile form got proper interactive states, and the release/PR proce
 ## v1.5.1 — Hardening & Quality (2026)
 
 A hardening cycle focused on security, engineering quality and operations — no new product
-features. Full roadmap and results in [`docs/roadmap/IMPROVE_ROADMAP.md`](docs/roadmap/IMPROVE_ROADMAP.md).
+features. Full roadmap and results in [`docs/roadmap/v1.5.1_IMPROVE.md`](docs/roadmap/v1.5.1_IMPROVE.md).
 
 ### Security
 

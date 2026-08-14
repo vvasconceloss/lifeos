@@ -1,6 +1,6 @@
 # LifeOS — Data Deletion Policy
 
-> Result of **Phase 6 — Account Soft-Delete** (see [`docs/roadmap/1.6_ROADMAP.md`](../roadmap/1.6_ROADMAP.md)).
+> Result of **Phase 6 — Account Soft-Delete** (see [`docs/roadmap/v1.6_ACCOUNT_SECURITY.md`](../roadmap/v1.6_ACCOUNT_SECURITY.md)).
 
 ## How account deletion works
 
@@ -48,4 +48,4 @@ Permanently removed (cascade via Prisma `onDelete: Cascade`):
 
 ---
 
-_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/1.6_ROADMAP.md) · [Security](../SECURITY.md)_
+_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/v1.6_ACCOUNT_SECURITY.md) · [Security](../SECURITY.md)_

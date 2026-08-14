@@ -1,6 +1,6 @@
 # LifeOS — Gamification / Progression
 
-Reference for the XP/Level/Rank system (Phase 9 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
+Reference for the XP/Level/Rank system (Phase 9 of [`v1.5_PUBLIC_BETA.md`](../roadmap/v1.5_PUBLIC_BETA.md)).
 
 ## Principle
 

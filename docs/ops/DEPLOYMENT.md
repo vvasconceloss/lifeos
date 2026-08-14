@@ -1,6 +1,6 @@
 # LifeOS — Deployment
 
-How LifeOS is deployed and configured for production (Phase 14 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
+How LifeOS is deployed and configured for production (Phase 14 of [`v1.5_PUBLIC_BETA.md`](../roadmap/v1.5_PUBLIC_BETA.md)).
 
 ## Architecture
 

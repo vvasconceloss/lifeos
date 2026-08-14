@@ -1,6 +1,6 @@
 # LifeOS — Database Review
 
-> (see [`roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md)).
+> (see [`roadmap/v1.5.1_IMPROVE.md`](roadmap/v1.5.1_IMPROVE.md)).
 > Source of truth: `apps/api/prisma/schema.prisma`.
 
 ## Indexes

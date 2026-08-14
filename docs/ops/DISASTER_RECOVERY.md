@@ -1,7 +1,7 @@
 # LifeOS — Disaster Recovery
 
 > Result of **Phase 7 — CI/CD Hardening and Production**
-> (see [`docs/roadmap/IMPROVE_ROADMAP.md`](../roadmap/IMPROVE_ROADMAP.md)).
+> (see [`docs/roadmap/v1.5.1_IMPROVE.md`](../roadmap/v1.5.1_IMPROVE.md)).
 > Lightweight by design — production-minded, not enterprise-grade.
 
 ## Objectives (RTO / RPO)

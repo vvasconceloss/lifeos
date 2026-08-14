@@ -1,7 +1,7 @@
 # LifeOS — Transactional Email Infrastructure
 
 > Result of **Phase 2 — Transactional Email Infrastructure**
-> (see [`docs/roadmap/1.6_ROADMAP.md`](../roadmap/1.6_ROADMAP.md)).
+> (see [`docs/roadmap/v1.6_ACCOUNT_SECURITY.md`](../roadmap/v1.6_ACCOUNT_SECURITY.md)).
 
 ## Provider
 
@@ -179,4 +179,4 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 
 ---
 
-_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/1.6_ROADMAP.md) · [Deployment](../ops/DEPLOYMENT.md)_
+_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/v1.6_ACCOUNT_SECURITY.md) · [Deployment](../ops/DEPLOYMENT.md)_

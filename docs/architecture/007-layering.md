@@ -1,7 +1,7 @@
 # LifeOS — Layering, Module Convention & Code Quality
 
 > Result of **Phase 6 — Code Quality and Boundaries**
-> (see [`docs/roadmap/IMPROVE_ROADMAP.md`](../roadmap/IMPROVE_ROADMAP.md)).
+> (see [`docs/roadmap/v1.5.1_IMPROVE.md`](../roadmap/v1.5.1_IMPROVE.md)).
 
 ## The 5-layer boundary
 

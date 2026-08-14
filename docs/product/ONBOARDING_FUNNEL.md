@@ -1,7 +1,7 @@
 # LifeOS — Product & Onboarding Funnel
 
 > Result of **Phase 9 — Product Polish**
-> (see [`docs/roadmap/IMPROVE_ROADMAP.md`](../roadmap/IMPROVE_ROADMAP.md)).
+> (see [`docs/roadmap/v1.5.1_IMPROVE.md`](../roadmap/v1.5.1_IMPROVE.md)).
 
 ## Onboarding funnel (conceptual)
 
