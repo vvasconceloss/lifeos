@@ -204,6 +204,15 @@ const TEMPLATES: Record<EmailTemplate, TemplateDef> = {
       return `A request was made to change the email address on your LifeOS account.\n\nIf this wasn't you, cancel the request right away: ${cancelUrl}`;
     },
   },
+  "email-changed": {
+    subject: "Your email was changed",
+    html: () =>
+      paragraph(
+        "The email address on your LifeOS account has been updated. If this wasn't you, contact us immediately to secure your account.",
+      ),
+    text: () =>
+      "The email address on your LifeOS account has been updated. If this wasn't you, contact us immediately to secure your account.",
+  },
   "account-deletion-requested": {
     subject: "Your account will be deleted",
     html: (data) => {

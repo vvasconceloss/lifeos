@@ -8,6 +8,7 @@ export type EmailTemplate =
   | "password-changed"
   | "email-change-request"
   | "email-change-alert"
+  | "email-changed"
   | "account-deletion-requested"
   | "account-deletion-reminder"
   | "account-deleted";
