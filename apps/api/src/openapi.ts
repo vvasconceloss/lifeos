@@ -73,6 +73,40 @@ const openapi = {
         },
       },
     },
+    "/auth/forgot-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Request a password reset link (generic response — no account enumeration)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
+    "/auth/reset-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Reset a password with a single-use token (invalidates old sessions)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
     "/auth/demo": {
       post: {
         tags: ["Auth"],
@@ -668,6 +702,25 @@ const openapi = {
         type: "object",
         required: ["email"],
         properties: { email: { type: "string", format: "email" } },
+      },
+      ForgotPasswordBody: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string", format: "email" } },
+      },
+      ResetPasswordBody: {
+        type: "object",
+        required: ["token", "password"],
+        properties: {
+          token: { type: "string", description: "The single-use password reset token" },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 72,
+            description:
+              "Strong password policy: 8–72 bytes, at least one lowercase letter, one uppercase letter, one number, one special character, not a common password.",
+          },
+        },
       },
       UpdateMeBody: {
         type: "object",

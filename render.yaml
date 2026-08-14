@@ -34,6 +34,14 @@ services:
         value: "10"
       - key: REGISTER_RATE_LIMIT_WINDOW
         value: 1 minute
+      - key: FORGOT_PASSWORD_RATE_LIMIT_MAX
+        value: "3"
+      - key: FORGOT_PASSWORD_RATE_LIMIT_WINDOW
+        value: 1 hour
+      - key: RESET_PASSWORD_RATE_LIMIT_MAX
+        value: "10"
+      - key: RESET_PASSWORD_RATE_LIMIT_WINDOW
+        value: 1 hour
       # Transactional email (Gmail SMTP). Set EMAIL_ENABLED=true to start sending.
       - key: EMAIL_ENABLED
         value: "false"
