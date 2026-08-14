@@ -65,6 +65,9 @@ jobs:
       - name: Web tests
         run: pnpm --filter @lifeos/web test
 
+      - name: i18n key completeness
+        run: pnpm --filter @lifeos/web i18n:check
+
       - name: Full test suite with coverage (fails below thresholds)
         run: pnpm test:coverage
 

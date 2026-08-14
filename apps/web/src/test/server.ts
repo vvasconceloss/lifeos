@@ -8,6 +8,7 @@ export const loggedInUser = {
   timezone: null,
   weekStart: 1,
   theme: 'system',
+  locale: 'en',
   onboarded: true,
   gamification: false,
   emailVerified: true,
