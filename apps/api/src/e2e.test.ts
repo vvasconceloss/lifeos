@@ -1,5 +1,6 @@
 import { buildApp } from './app';
 import { cleanupTestUsers, createHabit, createPillar, uniqueEmail } from '../test/helpers';
+import { prisma } from './db/client';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -22,6 +23,12 @@ describe('E2E: main flow', () => {
     expect(registerRes.statusCode).toBe(201);
     const tokenCookie = registerRes.cookies.find((c) => c.name === 'token');
     const cookie = `token=${tokenCookie!.value}`;
+
+    // 1b. Verify the email (required to access goals/projects/stats in the main flow).
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await prisma.user.update({ where: { id: user.id }, data: { emailVerified: true } });
+    }
 
     // 2. Onboarding creates the first pillar
     const onboardingRes = await app.inject({

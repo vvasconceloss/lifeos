@@ -40,6 +40,39 @@ const openapi = {
         },
       },
     },
+    "/auth/verify-email": {
+      post: {
+        tags: ["Auth"],
+        summary: "Verify an email address with a confirmation token",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/VerifyEmailBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/auth/resend-verification": {
+      post: {
+        tags: ["Auth"],
+        summary: "Resend the verification email (generic response — no account enumeration)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ResendVerificationBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
     "/auth/demo": {
       post: {
         tags: ["Auth"],
@@ -587,7 +620,7 @@ const openapi = {
       },
       User: {
         type: "object",
-        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "createdAt"],
+        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "emailVerified", "createdAt"],
         properties: {
           id: { type: "string", format: "uuid" },
           email: { type: "string", format: "email" },
@@ -597,6 +630,7 @@ const openapi = {
           theme: { type: "string", enum: ["light", "dark", "system"] },
           onboarded: { type: "boolean" },
           gamification: { type: "boolean" },
+          emailVerified: { type: "boolean", description: "Whether the user confirmed their email address" },
           createdAt: { type: "string", format: "date-time" },
         },
       },
@@ -624,6 +658,16 @@ const openapi = {
         type: "object",
         required: ["email", "password"],
         properties: { email: { type: "string", format: "email" }, password: { type: "string", minLength: 1 } },
+      },
+      VerifyEmailBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The email verification token from the confirmation link" } },
+      },
+      ResendVerificationBody: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string", format: "email" } },
       },
       UpdateMeBody: {
         type: "object",
