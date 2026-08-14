@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, CircleX, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,12 +15,13 @@ type State =
   | { status: "error"; message: string };
 
 export default function ConfirmEmailChangePage() {
+  const { t } = useTranslation("auth");
   const { token } = useSearch({ from: "/account/email/confirm" });
   const { logout } = useAuth();
   const [state, setState] = useState<State>(
     token
       ? { status: "loading" }
-      : { status: "error", message: "This confirmation link is missing or incomplete." },
+      : { status: "error", message: t("confirmEmailChange.missingLink") },
   );
   const sentRef = useRef(false);
 
@@ -39,7 +41,7 @@ export default function ConfirmEmailChangePage() {
       .catch((error) => {
         const code = (error as AxiosError<{ error?: { code?: string } }>).response?.data?.error?.code;
         if (code === "EMAIL_CHANGE_EXPIRED") setState({ status: "expired" });
-        else setState({ status: "error", message: getApiErrorMessage(error, "Invalid or used confirmation link") });
+        else setState({ status: "error", message: getApiErrorMessage(error, t("confirmEmailChange.invalidOrUsed")) });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -48,28 +50,28 @@ export default function ConfirmEmailChangePage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-6 py-12 text-foreground">
       <div className="w-full max-w-sm">
         <h1 className="mb-6 text-center text-2xl font-semibold tracking-tight text-foreground">
-          Confirm your new email
+          {t("confirmEmailChange.title")}
         </h1>
 
         {state.status === "loading" && (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <Spinner className="size-6" />
-            <p className="text-sm text-foreground/70">Confirming your new email…</p>
+            <p className="text-sm text-foreground/70">{t("confirmEmailChange.confirming")}</p>
           </div>
         )}
 
         {state.status === "success" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CheckCircle2 className="size-10 text-green-600 dark:text-green-500" />
-            <h2 className="text-lg font-semibold text-foreground">Email updated</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("confirmEmailChange.emailUpdated")}</h2>
             <p className="text-sm text-foreground/70">
-              Your email address has been changed successfully.
+              {t("confirmEmailChange.emailUpdatedSubtitle")}
             </p>
             <Link
               to="/login"
               className="mt-2 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              Go to sign in
+              {t("confirmEmailChange.goToSignIn")}
             </Link>
           </div>
         )}
@@ -77,9 +79,9 @@ export default function ConfirmEmailChangePage() {
         {state.status === "expired" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <TriangleAlert className="size-10 text-amber-600 dark:text-amber-500" />
-            <h2 className="text-lg font-semibold text-foreground">Link expired</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("confirmEmailChange.linkExpired")}</h2>
             <p className="text-sm text-foreground/70">
-              This confirmation link has expired. Request the change again from your profile.
+              {t("confirmEmailChange.linkExpiredSubtitle")}
             </p>
           </div>
         )}
@@ -87,7 +89,7 @@ export default function ConfirmEmailChangePage() {
         {state.status === "error" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CircleX className="size-10 text-destructive" />
-            <h2 className="text-lg font-semibold text-foreground">Could not confirm</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("confirmEmailChange.couldNotConfirm")}</h2>
             <p className="text-sm text-foreground/70">{state.message}</p>
           </div>
         )}

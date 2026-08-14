@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, CircleX, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/errors";
@@ -13,11 +14,12 @@ type State =
   | { status: "error"; message: string };
 
 export default function RecoverAccountPage() {
+  const { t } = useTranslation("auth");
   const { token } = useSearch({ from: "/account/recover" });
   const [state, setState] = useState<State>(
     token
       ? { status: "loading" }
-      : { status: "error", message: "This recovery link is missing or incomplete." },
+      : { status: "error", message: t("recoverAccount.missingLink") },
   );
   const sentRef = useRef(false);
 
@@ -32,36 +34,36 @@ export default function RecoverAccountPage() {
       .catch((error) => {
         const code = (error as AxiosError<{ error?: { code?: string } }>).response?.data?.error?.code;
         if (code === "RECOVERY_EXPIRED") setState({ status: "expired" });
-        else setState({ status: "error", message: getApiErrorMessage(error, "Invalid or used recovery link") });
+        else setState({ status: "error", message: getApiErrorMessage(error, t("recoverAccount.invalidOrUsed")) });
       });
-  }, [token]);
+  }, [token, t]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6 py-12 text-foreground">
       <div className="w-full max-w-sm">
         <h1 className="mb-6 text-center text-2xl font-semibold tracking-tight text-foreground">
-          Recover your account
+          {t("recoverAccount.title")}
         </h1>
 
         {state.status === "loading" && (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <Spinner className="size-6" />
-            <p className="text-sm text-foreground/70">Recovering your account…</p>
+            <p className="text-sm text-foreground/70">{t("recoverAccount.recovering")}</p>
           </div>
         )}
 
         {state.status === "success" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CheckCircle2 className="size-10 text-green-600 dark:text-green-500" />
-            <h2 className="text-lg font-semibold text-foreground">Account recovered</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("recoverAccount.accountRecovered")}</h2>
             <p className="text-sm text-foreground/70">
-              Your account is back and active. All of your data is intact.
+              {t("recoverAccount.recoveredSubtitle")}
             </p>
             <Link
               to="/login"
               className="mt-2 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              Go to sign in
+              {t("recoverAccount.goToSignIn")}
             </Link>
           </div>
         )}
@@ -69,10 +71,9 @@ export default function RecoverAccountPage() {
         {state.status === "expired" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <TriangleAlert className="size-10 text-amber-600 dark:text-amber-500" />
-            <h2 className="text-lg font-semibold text-foreground">Link expired</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("recoverAccount.linkExpired")}</h2>
             <p className="text-sm text-foreground/70">
-              This recovery link has expired. If you still want to keep your account, sign in and
-              cancel the deletion from the recovery screen.
+              {t("recoverAccount.linkExpiredSubtitle")}
             </p>
           </div>
         )}
@@ -80,7 +81,7 @@ export default function RecoverAccountPage() {
         {state.status === "error" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CircleX className="size-10 text-destructive" />
-            <h2 className="text-lg font-semibold text-foreground">Could not recover</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("recoverAccount.couldNotRecover")}</h2>
             <p className="text-sm text-foreground/70">{state.message}</p>
           </div>
         )}

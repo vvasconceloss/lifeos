@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { BedDouble, BookOpenCheck, Smile, Zap } from "lucide-react";
@@ -10,8 +11,8 @@ import { MonthNavigation } from "@/components/dashboard/month-navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorState } from "@/components/error-state";
 import { cn } from "@/lib/utils";
+import { formatMonthYear, activeLocale } from "@/lib/i18n-format";
 
-const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const RATING_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 function stateScore(log: { mood: number | null; energy: number | null }): number | null {
@@ -49,11 +50,11 @@ function sleepScore(hours: number): number {
 
 function formatFullDate(dateKey: string): string {
   const [y, m, d] = dateKey.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+  return new Intl.DateTimeFormat(activeLocale(), {
     weekday: "long",
     month: "long",
     day: "numeric",
-  });
+  }).format(new Date(Date.UTC(y, m - 1, d)));
 }
 
 function buildMonthCells(monthDays: string[], logsByDate: Map<string, DailyLogResponse>) {
@@ -78,6 +79,7 @@ function LogForm({
   log?: DailyLogResponse;
   onSaved: (log: DailyLogResponse) => void;
 }) {
+  const { t } = useTranslation("journal");
   const [mood, setMood] = useState<number | null>(log?.mood ?? null);
   const [energy, setEnergy] = useState<number | null>(log?.energy ?? null);
   const [sleepH, setSleepH] = useState(log?.sleepHours != null ? String(Math.floor(log.sleepHours)) : "");
@@ -104,9 +106,9 @@ function LogForm({
 
       const res = await api.post<{ log: DailyLogResponse }>("/daily-logs", payload);
       onSaved(res.data.log);
-      toast.success("Journal saved");
+      toast.success(t("form.savedToast"));
     } catch {
-      toast.error("Failed to save journal");
+      toast.error(t("form.errorToast"));
     } finally {
       setSaving(false);
     }
@@ -115,13 +117,13 @@ function LogForm({
   return (
     <div className="flex flex-col gap-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div>
-        <span className="text-xs font-medium text-foreground/60">Log entry</span>
+        <span className="text-xs font-medium text-foreground/60">{t("form.logEntry")}</span>
         <p className="text-sm font-semibold text-foreground">{formatFullDate(date)}</p>
       </div>
 
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <span className="text-xs font-medium text-foreground/60">Mood</span>
+          <span className="text-xs font-medium text-foreground/60">{t("form.mood")}</span>
           <div className="flex flex-wrap gap-1">
             {RATING_VALUES.map((v) => (
               <button
@@ -143,7 +145,7 @@ function LogForm({
         </div>
 
         <div className="grid gap-2">
-          <span className="text-xs font-medium text-foreground/60">Energy</span>
+          <span className="text-xs font-medium text-foreground/60">{t("form.energy")}</span>
           <div className="flex flex-wrap gap-1">
             {RATING_VALUES.map((v) => (
               <button
@@ -165,11 +167,11 @@ function LogForm({
         </div>
 
         <div className="grid gap-2">
-          <span className="text-xs font-medium text-foreground/60">Sleep</span>
+          <span className="text-xs font-medium text-foreground/60">{t("form.sleep")}</span>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <label htmlFor="j-sleep-h" className="text-[10px] text-foreground/50">
-                Hours
+                {t("form.hours")}
               </label>
               <input
                 id="j-sleep-h"
@@ -185,7 +187,7 @@ function LogForm({
             </div>
             <div className="grid gap-1.5">
               <label htmlFor="j-sleep-m" className="text-[10px] text-foreground/50">
-                Minutes
+                {t("form.minutes")}
               </label>
               <input
                 id="j-sleep-m"
@@ -204,14 +206,14 @@ function LogForm({
 
         <div className="grid gap-2">
           <label htmlFor="j-notes" className="text-xs font-medium text-foreground/60">
-            Notes
+            {t("form.notes")}
           </label>
           <textarea
             id="j-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            placeholder="How did the day go?"
+            placeholder={t("form.notesPlaceholder")}
             className={inputClass}
           />
         </div>
@@ -222,7 +224,13 @@ function LogForm({
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {saving ? <Spinner className="size-4" /> : null}
-          {saving ? "Saving..." : isFuture ? "Future days can't be logged" : log ? "Update entry" : "Save entry"}
+          {saving
+            ? t("form.saving")
+            : isFuture
+              ? t("form.futureDisabled")
+              : log
+                ? t("form.update")
+                : t("form.save")}
         </button>
       </div>
     </div>
@@ -282,20 +290,20 @@ function CorrelationRow({ label, days }: { label: string; days: number }) {
 }
 
 function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations }) {
+  const { t } = useTranslation("journal");
   const groups = [
-    { title: "Mood", icon: <Smile className="size-4" />, rows: correlations.mood },
-    { title: "Energy", icon: <Zap className="size-4" />, rows: correlations.energy },
-    { title: "Sleep", icon: <BedDouble className="size-4" />, rows: correlations.sleep },
+    { title: t("form.mood"), icon: <Smile className="size-4" />, rows: correlations.mood },
+    { title: t("form.energy"), icon: <Zap className="size-4" />, rows: correlations.energy },
+    { title: t("form.sleep"), icon: <BedDouble className="size-4" />, rows: correlations.sleep },
   ];
   const hasData = groups.some((g) => g.rows.length > 0);
 
   return (
     <div data-testid="logged-days-by-state" className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-      <span className="text-xs font-medium text-foreground/60">Your logged days by state</span>
+      <span className="text-xs font-medium text-foreground/60">{t("correlations.title")}</span>
       {!hasData ? (
         <p className="mt-3 text-sm text-foreground/60">
-          Log a few days (mood, energy or sleep) to see how your days are distributed across these
-          buckets.
+          {t("correlations.empty")}
         </p>
       ) : (
         <div className="mt-4 grid gap-6 md:grid-cols-3">
@@ -319,6 +327,7 @@ function CorrelationsCard({ correlations }: { correlations: DailyLogCorrelations
 }
 
 export default function JournalPage() {
+  const { t } = useTranslation("journal");
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     const now = new Date();
@@ -421,11 +430,11 @@ export default function JournalPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <BookOpenCheck className="size-5 text-foreground/60" aria-hidden />
-                  <span className="text-xs font-medium text-foreground/60">Daily journal</span>
+                  <span className="text-xs font-medium text-foreground/60">{t("title")}</span>
                 </div>
                 <MonthNavigation
                   monthOffset={monthOffset}
-                  label={targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  label={formatMonthYear(targetDate)}
                   onPrev={() => setMonthOffset(monthOffset - 1)}
                   onNext={() => setMonthOffset(monthOffset + 1)}
                   onToday={goToday}
@@ -436,9 +445,9 @@ export default function JournalPage() {
                 <LogForm key={selectedDate} date={selectedDate} log={selectedLog} onSaved={handleSaved} />
 
                 <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-                  <span className="text-xs font-medium text-foreground/60">Monthly calendar</span>
+                  <span className="text-xs font-medium text-foreground/60">{t("calendar.title")}</span>
                   <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-medium text-foreground/40">
-                    {WEEKDAY_LABELS.map((l) => (
+                    {(t("calendar.weekdays", { returnObjects: true }) as string[]).map((l) => (
                       <div key={l}>{l}</div>
                     ))}
                   </div>
@@ -450,7 +459,7 @@ export default function JournalPage() {
                           type="button"
                           disabled={cell.date > todayKey}
                           onClick={() => setSelectedDate(cell.date)}
-                          aria-label={`${cell.date}${cell.log ? " (logged)" : ""}`}
+                          aria-label={`${cell.date}${cell.log ? ` ${t("calendar.logged")}` : ""}`}
                           className={cn(
                             "flex min-h-0 items-center justify-center rounded-md text-xs tabular-nums transition-colors disabled:cursor-not-allowed",
                             cell.date > todayKey
@@ -469,22 +478,22 @@ export default function JournalPage() {
                     )}
                   </div>
                   <p className="text-[10px] text-foreground/50">
-                    Logged days are colored by mood &amp; energy (the stronger the green, the better the day).
+                    {t("calendar.hint")}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                 <div className="mb-4 flex items-baseline justify-between">
-                  <span className="text-xs font-medium text-foreground/60">Your daily state this month</span>
+                  <span className="text-xs font-medium text-foreground/60">{t("monthlyState.title")}</span>
                   <span className="text-[10px] text-foreground/60">
-                    {loggedDays} logged day{loggedDays === 1 ? "" : "s"}
+                    {t("monthlyState.loggedDays", { count: loggedDays })}
                   </span>
                 </div>
                 <div className="grid gap-5 md:grid-cols-3">
                   <StateCard
                     icon={<Smile className="size-4" />}
-                    label="Mood"
+                    label={t("form.mood")}
                     value={avgMood}
                     max={10}
                     unit="/10"
@@ -492,7 +501,7 @@ export default function JournalPage() {
                   />
                   <StateCard
                     icon={<Zap className="size-4" />}
-                    label="Energy"
+                    label={t("form.energy")}
                     value={avgEnergy}
                     max={10}
                     unit="/10"
@@ -500,7 +509,7 @@ export default function JournalPage() {
                   />
                   <StateCard
                     icon={<BedDouble className="size-4" />}
-                    label="Sleep"
+                    label={t("form.sleep")}
                     value={avgSleep}
                     max={12}
                     unit="h"
@@ -508,8 +517,7 @@ export default function JournalPage() {
                   />
                 </div>
                 <p className="mt-4 border-t border-border/40 pt-3 text-[10px] text-foreground/60">
-                  Monthly averages of the values you logged. Bars are drawn on each metric's own
-                  scale (mood/energy 1–10, sleep 0–12h) and colored by how good the value is.
+                  {t("monthlyState.hint")}
                 </p>
               </div>
 

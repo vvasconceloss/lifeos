@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -16,6 +17,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -34,83 +36,70 @@ const fadeUp = {
 const FEATURES = [
   {
     icon: Layers,
-    title: "Pillars",
-    description:
-      "Organize your life into areas that matter — Health, Engineering, Relationships, and anything else you define.",
+    titleKey: "features.items.0.title",
+    descriptionKey: "features.items.0.description",
   },
   {
     icon: CalendarCheck2,
-    title: "Flexible habits",
-    description:
-      "Track habits daily, on specific weekdays, or a target number of times per week or month.",
+    titleKey: "features.items.1.title",
+    descriptionKey: "features.items.1.description",
   },
   {
     icon: BarChart3,
-    title: "Progress & streaks",
-    description:
-      "See completion rates, current and best streaks, and how your consistency evolves over time.",
+    titleKey: "features.items.2.title",
+    descriptionKey: "features.items.2.description",
   },
   {
     icon: Target,
-    title: "Goals",
-    description:
-      "Set goals, link supporting habits to them, and watch progress update as you complete your routines.",
+    titleKey: "features.items.3.title",
+    descriptionKey: "features.items.3.description",
   },
   {
     icon: Sparkles,
-    title: "Insights",
-    description:
-      "Understand which pillar needs focus this week and how consistent your daily effort really is.",
+    titleKey: "features.items.4.title",
+    descriptionKey: "features.items.4.description",
   },
   {
     icon: NotebookPen,
-    title: "Journal",
-    description:
-      "Log mood, energy and sleep, and review your monthly state alongside your habit data.",
+    titleKey: "features.items.5.title",
+    descriptionKey: "features.items.5.description",
   },
 ];
 
 const STEPS = [
   {
-    title: "Define your pillars",
-    description:
-      "Start from the areas of your life you care about — or create your own from scratch.",
+    titleKey: "howItWorks.steps.0.title",
+    descriptionKey: "howItWorks.steps.0.description",
   },
   {
-    title: "Add realistic habits",
-    description:
-      "Choose a frequency that fits your life, not an impossible daily streak.",
+    titleKey: "howItWorks.steps.1.title",
+    descriptionKey: "howItWorks.steps.1.description",
   },
   {
-    title: "Track in seconds",
-    description:
-      "Mark a completion with one tap. That's it — the rest is calculated for you.",
+    titleKey: "howItWorks.steps.2.title",
+    descriptionKey: "howItWorks.steps.2.description",
   },
   {
-    title: "Review and adjust",
-    description:
-      "Use streaks, rates and insights to see what works and course-correct.",
+    titleKey: "howItWorks.steps.3.title",
+    descriptionKey: "howItWorks.steps.3.description",
   },
 ];
 
 const STATS = [
   {
     value: "4+",
-    label: "trackable habit frequencies",
-    description:
-      "Daily, specific weekdays, or a target number of times per week or month — pick what actually fits your life.",
+    labelKey: "stats.frequencies.label",
+    descriptionKey: "stats.frequencies.description",
   },
   {
     value: "6",
-    label: "predefined life pillars",
-    description:
-      "Health, Engineering, Relationships and more — or create your own areas from scratch.",
+    labelKey: "stats.pillars.label",
+    descriptionKey: "stats.pillars.description",
   },
   {
     value: "1",
-    label: "tap to log a completion",
-    description:
-      "One tap to mark a habit done. Everything else — streaks, rates and insights — is calculated for you.",
+    labelKey: "stats.tap.label",
+    descriptionKey: "stats.tap.description",
   },
 ];
 
@@ -126,11 +115,12 @@ const TECH = [
 ];
 
 function Logo({ className }: { className?: string }) {
+  const { t } = useTranslation("landing");
   const { theme } = useTheme();
   return (
     <img
       src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
-      alt="LifeOS logo"
+      alt={t("logoAlt")}
       className={className ?? "size-8 rounded-lg"}
     />
   );
@@ -219,6 +209,7 @@ function Card({
 }
 
 function DemoButton({ size = "lg" }: { size?: "lg" | "default" }) {
+  const { t } = useTranslation("landing");
   const { demoLogin } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -238,41 +229,46 @@ function DemoButton({ size = "lg" }: { size?: "lg" | "default" }) {
   return (
     <Button variant="outline" size={size} onClick={handleDemo} disabled={loading}>
       <Play className="mr-1 size-4" aria-hidden />
-      {loading ? "Loading demo…" : "View Demo"}
+      {loading ? t("demoLoading") : t("viewDemo")}
     </Button>
   );
 }
 
 export default function LandingPage() {
+  const { t } = useTranslation("landing");
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
             <Logo className="size-8 rounded-lg" />
-            <span className="text-base font-semibold tracking-tight">LifeOS</span>
+            <span className="text-base font-semibold tracking-tight">{t("common:appName")}</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-foreground/70 md:flex">
             <a href="#features" className="transition-colors hover:text-foreground">
-              Features
+              {t("nav.features")}
             </a>
             <a href="#how-it-works" className="transition-colors hover:text-foreground">
-              How it works
+              {t("nav.howItWorks")}
             </a>
             <a href="#technology" className="transition-colors hover:text-foreground">
-              Technology
+              {t("nav.technology")}
             </a>
             <a href="#project" className="transition-colors hover:text-foreground">
-              Project
+              {t("nav.project")}
             </a>
           </nav>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" render={<Link to="/login" />}>
-              Log in
+              {t("login")}
             </Button>
             <Button size="sm" render={<Link to="/register" />}>
-              Get Started
+              {t("getStarted")}
             </Button>
+            <div className="ml-1 border-l border-border/80 pl-3">
+              <LocaleSwitcher />
+            </div>
           </div>
         </div>
       </header>
@@ -290,28 +286,27 @@ export default function LandingPage() {
               className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
             >
               <Sparkles className="size-3.5" aria-hidden />
-              Track habits · Build goals · Understand yourself
+              {t("heroBadge")}
             </motion.span>
             <motion.h1
               variants={fadeUp}
               className="mt-8 text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-6xl"
             >
-              Build a life you can measure,
-              <br className="hidden sm:block" /> understand, and improve.
+              {t("heroTitle1")}
+              <br className="hidden sm:block" /> {t("heroTitle2")}
             </motion.h1>
             <motion.p
               variants={fadeUp}
               className="mx-auto mt-6 max-w-xl text-lg text-foreground/60"
             >
-              LifeOS is a personal system for turning the life you want into habits you can
-              actually keep — then showing you what is working.
+              {t("heroDescription")}
             </motion.p>
             <motion.div
               variants={fadeUp}
               className="mt-10 flex flex-wrap items-center justify-center gap-3"
             >
               <Button size="lg" render={<Link to="/register" />}>
-                Get Started
+                {t("getStarted")}
                 <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
               <DemoButton size="lg" />
@@ -322,14 +317,14 @@ export default function LandingPage() {
         <section className="border-y border-border/80 bg-muted/40">
           <StaggerGroup className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-24 sm:grid-cols-3">
             {STATS.map((stat) => (
-              <StaggerItem key={stat.label}>
+              <StaggerItem key={stat.labelKey}>
                 <div className="flex h-full flex-col rounded-2xl border border-border/80 bg-card p-8 text-center shadow-sm">
                   <div className="text-4xl font-semibold tracking-tight text-foreground">
                     {stat.value}
                   </div>
-                  <div className="mt-2 text-sm font-medium text-foreground">{stat.label}</div>
+                  <div className="mt-2 text-sm font-medium text-foreground">{t(stat.labelKey)}</div>
                   <p className="mt-3 text-sm leading-relaxed text-foreground/60">
-                    {stat.description}
+                    {t(stat.descriptionKey)}
                   </p>
                 </div>
               </StaggerItem>
@@ -340,13 +335,9 @@ export default function LandingPage() {
         <section id="problem" className="mx-auto w-full max-w-6xl px-6 py-28">
           <div className="grid items-center gap-16 lg:grid-cols-2">
             <div>
-              <SectionHeading eyebrow="The problem" title="Another to-do list isn't the answer" />
+              <SectionHeading eyebrow={t("problem.eyebrow")} title={t("problem.title")} />
               <StaggerGroup className="-mt-10 space-y-5">
-                {[
-                  "Lists tell you what to do, but nothing about whether you're improving.",
-                  "All-or-nothing streaks make one missed day feel like failure.",
-                  "A rigid daily schedule collapses the moment life gets busy.",
-                ].map((point) => (
+                {(t("problem.points", { returnObjects: true }) as string[]).map((point) => (
                   <StaggerItem key={point}>
                     <div className="flex items-start gap-3 text-foreground/70">
                       <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -360,16 +351,12 @@ export default function LandingPage() {
             </div>
             <Reveal>
               <Card className="p-8">
-                <p className="text-sm font-medium text-foreground/60">A to-do list tells you:</p>
-                <p className="mt-3 text-2xl font-semibold text-foreground">"Do this task."</p>
+                <p className="text-sm font-medium text-foreground/60">{t("problem.toDoListTells")}</p>
+                <p className="mt-3 text-2xl font-semibold text-foreground">{t("problem.toDoListQuote")}</p>
                 <div className="my-8 border-t border-border/40" />
-                <p className="text-sm font-medium text-foreground/60">LifeOS tells you:</p>
+                <p className="text-sm font-medium text-foreground/60">{t("problem.lifeOSTells")}</p>
                 <ul className="mt-3 space-y-3">
-                  {[
-                    "How consistent you actually are",
-                    "Whether your habits match a realistic frequency",
-                    "Which pillar deserves your attention this week",
-                  ].map((line) => (
+                  {(t("problem.lifeOSTellPoints", { returnObjects: true }) as string[]).map((line) => (
                     <li key={line} className="flex items-start gap-2 text-foreground">
                       <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                       {line}
@@ -384,18 +371,18 @@ export default function LandingPage() {
         <section id="how-it-works" className="border-y border-border/80 bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-6 py-28">
             <SectionHeading
-              eyebrow="How LifeOS works"
-              title="From scattered notes to a system that compounds"
+              eyebrow={t("howItWorks.eyebrow")}
+              title={t("howItWorks.title")}
             />
             <StaggerGroup className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step, i) => (
-                <StaggerItem key={step.title}>
+                <StaggerItem key={step.titleKey}>
                   <Card className="h-full">
                     <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
                       {i + 1}
                     </span>
-                    <h3 className="mt-5 text-base font-semibold text-foreground">{step.title}</h3>
-                    <p className="mt-2 text-sm text-foreground/60">{step.description}</p>
+                    <h3 className="mt-5 text-base font-semibold text-foreground">{t(step.titleKey)}</h3>
+                    <p className="mt-2 text-sm text-foreground/60">{t(step.descriptionKey)}</p>
                   </Card>
                 </StaggerItem>
               ))}
@@ -405,19 +392,19 @@ export default function LandingPage() {
 
         <section id="features" className="mx-auto w-full max-w-6xl px-6 py-28">
           <SectionHeading
-            eyebrow="Features"
-            title="Everything you need to run your life as a system"
-            description="Designed for depth without ceremony — each feature answers a concrete question about your progress."
+            eyebrow={t("features.eyebrow")}
+            title={t("features.title")}
+            description={t("features.description")}
           />
           <StaggerGroup className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
-              <StaggerItem key={feature.title}>
+              <StaggerItem key={feature.titleKey}>
                 <Card className="h-full">
                   <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <feature.icon className="size-5" aria-hidden />
                   </span>
-                  <h3 className="mt-5 text-base font-semibold text-foreground">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-foreground/60">{feature.description}</p>
+                  <h3 className="mt-5 text-base font-semibold text-foreground">{t(feature.titleKey)}</h3>
+                  <p className="mt-2 text-sm text-foreground/60">{t(feature.descriptionKey)}</p>
                 </Card>
               </StaggerItem>
             ))}
@@ -427,22 +414,22 @@ export default function LandingPage() {
         <section id="screenshots" className="border-y border-border/80 bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-6 py-28">
             <SectionHeading
-              eyebrow="Screenshots"
-              title="A quiet, focused workspace"
-              description="The same interface you'll use every day — clear in both light and dark mode."
+              eyebrow={t("screenshots.eyebrow")}
+              title={t("screenshots.title")}
+              description={t("screenshots.description")}
             />
             <StaggerGroup className="grid items-start gap-8 lg:grid-cols-2">
               <StaggerItem className="lg:col-span-2">
                 <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
                   <div className="flex items-center justify-between border-b border-border/80 px-5 py-3">
-                    <span className="text-sm font-semibold text-foreground">Dashboard</span>
+                    <span className="text-sm font-semibold text-foreground">{t("screenshots.dashboard")}</span>
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      Live demo
+                      {t("screenshots.liveDemo")}
                     </span>
                   </div>
                   <img
                     src="/screenshots/dashboard.png"
-                    alt="LifeOS dashboard with the monthly habit grid"
+                    alt={t("screenshots.imageAlt")}
                     loading="lazy"
                     className="block h-auto w-full"
                   />
@@ -454,9 +441,9 @@ export default function LandingPage() {
 
         <section id="technology" className="mx-auto w-full max-w-6xl px-6 py-28">
           <SectionHeading
-            eyebrow="Technology"
-            title="Modern, boring, dependable"
-            description="A focused full-stack foundation that stays out of the way."
+            eyebrow={t("technology.eyebrow")}
+            title={t("technology.title")}
+            description={t("technology.description")}
           />
           <StaggerGroup className="flex flex-wrap justify-center gap-3">
             {TECH.map((tech) => (
@@ -472,16 +459,14 @@ export default function LandingPage() {
         <section id="project" className="border-y border-border/80 bg-muted/40">
           <div className="mx-auto w-full max-w-6xl px-6 py-28">
             <SectionHeading
-              eyebrow="Open source"
-              title="A personal project, built in the open"
-              description="LifeOS started as a way for one person to systematically improve their life — and the code is available for anyone to learn from or build on."
+              eyebrow={t("project.eyebrow")}
+              title={t("project.title")}
+              description={t("project.description")}
             />
             <Reveal className="mx-auto max-w-2xl">
               <Card className="p-8 text-center">
                 <p className="text-sm text-foreground/60">
-                  The philosophy is simple: track what you do, understand what works, and improve
-                  one thing at a time. No aggressive marketing, no gamified streaks — just a
-                  clearer picture of your own life.
+                  {t("project.philosophy")}
                 </p>
               </Card>
             </Reveal>
@@ -491,20 +476,19 @@ export default function LandingPage() {
         <section className="mx-auto w-full max-w-6xl px-6 py-28 text-center">
           <Reveal>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Start with one habit today.
+              {t("cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base text-foreground/60">
-              Create a free account, define your pillars, and let LifeOS show you the progress
-              you're making.
+              {t("cta.description")}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" render={<Link to="/register" />}>
-                Get Started
+                {t("getStarted")}
                 <ArrowRight className="ml-1 size-4" aria-hidden />
               </Button>
               <DemoButton size="lg" />
               <Button variant="ghost" size="lg" render={<Link to="/login" />}>
-                Log in
+                {t("login")}
               </Button>
             </div>
           </Reveal>
@@ -515,10 +499,10 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row">
           <div className="flex items-center gap-2">
             <Logo className="size-6 rounded-md" />
-            <span className="text-sm font-semibold tracking-tight">LifeOS</span>
+            <span className="text-sm font-semibold tracking-tight">{t("common:appName")}</span>
           </div>
           <p className="text-xs text-foreground/50">
-            © {new Date().getFullYear()} LifeOS — build a life you can measure.
+            {t("footer", { year: new Date().getFullYear() })}
           </p>
         </div>
       </footer>

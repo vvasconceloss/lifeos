@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, CircleX, MailCheck, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,6 +22,7 @@ function isSafeRedirect(value: string | undefined): value is string {
 }
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation("auth");
   const { token, redirect } = useSearch({ from: "/verify-email" });
   const navigate = useNavigate();
   const { user, loading, refreshUser, resendVerification } = useAuth();
@@ -56,7 +58,7 @@ export default function VerifyEmailPage() {
       .post<{ emailVerified: boolean }>("/auth/verify-email", { token })
       .then(async (res) => {
         if (!res.data.emailVerified) {
-          setState({ status: "error", message: "Something went wrong" });
+          setState({ status: "error", message: t("verifyEmail.somethingWentWrong") });
           return;
         }
         setState({ status: "success" });
@@ -71,7 +73,7 @@ export default function VerifyEmailPage() {
         } else {
           setState({
             status: "error",
-            message: getApiErrorMessage(error, "Invalid or expired verification link"),
+            message: getApiErrorMessage(error, t("verifyEmail.invalidOrExpired")),
           });
         }
       });
@@ -111,35 +113,35 @@ export default function VerifyEmailPage() {
       <div className="w-full max-w-sm">
         <img
           src="/lifeos-black-icon.png"
-          alt="LifeOS logo"
+          alt={t("verifyEmail.logoAlt")}
           className="mx-auto mb-6 h-14 w-auto rounded-xl"
         />
         <h1 className="mb-1 text-center text-2xl font-semibold tracking-tight text-foreground">
-          Verify your email
+          {t("verifyEmail.title")}
         </h1>
         <p className="mb-6 text-center text-sm text-foreground/65">
-          Confirm your email address to activate your LifeOS account.
+          {t("verifyEmail.subtitle")}
         </p>
 
         {state.status === "loading" && (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <Spinner className="size-6" />
-            <p className="text-sm text-foreground/70">Verifying your email…</p>
+            <p className="text-sm text-foreground/70">{t("verifyEmail.verifying")}</p>
           </div>
         )}
 
         {state.status === "success" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CheckCircle2 className="size-10 text-green-600 dark:text-green-500" />
-            <h2 className="text-lg font-semibold text-foreground">Email verified</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("verifyEmail.verifiedHeading")}</h2>
             <p className="text-sm text-foreground/70">
-              Your email has been confirmed. Taking you to your dashboard…
+              {t("verifyEmail.verifiedSubtitle")}
             </p>
             <Link
               to="/app"
               className="mt-2 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              Go to dashboard
+              {t("verifyEmail.goToDashboard")}
             </Link>
           </div>
         )}
@@ -147,9 +149,9 @@ export default function VerifyEmailPage() {
         {state.status === "expired" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <TriangleAlert className="size-10 text-amber-600 dark:text-amber-500" />
-            <h2 className="text-lg font-semibold text-foreground">Link expired</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("verifyEmail.linkExpired")}</h2>
             <p className="text-sm text-foreground/70">
-              This verification link has expired. Request a new one below.
+              {t("verifyEmail.linkExpiredSubtitle")}
             </p>
             <RequestForm
               email={email}
@@ -164,7 +166,7 @@ export default function VerifyEmailPage() {
         {state.status === "error" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <CircleX className="size-10 text-destructive" />
-            <h2 className="text-lg font-semibold text-foreground">Could not verify</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("verifyEmail.couldNotVerify")}</h2>
             <p className="text-sm text-foreground/70">{state.message}</p>
             <RequestForm
               email={email}
@@ -179,9 +181,9 @@ export default function VerifyEmailPage() {
         {state.status === "no-token" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border/80 bg-card p-6 text-center">
             <MailCheck className="size-10 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">Verify your email</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("verifyEmail.verifyHeading")}</h2>
             <p className="text-sm text-foreground/70">
-              Enter your email address below and we'll send you a verification link.
+              {t("verifyEmail.enterEmailSubtitle")}
             </p>
             <RequestForm
               email={email}
@@ -210,13 +212,14 @@ function RequestForm({
   resending: boolean;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }) {
+  const { t } = useTranslation("auth");
   return (
     <form onSubmit={onSubmit} className="mt-3 w-full space-y-3">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="your@email.com"
+        placeholder={t("verifyEmail.emailPlaceholder")}
         autoComplete="email"
         required
         className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:border-foreground/70 focus:outline-none focus:ring-2 focus:ring-foreground/10"
@@ -228,10 +231,10 @@ function RequestForm({
       >
         {resending ? <Spinner className="size-4" /> : null}
         {cooldown > 0
-          ? `Resend in ${cooldown}s`
+          ? t("verifyEmail.resendIn", { count: cooldown })
           : resending
-            ? "Sending…"
-            : "Send verification email"}
+            ? t("verifyEmail.sending")
+            : t("verifyEmail.sendVerificationEmail")}
       </button>
     </form>
   );

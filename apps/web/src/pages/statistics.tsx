@@ -9,6 +9,7 @@ import { TopHabits } from "@/components/statistics/top-habits";
 import { useStatistics } from "@/components/statistics/use-statistics";
 import { StatisticsSkeleton } from "@/components/statistics/statistics-skeleton";
 import { ErrorState } from "@/components/error-state";
+import { formatMonthYear } from "@/lib/i18n-format";
 
 export default function StatisticsPage() {
   const s = useStatistics();
@@ -20,7 +21,7 @@ export default function StatisticsPage() {
           <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto scroll-subtle">
             <MonthNavigation
               monthOffset={s.monthOffset}
-              label={s.targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              label={formatMonthYear(s.targetDate)}
               onPrev={() => s.setMonthOffset(s.monthOffset - 1)}
               onNext={() => s.setMonthOffset(s.monthOffset + 1)}
               onToday={() => s.setMonthOffset(0)}
@@ -35,7 +36,7 @@ export default function StatisticsPage() {
                 <div className="grid gap-6 lg:grid-cols-2">
                   <PillarStats
                     pillars={s.overview.pillarStats}
-                    monthLabel={s.targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                    monthLabel={formatMonthYear(s.targetDate)}
                   />
                   <TopHabits habits={s.overview.habitStats} year={s.overview.year} month={s.overview.month} />
                 </div>
