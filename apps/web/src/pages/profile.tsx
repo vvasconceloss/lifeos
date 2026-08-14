@@ -206,31 +206,6 @@ export default function ProfilePage() {
           <div className="min-h-0 flex-1">
             {user ? <ProfileForm key={user.id} user={user} onSaved={refreshUser} /> : null}
           </div>
-
-          <div className="mt-6 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground">Feedback</h3>
-            <p className="mt-1 text-xs text-foreground/60">
-              Found a bug or have an idea? Open a GitHub issue and help improve LifeOS.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <a
-                href="https://github.com/vvasconceloss/lifeos/issues/new?template=bug.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-accent/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent/60"
-              >
-                Report a bug
-              </a>
-              <a
-                href="https://github.com/vvasconceloss/lifeos/issues/new?template=feature.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-accent/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent/60"
-              >
-                Suggest a feature
-              </a>
-            </div>
-          </div>
         </main>
       </AppLayout>
     </ProtectedRoute>
