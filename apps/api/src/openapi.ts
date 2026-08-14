@@ -107,6 +107,84 @@ const openapi = {
         },
       },
     },
+    "/account/change-password": {
+      post: {
+        tags: ["Account"],
+        summary: "Change the password (requires the current password)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangePasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/account/change-email/request": {
+      post: {
+        tags: ["Account"],
+        summary: "Request an email change (requires a verified email)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailRequestBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/account/change-email/confirm": {
+      post: {
+        tags: ["Account"],
+        summary: "Confirm an email change with the link sent to the new address",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailConfirmBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/account/change-email/cancel": {
+      delete: {
+        tags: ["Account"],
+        summary: "Cancel a pending email change (authenticated)",
+        security: [{ cookieAuth: [] }],
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+      post: {
+        tags: ["Account"],
+        summary: "Cancel a pending email change via the link sent to the old address",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailCancelBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
     "/auth/demo": {
       post: {
         tags: ["Auth"],
@@ -626,11 +704,13 @@ const openapi = {
       Progression: { description: "Progression", content: { "application/json": { schema: { $ref: "#/components/schemas/Progression" } } } },
       BadRequest: { $ref: "#/components/responses/Error400" },
       Unauthorized: { $ref: "#/components/responses/Error401" },
+      Forbidden: { $ref: "#/components/responses/Error403" },
       NotFound: { $ref: "#/components/responses/Error404" },
       Conflict: { $ref: "#/components/responses/Error409" },
       RateLimited: { $ref: "#/components/responses/Error429" },
       Error400: { description: "Validation or domain error", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error401: { description: "Unauthenticated", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+      Error403: { description: "Forbidden (action requires a verified email)", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error404: { description: "Not found (including cross-user access)", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error409: { description: "Conflict", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error429: { description: "Rate limited", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
@@ -721,6 +801,32 @@ const openapi = {
               "Strong password policy: 8–72 bytes, at least one lowercase letter, one uppercase letter, one number, one special character, not a common password.",
           },
         },
+      },
+      ChangePasswordBody: {
+        type: "object",
+        required: ["currentPassword", "newPassword"],
+        properties: {
+          currentPassword: { type: "string", description: "The user's current password (confirmation)" },
+          newPassword: { type: "string", minLength: 8, maxLength: 72 },
+        },
+      },
+      ChangeEmailRequestBody: {
+        type: "object",
+        required: ["currentPassword", "newEmail"],
+        properties: {
+          currentPassword: { type: "string", description: "The user's current password (confirmation)" },
+          newEmail: { type: "string", format: "email" },
+        },
+      },
+      ChangeEmailConfirmBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The confirmation token from the new-address link" } },
+      },
+      ChangeEmailCancelBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The cancel token from the old-address link" } },
       },
       UpdateMeBody: {
         type: "object",
