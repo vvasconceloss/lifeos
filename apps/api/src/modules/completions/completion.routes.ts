@@ -1,6 +1,6 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
-import { requireAuth } from '../../plugins/auth';
+import { requireActive } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { completionParamsSchema, listCompletionsQuerySchema } from './completion.schemas';
 import { listCompletions, markCompletion, unmarkCompletion } from './completion.service';
@@ -8,7 +8,7 @@ import { listCompletions, markCompletion, unmarkCompletion } from './completion.
 export async function completionRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/completions',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const query = validateInput(listCompletionsQuerySchema, request.query, reply);
       if (!query) return;
@@ -25,7 +25,7 @@ export async function completionRoutes(fastify: FastifyInstance) {
 
   fastify.put(
     '/habits/:id/completions/:date',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(completionParamsSchema, request.params, reply);
       if (!params) return;
@@ -46,7 +46,7 @@ export async function completionRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/habits/:id/completions/:date',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(completionParamsSchema, request.params, reply);
       if (!params) return;

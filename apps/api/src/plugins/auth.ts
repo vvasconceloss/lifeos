@@ -57,3 +57,33 @@ export async function requireVerified(
       .send({ error: toErrorBody("Please verify your email to continue", undefined, "EMAIL_NOT_VERIFIED") });
   }
 }
+
+/**
+ * Blocks accounts that are in the 15-day PENDING_DELETION grace period from the
+ * normal application — they only get the dedicated recovery screen. Keeps the
+ * basic modules (pillars, habits, completions, auth) usable for unverified users.
+ */
+export async function requireActive(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  await requireAuth(request, reply);
+  if (reply.sent) return;
+
+  const user = await prisma.user.findUnique({
+    where: { id: request.user.sub },
+    select: { status: true },
+  });
+
+  if (user?.status === "PENDING_DELETION") {
+    reply
+      .status(403)
+      .send({
+        error: toErrorBody(
+          "This account is scheduled for deletion. Please recover it first.",
+          undefined,
+          "ACCOUNT_PENDING_DELETION",
+        ),
+      });
+  }
+}

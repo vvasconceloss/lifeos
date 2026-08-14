@@ -1,6 +1,6 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
-import { requireAuth } from '../../plugins/auth';
+import { requireActive } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { createHabitBodySchema, updateHabitBodySchema, idParamSchema, listHabitsQuerySchema, habitReorderBodySchema } from './habit.schemas';
 import { listCompletionsQuerySchema } from '../completions/completion.schemas';
@@ -9,7 +9,7 @@ import { archiveHabit, createHabit, deleteHabit, getHabit, getHabitHistory, list
 export async function habitRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const query = validateInput(listHabitsQuerySchema, request.query, reply);
       if (!query) return;
@@ -25,7 +25,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/reorder',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const data = validateInput(habitReorderBodySchema, request.body, reply);
       if (!data) return;
@@ -42,7 +42,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/:id/history',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -67,7 +67,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const data = validateInput(createHabitBodySchema, request.body, reply);
       if (!data) return;
@@ -84,7 +84,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -101,7 +101,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -121,7 +121,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/:id/archive',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -138,7 +138,7 @@ export async function habitRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
