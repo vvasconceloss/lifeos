@@ -73,7 +73,7 @@ export function createEmailService(options: EmailServiceOptions): EmailService {
 
   async function send(input: SendEmailInput): Promise<void> {
     const { to, template, data, locale } = input;
-    const rendered = renderEmail(template, data);
+    const rendered = renderEmail(template, data, locale);
 
     if (!config.enabled) {
       logger.warn(

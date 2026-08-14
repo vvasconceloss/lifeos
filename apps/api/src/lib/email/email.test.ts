@@ -132,6 +132,49 @@ describe("renderEmail", () => {
     expect(rendered.html).not.toContain("<script>");
     expect(rendered.html).toContain("&lt;script&gt;");
   });
+
+  it("renders in the requested locale (pt/uk) with the correct lang attribute", () => {
+    const pt = renderEmail("account-deletion-requested", {
+      recoveryUrl: "https://lifeos.app/recover?token=abc",
+      deletionDate: "2026-08-30",
+    }, "pt");
+    expect(pt.subject).toBe("A sua conta será eliminada");
+    expect(pt.html).toContain('lang="pt"');
+    expect(pt.html).toContain("eliminação permanente em 2026-08-30");
+    expect(pt.html).toContain("Manter a minha conta");
+
+    const uk = renderEmail("account-recovered", {}, "uk");
+    expect(uk.subject).toBe("Ваш акаунт відновлено");
+    expect(uk.html).toContain('lang="uk"');
+    expect(uk.text).toContain("ласкаво просимо назад");
+
+    // Unknown/unsupported locales fall back to English.
+    const fallback = renderEmail("verify-email", {
+      verificationUrl: "https://lifeos.app/verify?token=abc",
+    }, "fr-FR");
+    expect(fallback.subject).toBe("Confirm your email address");
+    expect(fallback.html).toContain('lang="en"');
+  });
+
+  it("passes the locale through the service to the rendered email", async () => {
+    const { sendMail, transport } = makeTransport();
+    const service = createEmailService({
+      config: makeConfig({ enabled: true }),
+      transport,
+      logger: { warn: vi.fn(), error: vi.fn() },
+    });
+
+    await service.send({
+      to: "user@example.com",
+      template: "password-reset",
+      data: { resetUrl: "https://lifeos.app/reset?token=abc" },
+      locale: "pt",
+    });
+
+    const payload = sendMail.mock.calls[0]![0];
+    expect(payload.subject).toBe("Repor a sua palavra-passe");
+    expect(payload.html).toContain('lang="pt"');
+  });
 });
 
 describe("EmailService.send", () => {

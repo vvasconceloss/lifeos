@@ -15,11 +15,12 @@ async function main() {
     logger: console,
   });
 
-  const { deleted } = await processAccountDeletions(async (email) => {
+  const { deleted } = await processAccountDeletions(async (email, locale) => {
     await emailService.send({
       to: email,
       template: "account-deleted",
       data: {},
+      locale,
     });
   });
 

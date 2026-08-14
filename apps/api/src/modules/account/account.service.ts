@@ -89,7 +89,7 @@ export async function requestEmailChange(
 }
 
 export type ConfirmEmailChangeResult =
-  | { status: "confirmed"; email: string; previousEmail: string }
+  | { status: "confirmed"; email: string; previousEmail: string; locale: string }
   | { status: "expired" }
   | { status: "invalid" };
 
@@ -125,7 +125,7 @@ export async function confirmEmailChange(
     prisma.emailChangeToken.delete({ where: { id: record.id } }),
   ]);
 
-  return { status: "confirmed", email: record.newEmail, previousEmail };
+  return { status: "confirmed", email: record.newEmail, previousEmail, locale: user.locale };
 }
 
 /** Cancels a pending email change for the authenticated user (idempotent). */
@@ -156,6 +156,7 @@ export async function cancelEmailChangeByToken(
 export interface DeletionRequestResult {
   recoveryToken: string;
   scheduledDeletionAt: Date;
+  locale: string;
 }
 
 /**
@@ -203,7 +204,7 @@ export async function requestAccountDeletion(
     }),
   ]);
 
-  return { recoveryToken, scheduledDeletionAt };
+  return { recoveryToken, scheduledDeletionAt, locale: user.locale };
 }
 
 export type RecoverAccountResult =
@@ -281,21 +282,21 @@ export interface ProcessDeletionsResult {
  * twice never errors or deletes twice.
  */
 export async function processAccountDeletions(
-  sendEmail: (to: string) => Promise<void>,
+  sendEmail: (to: string, locale: string) => Promise<void>,
 ): Promise<ProcessDeletionsResult> {
   const due = await prisma.user.findMany({
     where: {
       status: "PENDING_DELETION",
       scheduledDeletionAt: { lte: new Date() },
     },
-    select: { id: true, email: true },
+    select: { id: true, email: true, locale: true },
   });
 
   const deleted: DeletedAccount[] = [];
 
   for (const user of due) {
     // Final email must be sent before deletion — the address won't exist after.
-    await sendEmail(user.email);
+    await sendEmail(user.email, user.locale);
 
     await prisma.user.delete({ where: { id: user.id } });
 

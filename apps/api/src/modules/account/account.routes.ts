@@ -4,6 +4,8 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
 import { changePasswordBodySchema, changeEmailRequestBodySchema, changeEmailConfirmBodySchema, changeEmailCancelBodySchema, deleteAccountBodySchema, recoverAccountBodySchema } from './account.schemas';
 import { changePassword, requestEmailChange, confirmEmailChange, cancelEmailChange, cancelEmailChangeByToken, requestAccountDeletion, recoverAccount, cancelAccountDeletion, ACCOUNT_ERRORS } from './account.service';
+import { getUserById } from '../auth/auth.service';
+import { normalizeEmailLocale } from '../../lib/email/i18n';
 
 const SESSION_TTL_DAYS = 30;
 const SESSION_TTL_SECONDS = SESSION_TTL_DAYS * 24 * 60 * 60;
@@ -24,6 +26,12 @@ function emailChangeConfirmUrl(token: string): string {
 
 function emailChangeCancelUrl(token: string): string {
   return `${WEB_URL}/account/email/cancel?token=${encodeURIComponent(token)}`;
+}
+
+/** Resolves the authenticated user's locale for localized emails. */
+async function userLocale(request: { user: { sub: string } }): Promise<string> {
+  const user = await getUserById(request.user.sub);
+  return normalizeEmailLocale(user?.locale ?? "en");
 }
 
 export async function accountRoutes(fastify: FastifyInstance) {
@@ -55,6 +63,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
         to: request.user.email,
         template: 'password-changed',
         data: {},
+        locale: await userLocale(request),
       });
 
       return { message: 'Password updated.' };
@@ -84,15 +93,18 @@ export async function accountRoutes(fastify: FastifyInstance) {
       // If the email is already in use we send nothing and respond generically
       // (no mass-enumeration side channel via this authenticated endpoint).
       if (result.status === 'requested') {
+        const locale = await userLocale(request);
         await fastify.emailService.send({
           to: data.newEmail,
           template: 'email-change-request',
           data: { confirmUrl: emailChangeConfirmUrl(result.confirmToken) },
+          locale,
         });
         await fastify.emailService.send({
           to: request.user.email,
           template: 'email-change-alert',
           data: { cancelUrl: emailChangeCancelUrl(result.cancelToken) },
+          locale,
         });
       }
 
@@ -119,11 +131,13 @@ export async function accountRoutes(fastify: FastifyInstance) {
           to: result.email,
           template: 'email-changed',
           data: {},
+          locale: result.locale,
         });
         await fastify.emailService.send({
           to: result.previousEmail,
           template: 'email-changed',
           data: {},
+          locale: result.locale,
         });
         return { message: 'Email address updated.' };
       }
@@ -180,6 +194,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
           recoveryUrl: accountRecoveryUrl(result.recoveryToken),
           deletionDate: result.scheduledDeletionAt.toISOString().slice(0, 10),
         },
+        locale: result.locale,
       });
 
       // All active sessions are invalidated — force a fresh login for any action.

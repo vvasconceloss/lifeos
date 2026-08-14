@@ -1,4 +1,5 @@
 import type { EmailTemplate, RenderedEmail } from "./email.types";
+import { tEmail, normalizeEmailLocale, type EmailLocale } from "./i18n";
 
 const APP_NAME = "LifeOS";
 
@@ -14,8 +15,6 @@ const FAINT = "#71717a"; // zinc-500, footer legal text
 const BORDER = "#e4e4e7"; // zinc-200
 const BODY_BG = "#f8f9fa"; // neutral light grey outside the card
 
-const DEFAULT_LOCALE = "en";
-
 /** Escape a plain string for safe HTML interpolation. */
 function escapeHtml(value: unknown): string {
   return String(value)
@@ -29,11 +28,12 @@ function escapeHtml(value: unknown): string {
 interface LayoutProps {
   title: string;
   body: string;
+  locale: EmailLocale;
 }
 
-function baseHtml({ title, body }: LayoutProps): string {
+function baseHtml({ title, body, locale }: LayoutProps): string {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -62,13 +62,13 @@ function baseHtml({ title, body }: LayoutProps): string {
             <tr>
               <td align="left" style="padding:24px 48px 40px;background-color:#ffffff;">
                 <p style="margin:0 0 8px;font-size:12px;line-height:1.6;color:${FAINT};">
-                  You received this email because of activity on your ${APP_NAME} account.
-                  If you didn't request this, you can safely ignore it.
+                  ${tEmail(locale, "common.receivedBecauseActivity")}
+                  ${tEmail(locale, "common.ignoreIfNotRequested")}
                 </p>
                 <p style="margin:0;font-size:12px;line-height:1.6;color:${FAINT};">
-                  <a href="${escapeHtml(PRIVACY_URL)}" style="color:${FAINT};text-decoration:underline;">Privacy Policy</a>
+                  <a href="${escapeHtml(PRIVACY_URL)}" style="color:${FAINT};text-decoration:underline;">${tEmail(locale, "common.privacyPolicy")}</a>
                   &nbsp;·&nbsp;
-                  <a href="${escapeHtml(SUPPORT_URL)}" style="color:${FAINT};text-decoration:underline;">Support</a>
+                  <a href="${escapeHtml(SUPPORT_URL)}" style="color:${FAINT};text-decoration:underline;">${tEmail(locale, "common.support")}</a>
                 </p>
               </td>
             </tr>
@@ -96,10 +96,10 @@ function linkButton(url: string, label: string): string {
 </table>`;
 }
 
-function fallbackLink(url: string): string {
+function fallbackLink(url: string, locale: EmailLocale): string {
   const host = safeHost(url);
   return `<p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:${MUTED};">
-  If the button above doesn't work, paste this link into your browser:<br />
+  ${tEmail(locale, "common.linkFallback")}<br />
   <a href="${escapeHtml(url)}" style="color:${BRAND_BLUE};text-decoration:underline;word-break:break-all;overflow-wrap:break-word;">${escapeHtml(host)}</a>
 </p>`;
 }
@@ -114,9 +114,9 @@ function safeHost(url: string): string {
 }
 
 interface TemplateDef {
-  subject: string;
-  html: (data: Record<string, unknown>) => string;
-  text: (data: Record<string, unknown>) => string;
+  subject: (locale: EmailLocale) => string;
+  html: (data: Record<string, unknown>, locale: EmailLocale) => string;
+  text: (data: Record<string, unknown>, locale: EmailLocale) => string;
 }
 
 function stringField(data: Record<string, unknown>, key: string): string {
@@ -133,156 +133,139 @@ function formatDateField(data: Record<string, unknown>, key: string): string {
 
 const TEMPLATES: Record<EmailTemplate, TemplateDef> = {
   "verify-email": {
-    subject: "Confirm your email address",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "verifyEmail.subject"),
+    html: (data, locale) => {
       const url = stringField(data, "verificationUrl");
       return (
-        paragraph("Welcome to LifeOS! Please confirm your email address to activate your account.") +
-        linkButton(url, "Confirm email address") +
-        fallbackLink(url)
+        paragraph(tEmail(locale, "verifyEmail.intro")) +
+        linkButton(url, tEmail(locale, "common.confirmEmail")) +
+        fallbackLink(url, locale)
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const url = stringField(data, "verificationUrl");
-      return `Welcome to LifeOS! Please confirm your email address to activate your account.\n\n${url}`;
+      return `${tEmail(locale, "verifyEmail.intro")}\n\n${url}`;
     },
   },
   "password-reset": {
-    subject: "Reset your password",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "passwordReset.subject"),
+    html: (data, locale) => {
       const url = stringField(data, "resetUrl");
       return (
-        paragraph("We received a request to reset your password. This link is valid for 1 hour.") +
-        linkButton(url, "Reset password") +
-        fallbackLink(url)
+        paragraph(tEmail(locale, "passwordReset.intro")) +
+        linkButton(url, tEmail(locale, "common.resetPassword")) +
+        fallbackLink(url, locale)
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const url = stringField(data, "resetUrl");
-      return `We received a request to reset your password. This link is valid for 1 hour.\n\n${url}\n\nIf you didn't request this, you can safely ignore this email.`;
+      return `${tEmail(locale, "passwordReset.intro")}\n\n${url}\n\n${tEmail(locale, "passwordReset.ignore")}`;
     },
   },
   "password-changed": {
-    subject: "Your password was changed",
-    html: () =>
-      paragraph(
-        "Your LifeOS password was successfully changed. If this wasn't you, contact us immediately to secure your account.",
-      ),
-    text: () =>
-      "Your LifeOS password was successfully changed. If this wasn't you, contact us immediately to secure your account.",
+    subject: (locale) => tEmail(locale, "passwordChanged.subject"),
+    html: (_data, locale) => paragraph(tEmail(locale, "passwordChanged.intro")),
+    text: (_data, locale) => tEmail(locale, "passwordChanged.intro"),
   },
   "email-change-request": {
-    subject: "Confirm your new email",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "emailChangeRequest.subject"),
+    html: (data, locale) => {
       const url = stringField(data, "confirmUrl");
       return (
-        paragraph("You requested to change the email on your LifeOS account to this address.") +
-        linkButton(url, "Confirm new email") +
-        fallbackLink(url)
+        paragraph(tEmail(locale, "emailChangeRequest.intro")) +
+        linkButton(url, tEmail(locale, "common.confirmNewEmail")) +
+        fallbackLink(url, locale)
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const url = stringField(data, "confirmUrl");
-      return `You requested to change the email on your LifeOS account to this address.\n\n${url}\n\nThis link is valid for 1 hour.`;
+      return `${tEmail(locale, "emailChangeRequest.intro")}\n\n${url}\n\n${tEmail(locale, "emailChangeRequest.validity")}`;
     },
   },
   "email-change-alert": {
-    subject: "Email change requested",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "emailChangeAlert.subject"),
+    html: (data, locale) => {
       const cancelUrl = stringField(data, "cancelUrl");
       return (
-        paragraph(
-          "A request was made to change the email address on your LifeOS account to a new address.",
-        ) +
-        paragraph("If this was you, you can ignore this alert once you confirm the new email.") +
-        paragraph("If this wasn't you, cancel the request right away:") +
-        linkButton(cancelUrl, "Cancel email change")
+        paragraph(tEmail(locale, "emailChangeAlert.intro")) +
+        paragraph(tEmail(locale, "emailChangeAlert.ifYou")) +
+        paragraph(tEmail(locale, "emailChangeAlert.ifNotYou")) +
+        linkButton(cancelUrl, tEmail(locale, "common.cancelEmailChange"))
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const cancelUrl = stringField(data, "cancelUrl");
-      return `A request was made to change the email address on your LifeOS account.\n\nIf this wasn't you, cancel the request right away: ${cancelUrl}`;
+      return `${tEmail(locale, "emailChangeAlert.intro")}\n\n${tEmail(locale, "emailChangeAlert.ifNotYou")} ${cancelUrl}`;
     },
   },
   "email-changed": {
-    subject: "Your email was changed",
-    html: () =>
-      paragraph(
-        "The email address on your LifeOS account has been updated. If this wasn't you, contact us immediately to secure your account.",
-      ),
-    text: () =>
-      "The email address on your LifeOS account has been updated. If this wasn't you, contact us immediately to secure your account.",
+    subject: (locale) => tEmail(locale, "emailChanged.subject"),
+    html: (_data, locale) => paragraph(tEmail(locale, "emailChanged.intro")),
+    text: (_data, locale) => tEmail(locale, "emailChanged.intro"),
   },
   "account-deletion-requested": {
-    subject: "Your account will be deleted",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "accountDeletionRequested.subject"),
+    html: (data, locale) => {
       const recoveryUrl = stringField(data, "recoveryUrl");
       const deletionDate = formatDateField(data, "deletionDate");
       return (
-        paragraph(
-          `Your LifeOS account is scheduled for permanent deletion on ${deletionDate}.`,
-        ) +
-        paragraph("All of your data will be permanently erased after that date.") +
-        paragraph("If you change your mind, you can recover your account before then:") +
-        linkButton(recoveryUrl, "Keep my account")
+        paragraph(tEmail(locale, "accountDeletionRequested.scheduledOn", { date: deletionDate })) +
+        paragraph(tEmail(locale, "accountDeletionRequested.dataErased")) +
+        paragraph(tEmail(locale, "accountDeletionRequested.changeMind")) +
+        linkButton(recoveryUrl, tEmail(locale, "common.keepMyAccount"))
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const recoveryUrl = stringField(data, "recoveryUrl");
       const deletionDate = formatDateField(data, "deletionDate");
-      return `Your LifeOS account is scheduled for permanent deletion on ${deletionDate}.\n\nIf you change your mind, recover your account before then: ${recoveryUrl}`;
+      return `${tEmail(locale, "accountDeletionRequested.scheduledOn", { date: deletionDate })}\n\n${tEmail(locale, "accountDeletionRequested.changeMind")} ${recoveryUrl}`;
     },
   },
   "account-deletion-reminder": {
-    subject: "Reminder: your account will be deleted soon",
-    html: (data) => {
+    subject: (locale) => tEmail(locale, "accountDeletionReminder.subject"),
+    html: (data, locale) => {
       const recoveryUrl = stringField(data, "recoveryUrl");
       const deletionDate = formatDateField(data, "deletionDate");
       return (
-        paragraph(
-          `This is a final reminder that your LifeOS account will be permanently deleted on ${deletionDate}.`,
-        ) +
-        paragraph("If you want to keep your account, recover it now:") +
-        linkButton(recoveryUrl, "Keep my account")
+        paragraph(tEmail(locale, "accountDeletionReminder.finalReminder", { date: deletionDate })) +
+        paragraph(tEmail(locale, "accountDeletionReminder.recoverNow")) +
+        linkButton(recoveryUrl, tEmail(locale, "common.keepMyAccount"))
       );
     },
-    text: (data) => {
+    text: (data, locale) => {
       const recoveryUrl = stringField(data, "recoveryUrl");
       const deletionDate = formatDateField(data, "deletionDate");
-      return `This is a final reminder that your LifeOS account will be permanently deleted on ${deletionDate}.\n\nRecover your account now: ${recoveryUrl}`;
+      return `${tEmail(locale, "accountDeletionReminder.finalReminder", { date: deletionDate })}\n\n${tEmail(locale, "accountDeletionReminder.recoverNow")} ${recoveryUrl}`;
     },
   },
   "account-deleted": {
-    subject: "Your account has been deleted",
-    html: () =>
-      paragraph(
-        "Your LifeOS account and all of your data have been permanently deleted. We're sorry to see you go.",
-      ),
-    text: () =>
-      "Your LifeOS account and all of your data have been permanently deleted. We're sorry to see you go.",
+    subject: (locale) => tEmail(locale, "accountDeleted.subject"),
+    html: (_data, locale) => paragraph(tEmail(locale, "accountDeleted.intro")),
+    text: (_data, locale) => tEmail(locale, "accountDeleted.intro"),
   },
   "account-recovered": {
-    subject: "Your account was recovered",
-    html: () =>
-      paragraph(
-        "Your LifeOS account is back and active. All of your data is intact — welcome back!",
-      ),
-    text: () =>
-      "Your LifeOS account is back and active. All of your data is intact — welcome back!",
+    subject: (locale) => tEmail(locale, "accountRecovered.subject"),
+    html: (_data, locale) => paragraph(tEmail(locale, "accountRecovered.intro")),
+    text: (_data, locale) => tEmail(locale, "accountRecovered.intro"),
   },
 };
 
 /**
  * Renders a transactional email for the given template and data, returning a
  * subject, an HTML body (with the shared LifeOS layout) and a plain-text fallback.
+ * The `locale` (default "en") selects the translation used for all copy.
  */
-export function renderEmail(template: EmailTemplate, data: Record<string, unknown>): RenderedEmail {
+export function renderEmail(
+  template: EmailTemplate,
+  data: Record<string, unknown>,
+  localeInput?: string,
+): RenderedEmail {
+  const locale = normalizeEmailLocale(localeInput);
   const def = TEMPLATES[template];
+  const subject = def.subject(locale);
   return {
-    subject: def.subject,
-    html: baseHtml({ title: def.subject, body: def.html(data) }),
-    text: def.text(data),
+    subject,
+    html: baseHtml({ title: subject, body: def.html(data, locale), locale }),
+    text: def.text(data, locale),
   };
 }
-
-export { DEFAULT_LOCALE };

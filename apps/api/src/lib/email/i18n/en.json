@@ -1,0 +1,61 @@
+{
+  "common": {
+    "receivedBecauseActivity": "You received this email because of activity on your LifeOS account.",
+    "ignoreIfNotRequested": "If you didn't request this, you can safely ignore it.",
+    "privacyPolicy": "Privacy Policy",
+    "support": "Support",
+    "keepMyAccount": "Keep my account",
+    "resetPassword": "Reset password",
+    "confirmEmail": "Confirm email address",
+    "confirmNewEmail": "Confirm new email",
+    "cancelEmailChange": "Cancel email change",
+    "linkFallback": "If the button above doesn't work, paste this link into your browser:"
+  },
+  "verifyEmail": {
+    "subject": "Confirm your email address",
+    "intro": "Welcome to LifeOS! Please confirm your email address to activate your account."
+  },
+  "passwordReset": {
+    "subject": "Reset your password",
+    "intro": "We received a request to reset your password. This link is valid for 1 hour.",
+    "ignore": "If you didn't request this, you can safely ignore this email."
+  },
+  "passwordChanged": {
+    "subject": "Your password was changed",
+    "intro": "Your LifeOS password was successfully changed. If this wasn't you, contact us immediately to secure your account."
+  },
+  "emailChangeRequest": {
+    "subject": "Confirm your new email",
+    "intro": "You requested to change the email on your LifeOS account to this address.",
+    "validity": "This link is valid for 1 hour."
+  },
+  "emailChangeAlert": {
+    "subject": "Email change requested",
+    "intro": "A request was made to change the email address on your LifeOS account to a new address.",
+    "ifYou": "If this was you, you can ignore this alert once you confirm the new email.",
+    "ifNotYou": "If this wasn't you, cancel the request right away:"
+  },
+  "emailChanged": {
+    "subject": "Your email was changed",
+    "intro": "The email address on your LifeOS account has been updated. If this wasn't you, contact us immediately to secure your account."
+  },
+  "accountDeletionRequested": {
+    "subject": "Your account will be deleted",
+    "scheduledOn": "Your LifeOS account is scheduled for permanent deletion on {{date}}.",
+    "dataErased": "All of your data will be permanently erased after that date.",
+    "changeMind": "If you change your mind, you can recover your account before then:"
+  },
+  "accountDeletionReminder": {
+    "subject": "Reminder: your account will be deleted soon",
+    "finalReminder": "This is a final reminder that your LifeOS account will be permanently deleted on {{date}}.",
+    "recoverNow": "If you want to keep your account, recover it now:"
+  },
+  "accountDeleted": {
+    "subject": "Your account has been deleted",
+    "intro": "Your LifeOS account and all of your data have been permanently deleted. We're sorry to see you go."
+  },
+  "accountRecovered": {
+    "subject": "Your account was recovered",
+    "intro": "Your LifeOS account is back and active. All of your data is intact — welcome back!"
+  }
+}

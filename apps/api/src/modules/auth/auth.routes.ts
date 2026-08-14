@@ -144,11 +144,12 @@ export async function authRoutes(fastify: FastifyInstance) {
 
       // Anti-enumeration: always send the same generic message, regardless of
       // whether the email exists or is already verified.
-      await resendVerification(data.email, async (token, email) => {
+      await resendVerification(data.email, async (token, email, locale) => {
         await fastify.emailService.send({
           to: email,
           template: 'verify-email',
           data: { verificationUrl: verificationUrl(token, data.redirect) },
+          locale,
         });
       });
 
@@ -174,11 +175,12 @@ export async function authRoutes(fastify: FastifyInstance) {
       if (!data) return;
 
       // Anti-enumeration: always the same message + consistent response time.
-      await forgotPassword(data.email, async (token, email) => {
+      await forgotPassword(data.email, async (token, email, locale) => {
         await fastify.emailService.send({
           to: email,
           template: 'password-reset',
           data: { resetUrl: resetUrl(token) },
+          locale,
         });
       });
 
@@ -221,6 +223,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         to: result.email,
         template: 'password-changed',
         data: {},
+        locale: result.locale,
       });
 
       return { message: 'Your password has been reset. You can now sign in.' };
