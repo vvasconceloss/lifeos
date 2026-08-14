@@ -610,7 +610,13 @@ const openapi = {
         required: ["email", "password"],
         properties: {
           email: { type: "string", format: "email" },
-          password: { type: "string", minLength: 8, maxLength: 72 },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 72,
+            description:
+              "Strong password policy: 8–72 bytes, at least one lowercase letter, one uppercase letter, one number, one special character (!@#$%^&*()-_=+[]{};:,.<>?/), must not be a common password, and must not equal the email.",
+          },
           name: { type: "string", maxLength: 100 },
         },
       },

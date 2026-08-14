@@ -1,6 +1,7 @@
 import { buildApp } from '../../app';
 import { cleanupTestUsers, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
+import { PASSWORD_ERRORS } from '@lifeos/shared';
 
 afterAll(cleanupTestUsers);
 
@@ -12,7 +13,7 @@ describe('POST /v1/auth/register', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     expect(response.statusCode).toBe(201);
@@ -37,13 +38,13 @@ describe('POST /v1/auth/register', () => {
     await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const response = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     expect(response.statusCode).toBe(409);
@@ -69,24 +70,69 @@ describe('POST /v1/auth/register', () => {
     await app.close();
   });
 
-  it('rejects a password without a letter or a number', async () => {
+  it.each<[string, string]>([
+    ['12345678', PASSWORD_ERRORS.LOWERCASE],
+    ['abcdefgh', PASSWORD_ERRORS.UPPERCASE],
+    ['Abcdefgh', PASSWORD_ERRORS.NUMBER],
+    ['Abcdef12', PASSWORD_ERRORS.SPECIAL],
+  ])('rejects a password violating a policy rule: %s', async (password, message) => {
     const app = await buildApp({ csrf: false });
 
-    const noLetter = await app.inject({
+    const response = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email: uniqueEmail(), password: '12345678' },
-    });
-    const noNumber = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/register',
-      payload: { email: uniqueEmail(), password: 'abcdefgh' },
+      payload: { email: uniqueEmail(), password },
     });
 
-    expect(noLetter.statusCode).toBe(400);
-    expect(noNumber.statusCode).toBe(400);
-    expect(noLetter.json().error.details[0].message).toContain('at least one letter');
-    expect(noNumber.json().error.details[0].message).toContain('at least one number');
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.details[0].message).toBe(message);
+
+    await app.close();
+  });
+
+  it('rejects a common password', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: uniqueEmail(), password: 'password1' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.details.map((i: { message: string }) => i.message)).toContain(
+      PASSWORD_ERRORS.COMMON,
+    );
+
+    await app.close();
+  });
+
+  it('rejects a password equal to the email', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: 'T3st@lifeos.com', password: 'T3st@lifeos.com' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.details[0].message).toBe(PASSWORD_ERRORS.EMAIL_EQUAL);
+
+    await app.close();
+  });
+
+  it('rejects a password exceeding the 72-byte bcrypt limit', async () => {
+    const app = await buildApp({ csrf: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/register',
+      payload: { email: uniqueEmail(), password: `A1!${'a'.repeat(72)}` },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.details[0].message).toBe(PASSWORD_ERRORS.MAX_BYTES);
 
     await app.close();
   });
@@ -102,7 +148,7 @@ describe('POST /v1/auth/register', () => {
       const res = await app.inject({
         method: 'POST',
         url: '/v1/auth/register',
-        payload: { email: uniqueEmail(), password: 'test1234' },
+        payload: { email: uniqueEmail(), password: 'Test1234!' },
       });
       statuses.push(res.statusCode);
     }
@@ -128,13 +174,13 @@ describe('POST /v1/auth/login', () => {
     await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const response = await app.inject({
       method: 'POST',
       url: '/v1/auth/login',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     expect(response.statusCode).toBe(200);
@@ -179,7 +225,7 @@ describe('POST /v1/auth/login', () => {
     await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const statuses: number[] = [];
@@ -217,7 +263,7 @@ describe('PATCH /v1/auth/me', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     const tokenCookie = registerRes.cookies.find((c) => c.name === 'token');
     const cookie = `token=${tokenCookie!.value}`;
@@ -268,7 +314,7 @@ describe('POST /v1/auth/onboarding', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     const cookie = cookieFrom(registerRes);
 
@@ -336,7 +382,7 @@ describe('POST /v1/auth/onboarding', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     const cookie = cookieFrom(registerRes);
 
@@ -364,7 +410,7 @@ describe('POST /v1/auth/onboarding', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     const cookie = cookieFrom(registerRes);
 
@@ -393,7 +439,7 @@ describe('POST /v1/auth/onboarding', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     const cookie = cookieFrom(registerRes);
 
@@ -442,7 +488,7 @@ describe('GET /v1/auth/me', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const tokenCookie = registerRes.cookies.find(
@@ -488,7 +534,7 @@ describe('GET /v1/auth/me', () => {
     await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const expired = app.jwt.sign({
@@ -515,7 +561,7 @@ describe('GET /v1/auth/me', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email: uniqueEmail(), password: 'test1234' },
+      payload: { email: uniqueEmail(), password: 'Test1234!' },
     });
 
     const tokenCookie = response.cookies.find((c) => c.name === 'token');
