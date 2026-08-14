@@ -55,6 +55,10 @@ User (1) ──── (N) DailyLog
    (24 h TTL, only its SHA-256 hash stored) confirms the address via `POST /auth/verify-email`.
    Resend (`/auth/resend-verification`) is anti-enumeration (always the same generic response) and
    rate-limited. Sensitive account actions require a verified email (`requireVerified`).
+3. **Sensitive account changes** — Changing the password or email requires the **current password**
+   as confirmation. An email change is a two-step flow (single-use token, 1 h TTL, confirm at the
+   new address + alert with a cancel link at the old one). Successful password/email changes bump
+   `passwordChangedAt`, invalidating all other sessions; the acting session gets a fresh JWT.
 2. **Password storage** — Password is never stored in plaintext. Must be hashed using bcrypt before persistence. Only the hash is stored.
 3. **Password strength** — Strong policy enforced by a single shared Zod schema
    (`packages/shared/src/schemas/password.ts`) at every point a password is set or changed:

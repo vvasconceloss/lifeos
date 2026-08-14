@@ -42,6 +42,8 @@ from the message via a central map (default `APP_ERROR`).
 | 400 | Expired verification link | `VERIFICATION_EXPIRED` |
 | 400 | Invalid or expired password-reset link | `INVALID_RESET_TOKEN` |
 | 400 | Expired password-reset link | `RESET_EXPIRED` |
+| 400 | Wrong current password / same new password | `INCORRECT_PASSWORD` · `SAME_PASSWORD` |
+| 400 | Invalid or expired email-change link | `EMAIL_CHANGE_EXPIRED` · `INVALID_EMAIL_CHANGE_TOKEN` |
 | 400 | Domain rule violation (future date, pillar mismatch, invalid onboarding pillar) | `FUTURE_DATE` · `HABIT_PILLAR_MISMATCH` · `INVALID_PILLAR_INDEX` |
 | 401 | Unauthenticated / expired session | `UNAUTHORIZED` |
 | 401 | Invalid credentials | `INVALID_CREDENTIALS` |
@@ -79,6 +81,11 @@ from the message via a central map (default `APP_ERROR`).
 | `INVALID_VERIFICATION_TOKEN` | Invalid or expired verification link |
 | `INVALID_RESET_TOKEN` | Invalid or expired reset link |
 | `RESET_EXPIRED` | Reset link has expired |
+| `INCORRECT_PASSWORD` | Current password is incorrect |
+| `SAME_PASSWORD` | New password must be different from the current one |
+| `NEW_EMAIL_SAME` | New email must be different from the current one |
+| `EMAIL_CHANGE_EXPIRED` | Confirmation link has expired |
+| `INVALID_EMAIL_CHANGE_TOKEN` | Invalid or used confirmation link |
 | `RATE_LIMIT_EXCEEDED` | Rate limit exceeded, retry in … |
 | `APP_ERROR` | Fallback for any unlisted message |
 

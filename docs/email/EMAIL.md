@@ -116,6 +116,21 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 - `requireAuth` rejects any JWT issued before `passwordChangedAt` — forces a fresh login everywhere.
 - Both endpoints are rate-limited (default 3/h forgot, 10/h reset).
 
+## Change password & change email (Phase 5)
+
+- `POST /account/change-password` requires the **current password**, validates the new one with the
+  Phase 1 policy and bumps `passwordChangedAt`. The current session gets a fresh JWT (stays active);
+  all other sessions are invalidated. Sends the `password-changed` notification.
+- `POST /account/change-email/request` (verified users) requires the current password, creates a
+  single-use `EmailChangeToken` (1 h TTL, confirm + cancel hashes) and sends the
+  `email-change-request` (new address) + `email-change-alert` (old address, with a cancel link).
+  If the new email already belongs to another account, it responds generically and sends nothing
+  (anti-enumeration).
+- `POST /account/change-email/confirm` finalizes the change (email stays verified), invalidates
+  other sessions and sends the `email-changed` notification to both addresses.
+- Cancellation is possible via `DELETE /account/change-email/cancel` (authenticated) or
+  `POST /account/change-email/cancel` (no-login link token from the old email).
+
 ## Supported templates & expected data
 
 | Template | Data fields |
@@ -125,6 +140,7 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 | `password-changed` | — (notification only) |
 | `email-change-request` | `confirmUrl` (string) — sent to the **new** address |
 | `email-change-alert` | `cancelUrl` (string) — sent to the **old** address |
+| `email-changed` | — (final confirmation, sent to both addresses) |
 | `account-deletion-requested` | `recoveryUrl` (string), `deletionDate` (string, YYYY-MM-DD) |
 | `account-deletion-reminder` | `recoveryUrl` (string), `deletionDate` (string, YYYY-MM-DD) |
 | `account-deleted` | — (notification only) |
