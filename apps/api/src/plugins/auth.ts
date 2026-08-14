@@ -18,14 +18,19 @@ export async function requireAuth(
   }
 
   // After a password reset/change, every JWT issued before `passwordChangedAt`
-  // is rejected — forces a fresh login on all devices.
+  // is rejected — forces a fresh login on all devices. JWT `iat` has second
+  // resolution, so compare at the second granularity (a token re-issued in the
+  // same second as the change must still be accepted).
   const user = await prisma.user.findUnique({
     where: { id: request.user.sub },
     select: { passwordChangedAt: true },
   });
 
-  const issuedAt = request.user.iat ? new Date(request.user.iat * 1000) : null;
-  if (user?.passwordChangedAt && issuedAt && issuedAt < user.passwordChangedAt) {
+  const issuedAt = request.user.iat ?? 0;
+  const changedAtSeconds = user?.passwordChangedAt
+    ? Math.floor(user.passwordChangedAt.getTime() / 1000)
+    : 0;
+  if (issuedAt < changedAtSeconds) {
     unauthorized(reply);
   }
 }

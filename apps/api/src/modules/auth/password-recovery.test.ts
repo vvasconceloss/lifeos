@@ -298,6 +298,10 @@ describe('POST /v1/auth/reset-password', () => {
     });
     expect(before.statusCode).toBe(200);
 
+    // Ensure the login happened on a different second than the reset, so the
+    // old token's `iat` is strictly before `passwordChangedAt` (second resolution).
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+
     await app.inject({
       method: 'POST',
       url: '/v1/auth/reset-password',
