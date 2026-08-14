@@ -1,9 +1,11 @@
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { Spinner } from "@/components/ui/spinner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
+import { activeLocale } from "@/lib/i18n-format";
 
 interface HeatmapDay {
   date: string;
@@ -18,8 +20,6 @@ interface HeatmapResponse {
   days: HeatmapDay[];
 }
 
-const WEEKDAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const LEVEL_CLASSES = [
   "bg-border/40",
   "bg-emerald-500/30",
@@ -33,14 +33,14 @@ function toDateKey(date: Date): string {
 
 function formatFullDate(date: string): string {
   const [year, month, day] = date.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-US", {
+  return new Intl.DateTimeFormat(activeLocale(), {
     weekday: "long",
     month: "long",
     day: "numeric",
-  });
+  }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-function buildYearGrid(days: HeatmapDay[], year: number) {
+function buildYearGrid(days: HeatmapDay[], year: number, months: string[]) {
   const byDate = new Map(days.map((d) => [d.date, d]));
   const daysInYear = days.length;
   const jan1 = new Date(Date.UTC(year, 0, 1));
@@ -66,7 +66,7 @@ function buildYearGrid(days: HeatmapDay[], year: number) {
         const month = date.getUTCMonth();
 
         if (month !== prevMonth) {
-          label = MONTH_LABELS[month];
+          label = months[month];
           prevMonth = month;
         }
 
@@ -101,6 +101,7 @@ function buildMonthGrid(days: HeatmapDay[], year: number, month: number) {
 }
 
 export function HeatmapCard({ year, month }: { year: number; month: number }) {
+  const { t } = useTranslation("statistics");
   const [data, setData] = useState<HeatmapResponse | null>(null);
   const isMobile = useIsMobile();
 
@@ -115,7 +116,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
         const res = await api.get<{ stats: HeatmapResponse }>(url);
         if (!cancelled) setData(res.data.stats);
       } catch (error) {
-        if (!cancelled && !isUnauthorizedError(error)) toast.error("Failed to load heatmap");
+        if (!cancelled && !isUnauthorizedError(error)) toast.error(t("heatmap.errorToast"));
       }
     }
 
@@ -123,16 +124,18 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
     return () => {
       cancelled = true;
     };
-  }, [year, month, isMobile]);
+  }, [year, month, isMobile, t]);
 
-  const monthLabel = MONTH_LABELS[month - 1];
+  const weekdays = t("heatmap.weekdays", { returnObjects: true }) as string[];
+  const months = t("heatmap.months", { returnObjects: true }) as string[];
+  const monthLabel = months[month - 1];
   const emptyText = isMobile
-    ? `No completions recorded in ${monthLabel} ${year}.`
-    : `No completions recorded in ${year}.`;
+    ? t("heatmap.emptyMonth", { month: monthLabel, year })
+    : t("heatmap.emptyYear", { year });
 
   const { columns, monthLabels } =
     !isMobile && data
-      ? buildYearGrid(data.days, data.year)
+      ? buildYearGrid(data.days, data.year, months)
       : { columns: [], monthLabels: [] };
   const cells = isMobile && data ? buildMonthGrid(data.days, data.year, data.month ?? month).cells : [];
   const isEmpty = data !== null && data.days.every((d) => d.count === 0);
@@ -140,7 +143,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
-        <span className="text-xs font-medium text-foreground/60">Activity</span>
+        <span className="text-xs font-medium text-foreground/60">{t("heatmap.activity")}</span>
         <span className="text-[10px] text-foreground/60">
           {isMobile ? `${monthLabel} ${year}` : year}
         </span>
@@ -157,7 +160,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
       ) : isMobile ? (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-7 gap-1.5">
-            {WEEKDAY_LABELS.map((label, r) => (
+            {weekdays.map((label, r) => (
               <div key={r} className="text-center text-[10px] leading-4 text-foreground/40">
                 {label}
               </div>
@@ -168,7 +171,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
                   key={cell.date}
                   className={`size-full rounded-[4px] ${LEVEL_CLASSES[cell.level]}`}
                   role="img"
-                  aria-label={`${formatFullDate(cell.date)} — ${cell.count} completion${cell.count === 1 ? "" : "s"}`}
+                  aria-label={`${formatFullDate(cell.date)} — ${t("heatmap.dayCompletions", { count: cell.count })}`}
                 />
               ) : (
                 <div key={`empty-${i}`} className="aspect-square" />
@@ -176,11 +179,11 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
             )}
           </div>
           <div className="flex items-center justify-end gap-1">
-            <span className="text-[9px] text-foreground/40">Less</span>
+            <span className="text-[9px] text-foreground/40">{t("heatmap.less")}</span>
             {LEVEL_CLASSES.map((cls, level) => (
               <div key={level} className={`h-[10px] w-[10px] rounded-[2px] ${cls}`} />
             ))}
-            <span className="text-[9px] text-foreground/40">More</span>
+            <span className="text-[9px] text-foreground/40">{t("heatmap.more")}</span>
           </div>
         </div>
       ) : (
@@ -188,7 +191,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
           <div className="flex items-start gap-[3px]">
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <div className="h-[13px]" />
-              {WEEKDAY_LABELS.map((label, r) => (
+              {weekdays.map((label, r) => (
                 <div
                   key={r}
                   className="flex aspect-square w-full items-center justify-center overflow-hidden text-[9px] leading-none text-foreground/40"
@@ -209,7 +212,7 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
                       <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-md group-hover:block">
                         <div>{formatFullDate(cell.day.date)}</div>
                         <div className="font-semibold">
-                          {cell.day.count} completion{cell.day.count === 1 ? "" : "s"}
+                          {t("heatmap.dayCompletions", { count: cell.day.count })}
                         </div>
                       </div>
                     </div>
@@ -222,11 +225,11 @@ export function HeatmapCard({ year, month }: { year: number; month: number }) {
           </div>
 
           <div className="flex items-center justify-end gap-1">
-            <span className="text-[9px] text-foreground/40">Less</span>
+            <span className="text-[9px] text-foreground/40">{t("heatmap.less")}</span>
             {LEVEL_CLASSES.map((cls, level) => (
               <div key={level} className={`h-[10px] w-[10px] rounded-[2px] ${cls}`} />
             ))}
-            <span className="text-[9px] text-foreground/40">More</span>
+            <span className="text-[9px] text-foreground/40">{t("heatmap.more")}</span>
           </div>
         </div>
       )}

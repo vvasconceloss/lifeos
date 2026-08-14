@@ -8,8 +8,13 @@ export const loggedInUser = {
   timezone: null,
   weekStart: 1,
   theme: 'system',
+  locale: 'en',
   onboarded: true,
   gamification: false,
+  emailVerified: true,
+  status: 'ACTIVE',
+  deletionRequestedAt: null,
+  scheduledDeletionAt: null,
   isDemo: false,
   createdAt: '2026-01-01T00:00:00.000Z',
 };

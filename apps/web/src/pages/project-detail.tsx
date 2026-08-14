@@ -4,6 +4,7 @@ import { isUnauthorizedError } from "@/lib/errors";
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Pencil, Trash2, X } from "lucide-react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
@@ -22,6 +23,13 @@ interface Pillar {
 
 const STATUSES: ProjectStatus[] = ["PLANNING", "IN_PROGRESS", "COMPLETED", "PAUSED"];
 
+const STATUS_KEYS: Record<ProjectStatus, string> = {
+  PLANNING: "planning",
+  IN_PROGRESS: "inProgress",
+  COMPLETED: "completed",
+  PAUSED: "paused",
+};
+
 function TaskRow({
   task,
   index,
@@ -39,6 +47,7 @@ function TaskRow({
   onDelete: (task: ProjectTask) => void;
   onMove: (index: number, direction: -1 | 1) => void;
 }) {
+  const { t } = useTranslation("projects");
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
 
@@ -47,7 +56,11 @@ function TaskRow({
       <button
         type="button"
         onClick={() => onToggle(task)}
-        aria-label={task.isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
+        aria-label={
+          task.isDone
+            ? t("projectDetail.taskRow.markNotDone", { title: task.title })
+            : t("projectDetail.taskRow.markDone", { title: task.title })
+        }
         aria-pressed={task.isDone}
         className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
           task.isDone ? "border-primary bg-primary text-primary-foreground" : "border-foreground/25"
@@ -72,7 +85,7 @@ function TaskRow({
               }
             }}
             className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            aria-label={`Edit task ${task.title}`}
+            aria-label={t("projectDetail.taskRow.editTask", { title: task.title })}
           />
         ) : (
           <button
@@ -96,7 +109,7 @@ function TaskRow({
           onClick={() => onMove(index, -1)}
           disabled={index === 0}
           className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-          aria-label={`Move "${task.title}" up`}
+          aria-label={t("projectDetail.taskRow.moveUp", { title: task.title })}
         >
           <ArrowUp className="size-3.5" />
         </button>
@@ -105,7 +118,7 @@ function TaskRow({
           onClick={() => onMove(index, 1)}
           disabled={index === count - 1}
           className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-          aria-label={`Move "${task.title}" down`}
+          aria-label={t("projectDetail.taskRow.moveDown", { title: task.title })}
         >
           <ArrowDown className="size-3.5" />
         </button>
@@ -121,7 +134,7 @@ function TaskRow({
                 setEditing(false);
               }}
               className="rounded-md p-1.5 text-foreground/60 hover:text-primary"
-              aria-label="Save task title"
+              aria-label={t("projectDetail.taskRow.saveTitle")}
             >
               <Check className="size-4" />
             </button>
@@ -132,7 +145,7 @@ function TaskRow({
                 setEditing(false);
               }}
               className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
-              aria-label="Cancel editing"
+              aria-label={t("projectDetail.taskRow.cancelEditing")}
             >
               <X className="size-4" />
             </button>
@@ -145,7 +158,7 @@ function TaskRow({
               setEditing(true);
             }}
             className="rounded-md p-1.5 text-foreground/40 hover:text-foreground"
-            aria-label={`Edit "${task.title}"`}
+            aria-label={t("projectDetail.taskRow.edit", { title: task.title })}
           >
             <Pencil className="size-4" />
           </button>
@@ -154,7 +167,7 @@ function TaskRow({
           type="button"
           onClick={() => onDelete(task)}
           className="rounded-md p-1.5 text-foreground/40 hover:text-destructive"
-          aria-label={`Delete "${task.title}"`}
+          aria-label={t("projectDetail.taskRow.delete", { title: task.title })}
         >
           <Trash2 className="size-4" />
         </button>
@@ -165,6 +178,7 @@ function TaskRow({
 
 export default function ProjectDetailPage() {
   const { id } = useParams({ from: "/projects/$id" });
+  const { t } = useTranslation("projects");
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,7 +226,7 @@ export default function ProjectDetailPage() {
       const res = await api.patch<{ project: Project }>(`/projects/${project.id}`, { status });
       setProject((prev) => (prev && prev.id === res.data.project.id ? { ...prev, ...res.data.project } : prev));
     } catch {
-      toast.error("Failed to update status");
+      toast.error(t("toast.updateStatusFailed"));
     }
   }
 
@@ -221,7 +235,7 @@ export default function ProjectDetailPage() {
       await api.patch(`/projects/tasks/${task.id}`, { isDone: !task.isDone });
       setReloadKey((k) => k + 1);
     } catch {
-      toast.error("Failed to update task");
+      toast.error(t("toast.updateTaskFailed"));
     }
   }
 
@@ -231,7 +245,7 @@ export default function ProjectDetailPage() {
       await api.patch(`/projects/tasks/${task.id}`, { title });
       setReloadKey((k) => k + 1);
     } catch {
-      toast.error("Failed to update task");
+      toast.error(t("toast.updateTaskFailed"));
     }
   }
 
@@ -240,7 +254,7 @@ export default function ProjectDetailPage() {
       await api.delete(`/projects/tasks/${task.id}`);
       setReloadKey((k) => k + 1);
     } catch {
-      toast.error("Failed to delete task");
+      toast.error(t("toast.deleteTaskFailed"));
     }
   }
 
@@ -258,7 +272,7 @@ export default function ProjectDetailPage() {
         ids: next.map((t) => t.id),
       });
     } catch {
-      toast.error("Failed to reorder tasks");
+      toast.error(t("toast.reorderTasksFailed"));
       setReloadKey((k) => k + 1);
     }
   }
@@ -282,7 +296,7 @@ export default function ProjectDetailPage() {
                 <Link
                   to="/projects"
                   className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/80 text-foreground/60 hover:text-foreground"
-                  aria-label="Back to projects"
+                  aria-label={t("projectDetail.backToProjects")}
                 >
                   <ArrowLeft className="size-4" />
                 </Link>
@@ -297,7 +311,7 @@ export default function ProjectDetailPage() {
               <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[1fr_minmax(16rem,20rem)]">
                 <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                   <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-2">
-                    <span className="text-xs font-medium text-foreground/60">Progress</span>
+                    <span className="text-xs font-medium text-foreground/60">{t("projectDetail.progress")}</span>
                     <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
                       {project.progress}%
                     </span>
@@ -309,7 +323,7 @@ export default function ProjectDetailPage() {
                     />
                   </div>
                   <div className="mt-2 shrink-0 text-xs text-foreground/60">
-                    {doneCount} of {tasks.length} tasks done
+                    {t("projectDetail.tasksDone", { done: doneCount, total: tasks.length })}
                   </div>
                   <div className="mt-4 flex shrink-0 flex-wrap gap-2 border-t border-border/40 pt-4">
                     {STATUSES.map((s) => (
@@ -322,13 +336,13 @@ export default function ProjectDetailPage() {
                             : "bg-accent text-foreground/70 hover:bg-accent/70"
                         }`}
                       >
-                        {s.toLowerCase().replace("_", " ")}
+                        {t(`status.${STATUS_KEYS[s]}`)}
                       </button>
                     ))}
                   </div>
                   {project.description && (
                     <div className="mt-4 border-t border-border/40 pt-4">
-                      <span className="text-xs font-medium text-foreground/60">Description</span>
+                      <span className="text-xs font-medium text-foreground/60">{t("projectDetail.description")}</span>
                       <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/70">
                         {project.description}
                       </p>
@@ -338,13 +352,13 @@ export default function ProjectDetailPage() {
 
                 <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
                   <div className="mb-3 flex shrink-0 items-center justify-between">
-                    <span className="text-xs font-medium text-foreground/60">Tasks</span>
+                    <span className="text-xs font-medium text-foreground/60">{t("projectDetail.tasks")}</span>
                     {project && <NewTaskModal projectId={project.id} onCreated={() => setReloadKey((k) => k + 1)} />}
                   </div>
 
                   {tasks.length === 0 ? (
                     <p className="py-4 text-center text-xs text-foreground/60">
-                      No tasks yet. Add a task to get started.
+                      {t("projectDetail.noTasks")}
                     </p>
                   ) : (
                     <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto scroll-subtle">

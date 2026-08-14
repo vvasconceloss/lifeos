@@ -12,7 +12,7 @@ describe('Authentication flows', () => {
       http.get('/v1/auth/me', () => HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })),
       http.post('/v1/auth/login', async ({ request }) => {
         const body = await request.json();
-        expect(body).toEqual({ email: 'user@lifeos.com', password: 'secret123' });
+        expect(body).toEqual({ email: 'user@lifeos.com', password: 'Secret123!' });
         return HttpResponse.json({ user: loggedInUser, token: 'jwt' });
       }),
     );
@@ -22,7 +22,7 @@ describe('Authentication flows', () => {
     expect(await screen.findByRole('heading', { name: /Welcome back/i })).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/email/i), 'user@lifeos.com');
-    await user.type(screen.getByLabelText("Password"), 'secret123');
+    await user.type(screen.getByLabelText("Password"), 'Secret123!');
     await user.click(screen.getByRole('button', { name: /Sign in/i }));
 
     expect(await screen.findByText('Welcome to LifeOS')).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('Authentication flows', () => {
         const body = await request.json();
         expect(body).toMatchObject({
           email: 'new@lifeos.com',
-          password: 'newpass123',
+          password: 'Newpass123!',
           name: 'New User',
         });
         return HttpResponse.json({ user: newUser, token: 'jwt' }, { status: 201 });
@@ -68,7 +68,7 @@ describe('Authentication flows', () => {
 
     await user.type(screen.getByLabelText(/name/i), 'New User');
     await user.type(screen.getByLabelText(/email/i), 'new@lifeos.com');
-    await user.type(screen.getByLabelText("Password"), 'newpass123');
+    await user.type(screen.getByLabelText("Password"), 'Newpass123!');
     await user.click(screen.getByRole('button', { name: /Create account/i }));
 
     expect(await screen.findByRole('heading', { name: /Welcome to LifeOS/i })).toBeInTheDocument();

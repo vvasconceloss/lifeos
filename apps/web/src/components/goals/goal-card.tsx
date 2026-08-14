@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Trash2 } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
@@ -41,6 +42,7 @@ export function GoalCard({
   onDelete: (id: string) => void;
   onUpdated: (goal: Goal) => void;
 }) {
+  const { t } = useTranslation("goals");
   const [alertOpen, setAlertOpen] = useState(false);
 
   return (
@@ -67,19 +69,19 @@ export function GoalCard({
               render={<button />}
               disabled={deletingId === goal.id}
               className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
-              aria-label={`Delete ${goal.title}`}
+              aria-label={t("goalCard.deleteLabel", { name: goal.title })}
             >
               {deletingId === goal.id ? <Spinner /> : <Trash2 className="size-4" />}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete goal?</AlertDialogTitle>
+                <AlertDialogTitle>{t("goalCard.deleteTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently remove <strong>{goal.title}</strong> and its habit links.
+                  <Trans i18nKey="goalCard.deleteDescription" values={{ name: goal.title }} />
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
                   onClick={() => {
@@ -87,7 +89,7 @@ export function GoalCard({
                     onDelete(goal.id);
                   }}
                 >
-                  Delete
+                  {t("common:delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -115,22 +117,22 @@ export function GoalCard({
                 <button
                   type="button"
                   className="inline-flex items-center text-amber-600 hover:text-amber-500 dark:text-amber-400"
-                  aria-label="This goal has no supporting habits yet"
+                  aria-label={t("goalCard.noHabitsAria")}
                 >
                   <AlertTriangle className="size-3.5" aria-hidden />
                 </button>
               }
             />
             <TooltipContent>
-              This goal has no supporting habits yet. Add habits from its pillar to track progress.
+              {t("goalCard.noHabits")}
             </TooltipContent>
           </Tooltip>
         ) : (
           <span>
-            {goal.habitCount} supporting habit{goal.habitCount === 1 ? "" : "s"}
+            {t("goalCard.habitCount", { count: goal.habitCount })}
           </span>
         )}
-        {goal.deadline && <span>· deadline {goal.deadline}</span>}
+        {goal.deadline && <span>{t("goalCard.deadline", { date: goal.deadline })}</span>}
       </div>
     </li>
   );

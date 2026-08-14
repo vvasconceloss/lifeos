@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { Layers } from "lucide-react";
 import { getApiErrorMessage, isUnauthorizedError } from "@/lib/errors";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { PillarCard } from "@/components/pillar-card";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -23,6 +24,7 @@ interface Pillar {
 }
 
 export default function SettingsPillarsPage() {
+  const { t } = useTranslation("habits");
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -63,9 +65,9 @@ export default function SettingsPillarsPage() {
     try {
       await api.delete(`/pillars/${id}`);
       setPillars((prev) => prev.filter((p) => p.id !== id));
-      toast.success("Pillar deleted");
+      toast.success(t("settingsPillars.deleted"));
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to delete pillar"));
+      toast.error(getApiErrorMessage(error, t("settingsPillars.deleteFailed")));
     } finally {
       setDeletingId(null);
     }
@@ -80,7 +82,7 @@ export default function SettingsPillarsPage() {
     try {
       await api.post("/pillars/reorder", { ids: next.map((p) => p.id) });
     } catch {
-      toast.error("Failed to reorder pillars");
+      toast.error(t("settingsPillars.reorderFailed"));
       reload();
     }
   }
@@ -91,7 +93,7 @@ export default function SettingsPillarsPage() {
         <main className="mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-              Pillars
+              {t("common:pillars")}
             </h2>
             <NewPillarModal onCreated={handleCreated} />
           </div>
@@ -105,8 +107,8 @@ export default function SettingsPillarsPage() {
             <EmptyState
               className="flex-1"
               icon={<Layers className="size-8" />}
-              title="No pillars yet"
-              description="Create your first pillar to start organizing your life."
+              title={t("settingsPillars.noPillars")}
+              description={t("settingsPillars.noPillarsDescription")}
               action={<NewPillarModal onCreated={handleCreated} />}
             />
           ) : (

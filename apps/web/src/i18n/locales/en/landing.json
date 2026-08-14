@@ -1,0 +1,125 @@
+{
+  "logoAlt": "LifeOS logo",
+  "login": "Log in",
+  "getStarted": "Get Started",
+  "demoLoading": "Loading demo…",
+  "viewDemo": "View Demo",
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "technology": "Technology",
+    "project": "Project"
+  },
+  "heroBadge": "Track habits · Build goals · Understand yourself",
+  "heroTitle1": "Build a life you can measure,",
+  "heroTitle2": "understand, and improve.",
+  "heroDescription": "LifeOS is a personal system for turning the life you want into habits you can actually keep — then showing you what is working.",
+  "stats": {
+    "frequencies": {
+      "label": "trackable habit frequencies",
+      "description": "Daily, specific weekdays, or a target number of times per week or month — pick what actually fits your life."
+    },
+    "pillars": {
+      "label": "predefined life pillars",
+      "description": "Health, Engineering, Relationships and more — or create your own areas from scratch."
+    },
+    "tap": {
+      "label": "tap to log a completion",
+      "description": "One tap to mark a habit done. Everything else — streaks, rates and insights — is calculated for you."
+    }
+  },
+  "problem": {
+    "eyebrow": "The problem",
+    "title": "Another to-do list isn't the answer",
+    "points": [
+      "Lists tell you what to do, but nothing about whether you're improving.",
+      "All-or-nothing streaks make one missed day feel like failure.",
+      "A rigid daily schedule collapses the moment life gets busy."
+    ],
+    "toDoListTells": "A to-do list tells you:",
+    "toDoListQuote": "\"Do this task.\"",
+    "lifeOSTells": "LifeOS tells you:",
+    "lifeOSTellPoints": [
+      "How consistent you actually are",
+      "Whether your habits match a realistic frequency",
+      "Which pillar deserves your attention this week"
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "How LifeOS works",
+    "title": "From scattered notes to a system that compounds",
+    "steps": [
+      {
+        "title": "Define your pillars",
+        "description": "Start from the areas of your life you care about — or create your own from scratch."
+      },
+      {
+        "title": "Add realistic habits",
+        "description": "Choose a frequency that fits your life, not an impossible daily streak."
+      },
+      {
+        "title": "Track in seconds",
+        "description": "Mark a completion with one tap. That's it — the rest is calculated for you."
+      },
+      {
+        "title": "Review and adjust",
+        "description": "Use streaks, rates and insights to see what works and course-correct."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Features",
+    "title": "Everything you need to run your life as a system",
+    "description": "Designed for depth without ceremony — each feature answers a concrete question about your progress.",
+    "items": [
+      {
+        "title": "Pillars",
+        "description": "Organize your life into areas that matter — Health, Engineering, Relationships, and anything else you define."
+      },
+      {
+        "title": "Flexible habits",
+        "description": "Track habits daily, on specific weekdays, or a target number of times per week or month."
+      },
+      {
+        "title": "Progress & streaks",
+        "description": "See completion rates, current and best streaks, and how your consistency evolves over time."
+      },
+      {
+        "title": "Goals",
+        "description": "Set goals, link supporting habits to them, and watch progress update as you complete your routines."
+      },
+      {
+        "title": "Insights",
+        "description": "Understand which pillar needs focus this week and how consistent your daily effort really is."
+      },
+      {
+        "title": "Journal",
+        "description": "Log mood, energy and sleep, and review your monthly state alongside your habit data."
+      }
+    ]
+  },
+  "screenshots": {
+    "eyebrow": "Screenshots",
+    "title": "A quiet, focused workspace",
+    "description": "The same interface you'll use every day — clear in both light and dark mode.",
+    "dashboard": "Dashboard",
+    "liveDemo": "Live demo",
+    "imageAlt": "LifeOS dashboard with the monthly habit grid"
+  },
+  "technology": {
+    "eyebrow": "Technology",
+    "title": "Modern, boring, dependable",
+    "description": "A focused full-stack foundation that stays out of the way."
+  },
+  "project": {
+    "eyebrow": "Open source",
+    "title": "A personal project, built in the open",
+    "description": "LifeOS started as a way for one person to systematically improve their life — and the code is available for anyone to learn from or build on.",
+    "philosophy": "The philosophy is simple: track what you do, understand what works, and improve one thing at a time. No aggressive marketing, no gamified streaks — just a clearer picture of your own life."
+  },
+  "cta": {
+    "title": "Start with one habit today.",
+    "description": "Create a free account, define your pillars, and let LifeOS show you the progress you're making."
+  },
+  "footer": "© {{year}} LifeOS — build a life you can measure."
+}

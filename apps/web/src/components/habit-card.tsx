@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Archive, ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Trans, useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import { EditHabitDialog } from "@/components/edit-habit-dialog";
 import { FrequencyBadge } from "@/components/frequency-badge";
@@ -71,6 +72,7 @@ export function HabitCard({
   onUpdated: (habit: Habit) => void;
 }) {
   const [alertOpen, setAlertOpen] = useState(false);
+  const { t } = useTranslation("habits");
 
   return (
     <li className="flex items-center gap-2 rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm transition-colors hover:bg-accent/30">
@@ -107,7 +109,7 @@ export function HabitCard({
             onClick={onMoveUp}
             disabled={!canMoveUp}
             className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-            aria-label={`Move ${habit.name} up`}
+            aria-label={t("habitCard.moveUp", { name: habit.name })}
           >
             <ArrowUp className="size-3.5" />
           </button>
@@ -116,7 +118,7 @@ export function HabitCard({
             onClick={onMoveDown}
             disabled={!canMoveDown}
             className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-            aria-label={`Move ${habit.name} down`}
+            aria-label={t("habitCard.moveDown", { name: habit.name })}
           >
             <ArrowDown className="size-3.5" />
           </button>
@@ -131,11 +133,11 @@ export function HabitCard({
             onClick={() => onArchive(habit.id)}
             disabled={archivingId === habit.id}
             className="rounded-md p-1.5 text-foreground/60 hover:text-foreground disabled:opacity-50"
-            aria-label={`Archive ${habit.name}`}
+            aria-label={t("habitCard.archive", { name: habit.name })}
           >
             {archivingId === habit.id ? <Spinner /> : <Archive className="size-4" />}
           </TooltipTrigger>
-          <TooltipContent>Archive</TooltipContent>
+          <TooltipContent>{t("common:archive")}</TooltipContent>
         </Tooltip>
       )}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
@@ -143,19 +145,21 @@ export function HabitCard({
           render={<button />}
           disabled={deletingId === habit.id}
           className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
-          aria-label={`Delete ${habit.name}`}
+          aria-label={t("habitCard.delete", { name: habit.name })}
         >
           {deletingId === habit.id ? <Spinner /> : <Trash2 className="size-4" />}
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete habit?</AlertDialogTitle>
+            <AlertDialogTitle>{t("habitCard.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove <strong>{habit.name}</strong> and all its completion history.
+              <Trans i18nKey="habitCard.deleteDescription" ns="habits" values={{ name: habit.name }}>
+                This will permanently remove <strong>{habit.name}</strong> and all its completion history.
+              </Trans>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
@@ -163,7 +167,7 @@ export function HabitCard({
                 onDelete(habit.id);
               }}
             >
-              Delete
+              {t("common:delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

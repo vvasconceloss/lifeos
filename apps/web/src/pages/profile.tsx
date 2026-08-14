@@ -1,14 +1,18 @@
+import { BadgeCheck } from "lucide-react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Spinner } from "@/components/ui/spinner";
 import { UserAvatar } from "@/components/user-avatar";
+import { LanguageSelector } from "@/components/language-selector";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { AccountSettings } from "@/components/account-settings";
 import type { User } from "@/contexts/AuthContextBase";
 
 const TIMEZONES = [
@@ -28,9 +32,9 @@ const TIMEZONES = [
 ];
 
 const WEEK_START_OPTIONS = [
-  { value: 1, label: "Monday" },
-  { value: 0, label: "Sunday" },
-  { value: 6, label: "Saturday" },
+  { value: 1, labelKey: "weekStart.monday" },
+  { value: 0, labelKey: "weekStart.sunday" },
+  { value: 6, labelKey: "weekStart.saturday" },
 ];
 
 const inputClass =
@@ -40,6 +44,7 @@ const errorInputClass =
   "border-destructive hover:border-destructive/70 focus:border-destructive focus:ring-destructive/30";
 
 function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<void> }) {
+  const { t } = useTranslation("settings");
   const { setTheme } = useTheme();
   const [name, setName] = useState(user.name ?? "");
   const [themePref, setThemePref] = useState<"light" | "dark" | "system">(
@@ -84,11 +89,11 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
       await api.patch("/auth/me", payload);
       setTheme(themePref);
       await onSaved();
-      toast.success("Profile updated");
+      toast.success(t("profileUpdated"));
       setSaved(true);
       successTimer.current = window.setTimeout(() => setSaved(false), 2000);
     } catch {
-      toast.error("Failed to update profile");
+      toast.error(t("profileUpdateFailed"));
     } finally {
       setSaving(false);
     }
@@ -97,18 +102,18 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-        <h3 className="mb-1 text-sm font-semibold text-foreground">Profile</h3>
-        <p className="mb-3 text-xs text-foreground/60">Your display name across the app.</p>
+        <h3 className="mb-1 text-sm font-semibold text-foreground">{t("title")}</h3>
+        <p className="mb-3 text-xs text-foreground/60">{t("nameDescription")}</p>
         <div className="grid gap-2">
           <label htmlFor="p-name" className="text-xs font-medium text-foreground/60">
-            Name
+            {t("name")}
           </label>
           <div className="relative">
             <input
               id="p-name"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Your name"
+              placeholder={t("namePlaceholder")}
               disabled={saving}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "p-name-error" : undefined}
@@ -117,19 +122,25 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
           </div>
           {nameError && (
             <p id="p-name-error" role="alert" className="text-xs text-destructive">
-              Name is required
+              {t("nameRequired")}
             </p>
           )}
         </div>
+
+        {!user.isDemo ? (
+          <div className="mt-5 border-t border-border/40 pt-4">
+            <AccountSettings />
+          </div>
+        ) : null}
       </div>
 
       <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-        <h3 className="mb-1 text-sm font-semibold text-foreground">Preferences</h3>
-        <p className="mb-3 text-xs text-foreground/60">Theme, timezone and the day your week starts.</p>
+        <h3 className="mb-1 text-sm font-semibold text-foreground">{t("preferences")}</h3>
+        <p className="mb-3 text-xs text-foreground/60">{t("preferencesDescription")}</p>
         <div className="grid gap-4">
           <div className="grid gap-2">
             <label htmlFor="p-theme" className="text-xs font-medium text-foreground/60">
-              Theme
+              {t("theme.label")}
             </label>
             <select
               id="p-theme"
@@ -138,15 +149,15 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               disabled={saving}
               className={cn(inputClass)}
             >
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              <option value="system">{t("theme.system")}</option>
+              <option value="light">{t("theme.light")}</option>
+              <option value="dark">{t("theme.dark")}</option>
             </select>
           </div>
 
           <div className="grid gap-2">
             <label htmlFor="p-tz" className="text-xs font-medium text-foreground/60">
-              Timezone
+              {t("timezone")}
             </label>
             <select
               id="p-tz"
@@ -155,7 +166,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               disabled={saving}
               className={cn(inputClass)}
             >
-              <option value="">Not set</option>
+              <option value="">{t("common:notSet")}</option>
               {TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>
                   {tz}
@@ -166,7 +177,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
 
           <div className="grid gap-2">
             <label htmlFor="p-week" className="text-xs font-medium text-foreground/60">
-              Week starts on
+              {t("weekStart.label")}
             </label>
             <select
               id="p-week"
@@ -177,24 +188,24 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
             >
               {WEEK_START_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label}
+                  {t(o.labelKey)}
                 </option>
               ))}
             </select>
           </div>
 
+          <LanguageSelector />
+
           <div className="flex items-start justify-between gap-3 border-t border-border/40 pt-4">
             <div>
-              <p className="text-sm font-medium text-foreground">Gamification</p>
-              <p className="text-xs text-foreground/60">
-                Show XP, levels and ranks. Off by default.
-              </p>
+              <p className="text-sm font-medium text-foreground">{t("gamification")}</p>
+              <p className="text-xs text-foreground/60">{t("gamificationDescription")}</p>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={gamification}
-              aria-label="Toggle gamification"
+              aria-label={t("gamificationToggle")}
               onClick={() => setGamification((v) => !v)}
               disabled={saving}
               className={cn(
@@ -226,7 +237,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
             )}
           >
             {saving ? <Spinner className="size-4" /> : null}
-            {saving ? "Saving..." : saved ? <Check className="size-4" /> : "Save changes"}
+            {saving ? t("saving") : saved ? <Check className="size-4" /> : t("common:saveChanges")}
           </button>
         </div>
       </div>
@@ -236,18 +247,27 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
+  const { t } = useTranslation("settings");
 
   return (
     <ProtectedRoute>
       <AppLayout>
-        <main className="mx-auto flex w-full max-w-4xl min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
+        <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-6 py-6">
           <div className="mb-6 flex items-center gap-4">
             {user && <UserAvatar email={user.email} className="size-14 text-xl" />}
             <div className="min-w-0">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                {user?.name || "Your profile"}
+                {user?.name || t("yourProfile")}
               </h2>
-              <p className="truncate text-sm text-foreground/60">{user?.email}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm text-foreground/60">{user?.email}</p>
+                {user?.emailVerified && !user.isDemo ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-500">
+                    <BadgeCheck className="size-3.5" aria-hidden />
+                    {t("verified")}
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
           <div className="min-h-0 flex-1">

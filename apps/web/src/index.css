@@ -135,6 +135,12 @@
     section[id] {
         scroll-margin-top: 4rem;
     }
+
+    /* Consistent pointer cursor across every button in the app. */
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
 }
 
 .dark .habit-checkbox {

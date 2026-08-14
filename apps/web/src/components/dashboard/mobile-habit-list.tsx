@@ -1,7 +1,9 @@
 import { CheckSquare } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import { expectedForMonth } from "@/lib/frequency";
+import { activeLocale } from "@/lib/i18n-format";
 import type { Completion, HabitsGrouped } from "./types";
 
 export function MobileHabitList({
@@ -19,15 +21,17 @@ export function MobileHabitList({
   togglingId: string | null;
   onToggle: (habitId: string, date: string) => void;
 }) {
+  const { t } = useTranslation("dashboard");
+
   function isCompleted(habitId: string, date: string) {
     return completions.some((c) => c.habitId === habitId && c.date.startsWith(date));
   }
 
-  const todayLabel = new Date(`${todayStr}T00:00:00.000Z`).toLocaleDateString("en-US", {
+  const todayLabel = new Intl.DateTimeFormat(activeLocale(), {
     weekday: "short",
     month: "short",
     day: "numeric",
-  });
+  }).format(new Date(`${todayStr}T00:00:00.000Z`));
 
   const [listYear, listMonth] = (monthDays[0] ?? "2000-01").split("-").map(Number);
 
@@ -46,7 +50,7 @@ export function MobileHabitList({
     <div className="flex flex-col gap-5 md:hidden">
       <div className="flex items-baseline justify-between px-1">
         <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-          Today
+          {t("mobileHabitList.today")}
         </span>
         <span className="text-xs text-foreground/60">{todayLabel}</span>
       </div>
@@ -82,7 +86,7 @@ export function MobileHabitList({
                       {habit.name}
                     </Link>
                     <p className="text-xs text-foreground/60">
-                      {completed}/{goal} this month · {pct}%
+                      {t("mobileHabitList.monthProgress", { completed, goal, pct })}
                     </p>
                   </div>
                   <button
@@ -90,8 +94,8 @@ export function MobileHabitList({
                     disabled={togglingId === cellKey}
                     aria-label={
                       doneToday
-                        ? `Unmark ${habit.name} for today`
-                        : `Mark ${habit.name} for today`
+                        ? t("mobileHabitList.unmarkToday", { habit: habit.name })
+                        : t("mobileHabitList.markToday", { habit: habit.name })
                     }
                     className="flex size-11 shrink-0 items-center justify-center rounded-lg transition-all disabled:opacity-30"
                   >

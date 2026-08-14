@@ -1,0 +1,35 @@
+{
+  "title": "Registo diário",
+  "form": {
+    "logEntry": "Registo",
+    "mood": "Humor",
+    "energy": "Energia",
+    "sleep": "Sono",
+    "hours": "Horas",
+    "minutes": "Minutos",
+    "notes": "Notas",
+    "notesPlaceholder": "Como correu o dia?",
+    "save": "Guardar registo",
+    "update": "Atualizar registo",
+    "saving": "A guardar...",
+    "futureDisabled": "Não é possível registar dias futuros",
+    "savedToast": "Diário guardado",
+    "errorToast": "Falha ao guardar o diário"
+  },
+  "calendar": {
+    "title": "Calendário mensal",
+    "weekdays": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+    "logged": "(registado)",
+    "hint": "Os dias registados são coloridos pelo humor e pela energia (quanto mais verde, melhor o dia)."
+  },
+  "correlations": {
+    "title": "Os seus dias registados por estado",
+    "empty": "Registe alguns dias (humor, energia ou sono) para ver como os seus dias estão distribuídos por estas categorias."
+  },
+  "monthlyState": {
+    "title": "O seu estado diário este mês",
+    "loggedDays_one": "{{count}} dia registado",
+    "loggedDays_other": "{{count}} dias registados",
+    "hint": "Médias mensais dos valores que registou. As barras são desenhadas na escala de cada métrica (humor/energia 1–10, sono 0–12h) e coloridas conforme a qualidade do valor."
+  }
+}

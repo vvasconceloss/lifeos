@@ -1,0 +1,93 @@
+{
+  "title": "Projetos",
+  "emptyState": {
+    "title": "Ainda não há projetos",
+    "description": "Organize o trabalho estruturado — defina tarefas e veja o progresso do projeto atualizar-se à medida que as conclui."
+  },
+  "other": "Outros",
+  "toast": {
+    "deleted": "Projeto eliminado",
+    "deleteFailed": "Não foi possível eliminar o projeto",
+    "createFailed": "Não foi possível criar o projeto",
+    "updated": "Projeto atualizado",
+    "updateFailed": "Não foi possível atualizar o projeto",
+    "createTaskFailed": "Não foi possível criar a tarefa",
+    "updateStatusFailed": "Não foi possível atualizar o estado",
+    "updateTaskFailed": "Não foi possível atualizar a tarefa",
+    "deleteTaskFailed": "Não foi possível eliminar a tarefa",
+    "reorderTasksFailed": "Não foi possível reordenar as tarefas"
+  },
+  "status": {
+    "planning": "Planeamento",
+    "inProgress": "Em curso",
+    "completed": "Concluído",
+    "paused": "Em pausa"
+  },
+  "projectCard": {
+    "deleteLabel": "Eliminar {{name}}",
+    "deleteTitle": "Eliminar projeto?",
+    "deleteDescription": "Isto removerá permanentemente <strong>{{name}}</strong> e todas as suas tarefas.",
+    "taskCount_one": "{{count}} tarefa",
+    "taskCount_other": "{{count}} tarefas",
+    "deadline": "· prazo {{date}}"
+  },
+  "newProject": {
+    "trigger": "Novo projeto",
+    "title": "Criar novo projeto",
+    "description": "Defina trabalho estruturado para produzir um resultado e, em seguida, adicione tarefas.",
+    "titleLabel": "Título",
+    "titlePlaceholder": "ex.: Criar a página de destino",
+    "titleRequired": "O título é obrigatório",
+    "descriptionLabel": "Descrição (opcional)",
+    "descriptionPlaceholder": "Sobre o que é este trabalho?",
+    "pillarLabel": "Pilar",
+    "pillarPlaceholder": "Selecionar um pilar",
+    "deadlineLabel": "Prazo (opcional)",
+    "deadlinePlaceholder": "Escolher uma data",
+    "saving": "A guardar...",
+    "create": "Criar projeto"
+  },
+  "editProject": {
+    "editLabel": "Editar {{name}}",
+    "title": "Editar projeto",
+    "description": "Atualize o trabalho, o seu pilar, o prazo ou o estado.",
+    "titleLabel": "Título",
+    "titlePlaceholder": "ex.: Criar a página de destino",
+    "titleRequired": "O título é obrigatório",
+    "descriptionLabel": "Descrição (opcional)",
+    "pillarLabel": "Pilar",
+    "deadlineLabel": "Prazo (opcional)",
+    "deadlinePlaceholder": "Escolher uma data",
+    "statusLabel": "Estado",
+    "saving": "A guardar..."
+  },
+  "projectDetail": {
+    "backToProjects": "Voltar aos projetos",
+    "progress": "Progresso",
+    "tasksDone": "{{done}} de {{total}} tarefas concluídas",
+    "description": "Descrição",
+    "tasks": "Tarefas",
+    "noTasks": "Ainda não há tarefas. Adicione uma tarefa para começar.",
+    "taskRow": {
+      "markNotDone": "Marcar \"{{title}}\" como não concluída",
+      "markDone": "Marcar \"{{title}}\" como concluída",
+      "editTask": "Editar tarefa {{title}}",
+      "moveUp": "Mover \"{{title}}\" para cima",
+      "moveDown": "Mover \"{{title}}\" para baixo",
+      "saveTitle": "Guardar título da tarefa",
+      "cancelEditing": "Cancelar edição",
+      "edit": "Editar \"{{title}}\"",
+      "delete": "Eliminar \"{{title}}\""
+    }
+  },
+  "newTask": {
+    "trigger": "Nova tarefa",
+    "title": "Criar nova tarefa",
+    "description": "Adicione uma tarefa a este projeto.",
+    "taskTitleLabel": "Título da tarefa",
+    "placeholder": "ex.: Criar a página de destino",
+    "titleRequired": "O título é obrigatório",
+    "saving": "A guardar...",
+    "create": "Criar tarefa"
+  }
+}

@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -26,7 +26,7 @@ async function createGoal(
 describe('Goal CRUD', () => {
   it('creates a goal', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
 
     const response = await app.inject({
@@ -51,7 +51,7 @@ describe('Goal CRUD', () => {
 
   it('rejects a non-existent pillar', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'POST',
@@ -67,7 +67,7 @@ describe('Goal CRUD', () => {
 
   it('lists goals with pillar info', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     await createGoal(app, cookie, pillarId, 'Run a marathon');
 
@@ -86,7 +86,7 @@ describe('Goal CRUD', () => {
 
   it('updates a goal and sets completedAt when completed', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
 
@@ -106,7 +106,7 @@ describe('Goal CRUD', () => {
 
   it('deletes a goal', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
 
@@ -125,7 +125,7 @@ describe('Goal CRUD', () => {
 describe('Goal habit association', () => {
   it('associates and disassociates habits', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
@@ -159,8 +159,8 @@ describe('Goal habit association', () => {
 
   it('rejects associating another user\'s habit', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarA = await createPillar(app, cookieA, 'Health');
     const goalId = (await createGoal(app, cookieA, pillarA)).json().goal.id;
     const pillarB = await createPillar(app, cookieB, 'Health');
@@ -179,7 +179,7 @@ describe('Goal habit association', () => {
 
   it('rejects a habit from a different pillar than the goal', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const healthId = await createPillar(app, cookie, 'Health');
     const engId = await createPillar(app, cookie, 'Engineering');
     const goalId = (await createGoal(app, cookie, healthId)).json().goal.id;
@@ -198,7 +198,7 @@ describe('Goal habit association', () => {
 
   it('derives progress from associated habit completions', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
@@ -229,7 +229,7 @@ describe('Goal habit association', () => {
 
   it('computes progress since the habit was linked, not since its creation', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const goalId = (await createGoal(app, cookie, pillarId)).json().goal.id;
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
@@ -258,8 +258,8 @@ describe('Goal habit association', () => {
 describe('Goal isolation', () => {
   it('prevents another user from reading or mutating a goal', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarA = await createPillar(app, cookieA, 'Health');
     const goalId = (await createGoal(app, cookieA, pillarA)).json().goal.id;
 

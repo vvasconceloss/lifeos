@@ -10,7 +10,7 @@ import {
   getMonthReference,
   toDateKey,
 } from './stats.utils';
-import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -179,7 +179,7 @@ describe('stats.utils', () => {
 describe('GET /v1/stats/monthly', () => {
   it('returns monthly stats with no habits', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',
@@ -215,7 +215,7 @@ describe('GET /v1/stats/monthly', () => {
 describe('GET /v1/stats/overview', () => {
   it('returns habit and pillar stats', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -250,7 +250,7 @@ describe('GET /v1/stats/overview', () => {
 
   it('scopes streaks to the selected month', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -294,8 +294,8 @@ describe('GET /v1/stats/overview', () => {
 
   it('respects user isolation', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const pillarA = await createPillar(app, cookieA, 'Health');
     const habitA = await createHabit(app, cookieA, 'Run', pillarA);
@@ -319,7 +319,7 @@ describe('GET /v1/stats/overview', () => {
 
   it('computes the current-month rate over the elapsed days only', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -369,7 +369,7 @@ describe('GET /v1/stats/overview', () => {
 describe('GET /v1/stats/habits/:id', () => {
   it('returns stats for a habit owned by the user', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -394,8 +394,8 @@ describe('GET /v1/stats/habits/:id', () => {
 
   it('returns 404 for a habit owned by another user', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const pillarA = await createPillar(app, cookieA, 'Health');
     const habitA = await createHabit(app, cookieA, 'Run', pillarA);
@@ -428,7 +428,7 @@ describe('GET /v1/stats/habits/:id', () => {
 describe('GET /v1/stats/heatmap', () => {
   it('returns daily counts with intensity levels for a month', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitA = await createHabit(app, cookie, 'Run', pillarId);
     const habitB = await createHabit(app, cookie, 'Read', pillarId);
@@ -462,7 +462,7 @@ describe('GET /v1/stats/heatmap', () => {
 
   it('aggregates the full year when month is omitted', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitA = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -494,8 +494,8 @@ describe('GET /v1/stats/heatmap', () => {
 
   it('respects user isolation', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const pillarA = await createPillar(app, cookieA, 'Health');
     const habitA = await createHabit(app, cookieA, 'Run', pillarA);
@@ -530,7 +530,7 @@ describe('GET /v1/stats/heatmap', () => {
 describe('input validation', () => {
   it('rejects an invalid year in the overview query', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',
@@ -546,7 +546,7 @@ describe('input validation', () => {
 
   it('rejects an invalid month in the heatmap query', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',
@@ -561,7 +561,7 @@ describe('input validation', () => {
 
   it('rejects a non-uuid habit id in the stats detail', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',

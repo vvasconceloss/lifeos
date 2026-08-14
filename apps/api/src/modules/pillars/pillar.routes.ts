@@ -1,6 +1,6 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
-import { requireAuth } from '../../plugins/auth';
+import { requireActive } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { createPillarBodySchema, updatePillarBodySchema, idParamSchema, pillarReorderBodySchema } from './pillar.schemas';
 import { createPillar, deletePillar, listPillars, reorderPillars, updatePillar } from './pillar.service';
@@ -8,7 +8,7 @@ import { createPillar, deletePillar, listPillars, reorderPillars, updatePillar }
 export async function pillarRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request) => {
       const pillars = await listPillars(request.user.sub);
       return { pillars };
@@ -17,7 +17,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/reorder',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const data = validateInput(pillarReorderBodySchema, request.body, reply);
       if (!data) return;
@@ -34,7 +34,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const data = validateInput(createPillarBodySchema, request.body, reply);
       if (!data) return;
@@ -50,7 +50,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -74,7 +74,7 @@ export async function pillarRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireActive },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;

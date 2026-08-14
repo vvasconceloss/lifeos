@@ -1,14 +1,19 @@
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { AlertTriangle, Eye, EyeOff, Info } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthLayout } from "@/components/auth-layout";
-import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/errors";
 import { registerBodySchema } from "@lifeos/shared";
 import { validateForm } from "@/lib/validation";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  PasswordStrengthMeter,
+  PasswordRequirementsList,
+} from "@/components/password-requirements";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 interface FieldErrors {
@@ -17,56 +22,25 @@ interface FieldErrors {
   name?: string;
 }
 
-const PASSWORD_REQUIREMENTS = [
-  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { id: "number", label: "Includes a number", test: (p: string) => /\d/.test(p) },
-  { id: "letter", label: "Includes a letter", test: (p: string) => /[a-zA-Z]/.test(p) },
-];
-
-function PasswordRequirements({ password }: { password: string }) {
-  const hasValue = password.length > 0;
-
-  return (
-    <div className="mt-2">
-      <div className="flex gap-1.5" aria-hidden>
-        {PASSWORD_REQUIREMENTS.map((req) => {
-          const met = req.test(password);
-          return (
-            <span
-              key={req.id}
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors duration-200",
-                !hasValue ? "bg-border" : met ? "bg-green-500" : "bg-destructive/70",
-              )}
-            />
-          );
-        })}
-      </div>
-      <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5" aria-live="polite">
-        {PASSWORD_REQUIREMENTS.map((req) => {
-          const met = req.test(password);
-          return (
-            <li
-              key={req.id}
-              className={cn(
-                "text-xs transition-colors duration-200",
-                !hasValue
-                  ? "text-foreground/60"
-                  : met
-                    ? "text-green-600 dark:text-green-500"
-                    : "text-destructive",
-              )}
-            >
-              {req.label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
+const ERROR_KEYS: Record<string, string> = {
+  "Invalid email address": "errors.emailInvalid",
+  "Email must be at least 5 characters": "errors.emailMin",
+  "Email must be at most 254 characters": "errors.emailMax",
+  "Password is required": "errors.passwordRequired",
+  "Password must be at least 8 characters": "errors.passwordMin",
+  "Password must include at least one lowercase letter": "errors.passwordLowercase",
+  "Password must include at least one uppercase letter": "errors.passwordUppercase",
+  "Password must include at least one number": "errors.passwordNumber",
+  "Password must include at least one special character": "errors.passwordSpecial",
+  "Password is too common. Choose a more unique password.": "errors.passwordCommon",
+  "Password must not be the same as your email": "errors.passwordEmailEqual",
+  "Password must be at most 72 bytes": "errors.passwordMaxBytes",
+  "Name is required": "errors.nameRequired",
+  "Name must be at most 100 characters": "errors.nameMax",
+};
 
 export default function RegisterPage() {
+  const { t } = useTranslation("auth");
   const { user, loading, register, logout } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -84,6 +58,10 @@ export default function RegisterPage() {
     if (user.isDemo) {
       // The demo session must never block the real login/register pages.
       void logout();
+      return;
+    }
+    if (user.status === "PENDING_DELETION") {
+      navigate({ to: "/account/recovery", replace: true });
       return;
     }
     navigate({ to: user.onboarded ? "/app" : "/onboarding" });
@@ -126,11 +104,11 @@ export default function RegisterPage() {
       navigate({ to: u.onboarded ? "/app" : "/onboarding" });
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
-        toast.error("This email is already registered");
+        toast.error(t("register.emailAlreadyRegistered"));
       } else if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error(getApiErrorMessage(error, "Invalid input. Please check your data."));
+        toast.error(getApiErrorMessage(error, t("register.invalidInput")));
       } else {
-        toast.error("Something went wrong. Please try again.");
+        toast.error(t("register.genericError"));
       }
     } finally {
       setSubmitting(false);
@@ -157,14 +135,14 @@ export default function RegisterPage() {
     <AuthLayout>
       <div>
         <h1 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">
-          Create your account
+          {t("register.createAccount")}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor={nameInputId} className="block text-sm font-medium text-foreground">
-              Name{" "}
-              <span className="text-foreground/60">(optional)</span>
+              {t("register.name")}{" "}
+              <span className="text-foreground/60">{t("register.nameOptional")}</span>
             </label>
             <input
               id={nameInputId}
@@ -175,21 +153,21 @@ export default function RegisterPage() {
                 setName(e.target.value);
                 clearFieldError("name");
               }}
-              placeholder="Your name"
+              placeholder={t("register.namePlaceholder")}
               className={inputClass("name")}
               aria-invalid={hasSubmitted && !!errors.name ? "true" : undefined}
               aria-describedby={hasSubmitted && errors.name ? errorId("name") : undefined}
             />
             {hasSubmitted && errors.name && (
               <p className="mt-1 text-xs text-destructive" id={errorId("name")} role="alert">
-                {errors.name}
+                {t(ERROR_KEYS[errors.name] ?? errors.name)}
               </p>
             )}
           </div>
 
           <div>
             <label htmlFor={emailInputId} className="block text-sm font-medium text-foreground">
-              Email
+              {t("register.email")}
             </label>
             <div className="relative">
               <input
@@ -201,7 +179,7 @@ export default function RegisterPage() {
                   setEmail(e.target.value);
                   clearFieldError("email");
                 }}
-                placeholder="you@example.com"
+                placeholder={t("register.emailPlaceholder")}
                 className={inputClass("email")}
                 autoComplete="email"
                 aria-invalid={hasSubmitted && !!errors.email ? "true" : undefined}
@@ -216,15 +194,33 @@ export default function RegisterPage() {
             </div>
             {hasSubmitted && errors.email && (
               <p className="mt-1 text-xs text-destructive" id={errorId("email")} role="alert">
-                {errors.email}
+                {t(ERROR_KEYS[errors.email] ?? errors.email)}
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor={passwordInputId} className="block text-sm font-medium text-foreground">
-              Password
-            </label>
+            <div className="flex items-center gap-x-1">
+              <label htmlFor={passwordInputId} className="block text-sm font-medium text-foreground">
+                {t("register.password")}
+              </label>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="inline-flex size-5 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-accent hover:text-foreground"
+                      aria-label={t("register.passwordRequirements")}
+                    >
+                      <Info className="size-4" />
+                    </button>
+                  }
+                />
+                <TooltipContent side="left" align="center" className="w-64">
+                  <PasswordRequirementsList password={password} email={email} />
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="relative">
               <input
                 id={passwordInputId}
@@ -235,7 +231,7 @@ export default function RegisterPage() {
                   setPassword(e.target.value);
                   clearFieldError("password");
                 }}
-                placeholder="At least 8 characters"
+                placeholder={t("register.passwordPlaceholder")}
                 className={inputClass("password")}
                 autoComplete="new-password"
                 aria-invalid={hasSubmitted && !!errors.password ? "true" : undefined}
@@ -245,7 +241,7 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-foreground"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? t("register.hidePassword") : t("register.showPassword")}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -256,10 +252,10 @@ export default function RegisterPage() {
                 />
               )}
             </div>
-            <PasswordRequirements password={password} />
+            <PasswordStrengthMeter password={password} email={email} />
             {hasSubmitted && errors.password && (
               <p className="mt-1 text-xs text-destructive" id={errorId("password")} role="alert">
-                {errors.password}
+                {t(ERROR_KEYS[errors.password] ?? errors.password)}
               </p>
             )}
           </div>
@@ -270,17 +266,17 @@ export default function RegisterPage() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting && <Spinner />}
-            {submitting ? "Creating account..." : "Create account"}
+            {submitting ? t("register.creatingAccount") : t("register.createAccountButton")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-foreground/65">
-          Already have an account?{" "}
+          {t("register.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
-            Sign in
+            {t("register.signIn")}
           </Link>
         </p>
       </div>

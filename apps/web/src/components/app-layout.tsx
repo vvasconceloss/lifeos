@@ -1,45 +1,70 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/app-sidebar";
 import { FeedbackMenu } from "@/components/feedback-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-const PAGE_TITLES: Record<string, string> = {
-  "/app": "Dashboard",
-  "/insights": "Insights",
-  "/statistics": "Statistics",
-  "/goals": "Goals",
-  "/projects": "Projects",
-  "/progression": "Progression",
-  "/journal": "Journal",
-  "/profile": "Profile",
-  "/settings/pillars": "Pillars",
-  "/settings/habits": "Habits",
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  "/app": "common:dashboard",
+  "/insights": "common:insights",
+  "/statistics": "common:statistics",
+  "/goals": "common:goals",
+  "/projects": "common:projects",
+  "/progression": "common:progression",
+  "/journal": "common:journal",
+  "/profile": "common:profile",
+  "/settings/pillars": "common:pillars",
+  "/settings/habits": "common:habits",
 };
 
-function getPageTitle(pathname: string): string {
-  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
-  if (pathname.startsWith("/goals/")) return "Goal";
-  if (pathname.startsWith("/projects/")) return "Project";
-  if (pathname.startsWith("/habits/")) return "Habit";
-  return "LifeOS";
+// Routes that require a verified email (everything except pillars/habits setup).
+const PREMIUM_PREFIXES = ["/insights", "/statistics", "/goals", "/projects", "/progression", "/journal"];
+
+function isPremiumPath(pathname: string): boolean {
+  return PREMIUM_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function getPageTitleKey(pathname: string): string {
+  if (PAGE_TITLE_KEYS[pathname]) return PAGE_TITLE_KEYS[pathname];
+  if (pathname.startsWith("/goals/")) return "pageTitles.goal";
+  if (pathname.startsWith("/projects/")) return "pageTitles.project";
+  if (pathname.startsWith("/habits/")) return "pageTitles.habit";
+  return "common:appName";
 }
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const pageTitle = getPageTitle(pathname);
+  const { t } = useTranslation("dashboard");
+  const pageTitle = t(getPageTitleKey(pathname));
 
   useEffect(() => {
     if (!loading && user && !user.onboarded && pathname !== "/onboarding") {
       navigate({ to: "/onboarding", replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
+
+  // Unverified users are restricted to pillars/habits until they confirm the email.
+  useEffect(() => {
+    if (!loading && user && !user.emailVerified && !user.isDemo && isPremiumPath(pathname)) {
+      navigate({ to: "/app", replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
+
+  // Accounts in the 15-day deletion grace period only see the recovery screen.
+  useEffect(() => {
+    if (!loading && user && user.status === "PENDING_DELETION" && pathname !== "/account/recovery") {
+      navigate({ to: "/account/recovery", replace: true });
     }
   }, [user, loading, pathname, navigate]);
 
@@ -49,10 +74,27 @@ export function AppLayout({ children }: { children: ReactNode }) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-2 focus:ring-ring"
       >
-        Skip to content
+        {t("skipToContent")}
       </a>
       <AppSidebar />
       <SidebarInset id="main-content" className="flex h-full max-h-full flex-1 flex-col overflow-hidden">
+        {user && !user.emailVerified && !user.isDemo ? (
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-500/10 px-6 py-2.5">
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              {t("verifyEmailBanner")}
+            </p>
+            <Link
+              to="/verify-email"
+              search={{ token: undefined, redirect: pathname }}
+              className={cn(
+                "shrink-0 rounded-md px-2.5 py-1 text-xs font-medium underline underline-offset-4",
+                "text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300",
+              )}
+            >
+              {t("verifyNow")}
+            </Link>
+          </div>
+        ) : null}
         <header className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
           <div className="flex items-center gap-3">
             <SidebarTrigger />

@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -13,7 +13,7 @@ const TODAY = utcDateKey(new Date());
 describe('DailyLog CRUD', () => {
   it('creates (upserts) a log for a date', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'POST',
@@ -36,7 +36,7 @@ describe('DailyLog CRUD', () => {
 
   it('is idempotent for the same date', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     await app.inject({
       method: 'POST',
@@ -63,7 +63,7 @@ describe('DailyLog CRUD', () => {
 
   it('lists logs within a range and fetches by date', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     await app.inject({ method: 'POST', url: '/v1/daily-logs', headers: { cookie }, payload: { date: TODAY, mood: 6 } });
 
@@ -80,7 +80,7 @@ describe('DailyLog CRUD', () => {
 
   it('updates and deletes a log', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const created = await app.inject({ method: 'POST', url: '/v1/daily-logs', headers: { cookie }, payload: { date: TODAY, mood: 3 } });
     const logId = created.json().log.id;
@@ -97,7 +97,7 @@ describe('DailyLog CRUD', () => {
 
   it('rejects a future date', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const future = utcDateKey(new Date(Date.now() + 3 * 86400000));
 
     const response = await app.inject({
@@ -125,7 +125,7 @@ describe('DailyLog CRUD', () => {
 describe('DailyLog correlations', () => {
   it('groups daily completion rate by sleep, mood and energy', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitA = await createHabit(app, cookie, 'Run', pillarId);
     const habitB = await createHabit(app, cookie, 'Read', pillarId);
@@ -159,8 +159,8 @@ describe('DailyLog correlations', () => {
 describe('DailyLog isolation', () => {
   it('prevents another user from mutating a log', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const created = await app.inject({ method: 'POST', url: '/v1/daily-logs', headers: { cookie: cookieA }, payload: { date: TODAY, mood: 4 } });
     const logId = created.json().log.id;

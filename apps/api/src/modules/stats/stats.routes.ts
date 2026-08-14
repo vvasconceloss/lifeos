@@ -1,6 +1,6 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
-import { requireAuth } from '../../plugins/auth';
+import { requireActive, requireVerified } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { idParamSchema, statsQuerySchema, analyticsQuerySchema } from './stats.schemas';
 import { getAnalytics, getHabitStats, getHeatmap, getMonthlyStats, getOverview } from './stats.service';
@@ -8,7 +8,7 @@ import { getAnalytics, getHabitStats, getHeatmap, getMonthlyStats, getOverview }
 export async function statsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/stats/analytics',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const query = validateInput(analyticsQuerySchema, request.query, reply);
       if (!query) return;
@@ -21,7 +21,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/stats/heatmap',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const query = validateInput(statsQuerySchema, request.query, reply);
       if (!query) return;
@@ -39,7 +39,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/stats/monthly',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const query = validateInput(statsQuerySchema, request.query, reply);
       if (!query) return;
@@ -57,7 +57,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/stats/overview',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const query = validateInput(statsQuerySchema, request.query, reply);
       if (!query) return;
@@ -75,7 +75,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/stats/habits/:id',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;

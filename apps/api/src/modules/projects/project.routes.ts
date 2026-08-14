@@ -1,7 +1,7 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth } from '../../plugins/auth';
+import { requireActive, requireVerified } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import {
   createProjectBodySchema,
@@ -30,7 +30,7 @@ const taskIdParamSchema = z.object({
 export async function projectRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request) => {
       const projects = await listProjects(request.user.sub);
       return { projects };
@@ -39,7 +39,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const data = validateInput(createProjectBodySchema, request.body, reply);
       if (!data) return;
@@ -56,7 +56,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -73,7 +73,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -93,7 +93,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -110,7 +110,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/:id/tasks',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -130,7 +130,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/:id/tasks/reorder',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -150,7 +150,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/tasks/:taskId',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(taskIdParamSchema, request.params, reply);
       if (!params) return;
@@ -170,7 +170,7 @@ export async function projectRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/tasks/:taskId',
-    { preHandler: requireAuth },
+    { preHandler: [requireVerified, requireActive] },
     async (request, reply) => {
       const params = validateInput(taskIdParamSchema, request.params, reply);
       if (!params) return;

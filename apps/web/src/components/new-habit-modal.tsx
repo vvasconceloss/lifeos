@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { Check, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { FrequencyFields } from "@/components/frequency-fields";
@@ -63,6 +64,7 @@ export function NewHabitModal({
   pillars: Pillar[];
   onCreated: (habit: Habit) => void;
 }) {
+  const { t } = useTranslation("habits");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -78,16 +80,16 @@ export function NewHabitModal({
   const [pillarTouched, setPillarTouched] = useState(false);
   const [freqTouched, setFreqTouched] = useState(false);
 
-  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
-  const pillarError = pillarTouched && !pillarId ? "Select a pillar" : undefined;
+  const nameError = nameTouched && !name.trim() ? t("newHabit.nameRequired") : undefined;
+  const pillarError = pillarTouched && !pillarId ? t("newHabit.selectPillar") : undefined;
   const freqError = !freqTouched
     ? undefined
     : frequency === "WEEKLY_DAYS" && daysOfWeek.length === 0
-      ? "Select at least one day of the week"
+      ? t("newHabit.selectDayOfWeek")
       : frequency === "TIMES_PER_WEEK" && !timesPerWeek
-        ? "Enter how many times per week"
+        ? t("newHabit.enterTimesPerWeek")
         : frequency === "TIMES_PER_MONTH" && !timesPerMonth
-          ? "Enter how many times per month"
+          ? t("newHabit.enterTimesPerMonth")
           : undefined;
 
   const canSubmit =
@@ -135,9 +137,9 @@ export function NewHabitModal({
       setOpen(false);
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error("Check the habit details and try again.");
+        toast.error(t("newHabit.checkDetailsError"));
       } else {
-        toast.error("Failed to create habit");
+        toast.error(t("newHabit.createFailed"));
       }
     } finally {
       setCreating(false);
@@ -150,19 +152,19 @@ export function NewHabitModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-1.5 size-4" />
-        New Habit
+        {t("newHabit.new")}
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create new habit</DialogTitle>
+          <DialogTitle>{t("newHabit.title")}</DialogTitle>
           <DialogDescription>
-            Add a habit to your routine and associate it with a pillar.
+            {t("newHabit.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4 sm:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="nh-name">Habit name</Label>
+            <Label htmlFor="nh-name">{t("newHabit.name")}</Label>
             <input
               id="nh-name"
               value={name}
@@ -171,7 +173,7 @@ export function NewHabitModal({
                 setNameTouched(true);
               }}
               onBlur={() => setNameTouched(true)}
-              placeholder="e.g. Morning run"
+              placeholder={t("newHabit.namePlaceholder")}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "nh-name-error" : undefined}
               className={`${inputClass} ${
@@ -187,27 +189,27 @@ export function NewHabitModal({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="nh-desc">Description (optional)</Label>
+            <Label htmlFor="nh-desc">{t("newHabit.descriptionLabel")}</Label>
             <input
               id="nh-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Run 5km"
+              placeholder={t("newHabit.descriptionPlaceholder")}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="nh-icon">Icon (optional)</Label>
+            <Label htmlFor="nh-icon">{t("newHabit.iconLabel")}</Label>
             <input
               id="nh-icon"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              placeholder="e.g. 🏃"
+              placeholder={t("newHabit.iconPlaceholder")}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label>Color (optional)</Label>
+            <Label>{t("newHabit.colorLabel")}</Label>
             <div className="flex flex-wrap gap-2">
               {HABIT_COLORS.map((c) => {
                 const active = color === c;
@@ -218,7 +220,7 @@ export function NewHabitModal({
                     onClick={() => setColor(active ? "" : c)}
                     className="relative flex size-7 items-center justify-center rounded-full transition-all"
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("newHabit.colorAria", { color: c })}
                     aria-pressed={active}
                   >
                     {active && (
@@ -232,7 +234,7 @@ export function NewHabitModal({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="nh-pillar">Pillar</Label>
+            <Label htmlFor="nh-pillar">{t("newHabit.pillar")}</Label>
             <Select
               value={pillarId}
               onValueChange={(v) => {
@@ -247,7 +249,7 @@ export function NewHabitModal({
                 aria-invalid={pillarError ? "true" : undefined}
                 aria-describedby={pillarError ? "nh-pillar-error" : undefined}
               >
-                <SelectValue placeholder="Select a pillar">
+                <SelectValue placeholder={t("newHabit.selectPillar")}>
                   {selectedPillar ? (
                     <span className="inline-flex items-center gap-2">
                       {selectedPillar.color && (
@@ -307,7 +309,7 @@ export function NewHabitModal({
             className="w-full sm:w-auto"
           >
             {creating ? <Spinner className="mr-2" /> : null}
-            {creating ? "Saving..." : "Save Habit"}
+            {creating ? t("newHabit.saving") : t("newHabit.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

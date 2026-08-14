@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
 import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
@@ -36,6 +37,7 @@ export function ProjectCard({
   onDelete: (id: string) => void;
   onUpdated: (project: Project) => void;
 }) {
+  const { t } = useTranslation("projects");
   const [alertOpen, setAlertOpen] = useState(false);
 
   return (
@@ -62,19 +64,19 @@ export function ProjectCard({
               render={<button />}
               disabled={deletingId === project.id}
               className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
-              aria-label={`Delete ${project.title}`}
+              aria-label={t("projectCard.deleteLabel", { name: project.title })}
             >
               {deletingId === project.id ? <Spinner /> : <Trash2 className="size-4" />}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete project?</AlertDialogTitle>
+                <AlertDialogTitle>{t("projectCard.deleteTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently remove <strong>{project.title}</strong> and all of its tasks.
+                  <Trans i18nKey="projectCard.deleteDescription" values={{ name: project.title }} />
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
                   onClick={() => {
@@ -82,7 +84,7 @@ export function ProjectCard({
                     onDelete(project.id);
                   }}
                 >
-                  Delete
+                  {t("common:delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -104,9 +106,9 @@ export function ProjectCard({
 
       <div className="flex items-center gap-3 pl-4 text-[10px] text-foreground/60">
         <span>
-          {project.taskCount} task{project.taskCount === 1 ? "" : "s"}
+          {t("projectCard.taskCount", { count: project.taskCount })}
         </span>
-        {project.deadline && <span>· deadline {project.deadline}</span>}
+        {project.deadline && <span>{t("projectCard.deadline", { date: project.deadline })}</span>}
       </div>
     </li>
   );

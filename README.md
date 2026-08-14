@@ -28,7 +28,7 @@ slowly building a life you can measure, understand and improve.
 profile form UX) on top of the v1.5.1 hardening — see
 [`docs/README.md`](docs/README.md) as the documentation entry point (roadmap, domain rules,
 frequencies, gamification, ops, deployment), the [`CHANGELOG.md`](CHANGELOG.md) for the release
-history, and [`docs/roadmap/ROADMAP.md`](docs/roadmap/ROADMAP.md) for the phase-by-phase roadmap.
+history, and [`docs/roadmap/v1.5_PUBLIC_BETA.md`](docs/roadmap/v1.5_PUBLIC_BETA.md) for the phase-by-phase roadmap.
 
 ---
 

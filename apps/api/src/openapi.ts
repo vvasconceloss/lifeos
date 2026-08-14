@@ -2,7 +2,7 @@ const openapi = {
   openapi: "3.0.3",
   info: {
     title: "LifeOS API",
-    version: "1.5.1",
+    version: "1.6.0",
     description:
       "LifeOS — track habits, goals and projects, log your daily state, and understand how your days actually go.\n\nAll protected endpoints require the `token` cookie set by `POST /auth/login`, `/auth/register` or `/auth/demo`. Errors follow the contract `{ error: { code, message, details? } }` (see `docs/api/ERROR_CONTRACT.md`).",
   },
@@ -37,6 +37,198 @@ const openapi = {
           "400": { $ref: "#/components/responses/BadRequest" },
           "409": { $ref: "#/components/responses/Conflict" },
           "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
+    "/auth/verify-email": {
+      post: {
+        tags: ["Auth"],
+        summary: "Verify an email address with a confirmation token",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/VerifyEmailBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/auth/resend-verification": {
+      post: {
+        tags: ["Auth"],
+        summary: "Resend the verification email (generic response — no account enumeration)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ResendVerificationBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
+    "/auth/forgot-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Request a password reset link (generic response — no account enumeration)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
+    "/auth/reset-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Reset a password with a single-use token (invalidates old sessions)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/RateLimited" },
+        },
+      },
+    },
+    "/account/change-password": {
+      post: {
+        tags: ["Account"],
+        summary: "Change the password (requires the current password)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangePasswordBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/account/change-email/request": {
+      post: {
+        tags: ["Account"],
+        summary: "Request an email change (requires a verified email)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailRequestBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/account/change-email/confirm": {
+      post: {
+        tags: ["Account"],
+        summary: "Confirm an email change with the link sent to the new address",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailConfirmBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/account/change-email/cancel": {
+      delete: {
+        tags: ["Account"],
+        summary: "Cancel a pending email change (authenticated)",
+        security: [{ cookieAuth: [] }],
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+      post: {
+        tags: ["Account"],
+        summary: "Cancel a pending email change via the link sent to the old address",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ChangeEmailCancelBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/account/delete": {
+      post: {
+        tags: ["Account"],
+        summary: "Schedule account deletion (15-day recovery window)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/DeleteAccountBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/account/recover": {
+      post: {
+        tags: ["Account"],
+        summary: "Recover an account via the email link (no login required)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/RecoverAccountBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/account/cancel-deletion": {
+      post: {
+        tags: ["Account"],
+        summary: "Cancel a pending deletion (authenticated recovery)",
+        security: [{ cookieAuth: [] }],
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
         },
       },
     },
@@ -559,11 +751,13 @@ const openapi = {
       Progression: { description: "Progression", content: { "application/json": { schema: { $ref: "#/components/schemas/Progression" } } } },
       BadRequest: { $ref: "#/components/responses/Error400" },
       Unauthorized: { $ref: "#/components/responses/Error401" },
+      Forbidden: { $ref: "#/components/responses/Error403" },
       NotFound: { $ref: "#/components/responses/Error404" },
       Conflict: { $ref: "#/components/responses/Error409" },
       RateLimited: { $ref: "#/components/responses/Error429" },
       Error400: { description: "Validation or domain error", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error401: { description: "Unauthenticated", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+      Error403: { description: "Forbidden (action requires a verified email)", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error404: { description: "Not found (including cross-user access)", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error409: { description: "Conflict", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
       Error429: { description: "Rate limited", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
@@ -587,7 +781,7 @@ const openapi = {
       },
       User: {
         type: "object",
-        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "createdAt"],
+        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "emailVerified", "status", "createdAt"],
         properties: {
           id: { type: "string", format: "uuid" },
           email: { type: "string", format: "email" },
@@ -597,6 +791,10 @@ const openapi = {
           theme: { type: "string", enum: ["light", "dark", "system"] },
           onboarded: { type: "boolean" },
           gamification: { type: "boolean" },
+          emailVerified: { type: "boolean", description: "Whether the user confirmed their email address" },
+          status: { type: "string", enum: ["ACTIVE", "PENDING_DELETION"] },
+          deletionRequestedAt: { type: "string", format: "date-time", nullable: true },
+          scheduledDeletionAt: { type: "string", format: "date-time", nullable: true },
           createdAt: { type: "string", format: "date-time" },
         },
       },
@@ -610,7 +808,13 @@ const openapi = {
         required: ["email", "password"],
         properties: {
           email: { type: "string", format: "email" },
-          password: { type: "string", minLength: 8, maxLength: 72 },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 72,
+            description:
+              "Strong password policy: 8–72 bytes, at least one lowercase letter, one uppercase letter, one number, one special character (!@#$%^&*()-_=+[]{};:,.<>?/), must not be a common password, and must not equal the email.",
+          },
           name: { type: "string", maxLength: 100 },
         },
       },
@@ -618,6 +822,71 @@ const openapi = {
         type: "object",
         required: ["email", "password"],
         properties: { email: { type: "string", format: "email" }, password: { type: "string", minLength: 1 } },
+      },
+      VerifyEmailBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The email verification token from the confirmation link" } },
+      },
+      ResendVerificationBody: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string", format: "email" } },
+      },
+      ForgotPasswordBody: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string", format: "email" } },
+      },
+      ResetPasswordBody: {
+        type: "object",
+        required: ["token", "password"],
+        properties: {
+          token: { type: "string", description: "The single-use password reset token" },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 72,
+            description:
+              "Strong password policy: 8–72 bytes, at least one lowercase letter, one uppercase letter, one number, one special character, not a common password.",
+          },
+        },
+      },
+      ChangePasswordBody: {
+        type: "object",
+        required: ["currentPassword", "newPassword"],
+        properties: {
+          currentPassword: { type: "string", description: "The user's current password (confirmation)" },
+          newPassword: { type: "string", minLength: 8, maxLength: 72 },
+        },
+      },
+      ChangeEmailRequestBody: {
+        type: "object",
+        required: ["currentPassword", "newEmail"],
+        properties: {
+          currentPassword: { type: "string", description: "The user's current password (confirmation)" },
+          newEmail: { type: "string", format: "email" },
+        },
+      },
+      ChangeEmailConfirmBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The confirmation token from the new-address link" } },
+      },
+      ChangeEmailCancelBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The cancel token from the old-address link" } },
+      },
+      DeleteAccountBody: {
+        type: "object",
+        required: ["currentPassword"],
+        properties: { currentPassword: { type: "string", description: "The user's current password (confirmation)" } },
+      },
+      RecoverAccountBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The recovery token from the confirmation email" } },
       },
       UpdateMeBody: {
         type: "object",

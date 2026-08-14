@@ -1,4 +1,5 @@
 import type { GoalStatus } from "@lifeos/shared";
+import { useTranslation } from "react-i18next";
 
 const STYLES: Record<GoalStatus, string> = {
   ACTIVE: "bg-primary/10 text-primary",
@@ -7,11 +8,12 @@ const STYLES: Record<GoalStatus, string> = {
 };
 
 export function GoalStatusBadge({ status }: { status: GoalStatus }) {
+  const { t } = useTranslation("goals");
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${STYLES[status]}`}
     >
-      {status.toLowerCase()}
+      {t(`status.${status.toLowerCase()}`)}
     </span>
   );
 }

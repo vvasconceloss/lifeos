@@ -9,10 +9,14 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 
 ## Roadmap & backlog
 
+The roadmaps below are ordered chronologically — from the first release plan to the latest.
+
 | Document | What it is |
 |---|---|
-| [`roadmap/ROADMAP.md`](roadmap/ROADMAP.md) | The v1.5 roadmap: objectives, specs and the task backlog for every phase (audit, UX, frequencies, analytics, goals, projects, journal, personalization, onboarding, gamification, observability, testing, CI/CD, release). |
-| [`roadmap/MVP_ROADMAP.md`](roadmap/MVP_ROADMAP.md) | The original v1.0 MVP plan (Foundation → Deployment). Historical reference. |
+| [`roadmap/v1.0_MVP.md`](roadmap/v1.0_MVP.md) | The original v1.0 MVP plan (Foundation → Deployment). Historical reference. |
+| [`roadmap/v1.5_PUBLIC_BETA.md`](roadmap/v1.5_PUBLIC_BETA.md) | The v1.5 roadmap (Public Beta): objectives, specs and the task backlog for every phase (audit, UX, frequencies, analytics, goals, projects, journal, personalization, onboarding, gamification, observability, testing, CI/CD, release). |
+| [`roadmap/v1.5.1_IMPROVE.md`](roadmap/v1.5.1_IMPROVE.md) | The v1.5.1 "Improve" hardening roadmap (security, error contract, coverage, architecture, API/db review, CI/CD, frontend, polish). |
+| [`roadmap/v1.6_ACCOUNT_SECURITY.md`](roadmap/v1.6_ACCOUNT_SECURITY.md) | The v1.6 roadmap (Account Security, Lifecycle & i18n): password policy, email verification, password recovery, change password/email, account soft-delete and internationalization. |
 
 ## Domain & data model
 
@@ -26,6 +30,7 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | Document | What it is |
 |---|---|
 | [`features/GAMIFICATION.md`](features/GAMIFICATION.md) | The optional XP/level/rank system: the transparent formula, level curve and ranks. |
+| [`features/INTERNATIONALIZATION.md`](features/INTERNATIONALIZATION.md) | The i18n system: supported languages, translation structure, plural rules, and how to add a new language. |
 
 ## Operations & deployment
 
@@ -40,7 +45,8 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | Document | What it is |
 |---|---|
 | [`SECURITY.md`](SECURITY.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
-| [`roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md) | The "Improve" hardening roadmap (security, error contract, coverage, architecture, API/db review, CI/CD, frontend, polish). |
+| [`email/EMAIL.md`](email/EMAIL.md) | The transactional email infrastructure: Gmail SMTP provider, env vars, the `EmailService` abstraction, supported templates and expected data. |
+| [`legal/data-deletion-policy.md`](legal/data-deletion-policy.md) | The account soft-delete policy: the 15-day recovery window, what gets deleted, and the anonymized audit trail. |
 
 ## API
 

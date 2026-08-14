@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -44,6 +45,7 @@ export function EditGoalDialog({
   pillars: Pillar[];
   onUpdated: (goal: Goal) => void;
 }) {
+  const { t } = useTranslation("goals");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +64,7 @@ export function EditGoalDialog({
     setTitleTouched(false);
   }
 
-  const titleError = titleTouched && !title.trim() ? "Title is required" : undefined;
+  const titleError = titleTouched && !title.trim() ? t("editGoal.titleRequired") : undefined;
   const canSubmit = title.trim().length > 0;
 
   async function handleSave() {
@@ -78,10 +80,10 @@ export function EditGoalDialog({
       };
       const res = await api.patch<{ goal: Goal }>(`/goals/${goal.id}`, payload);
       onUpdated(res.data.goal);
-      toast.success("Goal updated");
+      toast.success(t("toast.updated"));
       setOpen(false);
     } catch {
-      toast.error("Failed to update goal");
+      toast.error(t("toast.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -102,7 +104,7 @@ export function EditGoalDialog({
           <button
             type="button"
             className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
-            aria-label={`Edit ${goal.title}`}
+            aria-label={t("editGoal.editLabel", { name: goal.title })}
           >
             <Pencil className="size-4" />
           </button>
@@ -110,13 +112,13 @@ export function EditGoalDialog({
       />
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Edit goal</DialogTitle>
-          <DialogDescription>Update the outcome, its pillar, deadline or status.</DialogDescription>
+          <DialogTitle>{t("editGoal.title")}</DialogTitle>
+          <DialogDescription>{t("editGoal.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="eg-title">Title</Label>
+            <Label htmlFor="eg-title">{t("editGoal.titleLabel")}</Label>
             <input
               id="eg-title"
               value={title}
@@ -125,7 +127,7 @@ export function EditGoalDialog({
                 setTitleTouched(true);
               }}
               onBlur={() => setTitleTouched(true)}
-              placeholder="e.g. Become a better engineer"
+              placeholder={t("editGoal.titlePlaceholder")}
               aria-invalid={titleError ? "true" : undefined}
               aria-describedby={titleError ? "eg-title-error" : undefined}
               className={`${inputClass} ${
@@ -139,7 +141,7 @@ export function EditGoalDialog({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="eg-desc">Description (optional)</Label>
+            <Label htmlFor="eg-desc">{t("editGoal.descriptionLabel")}</Label>
             <textarea
               id="eg-desc"
               value={description}
@@ -149,7 +151,7 @@ export function EditGoalDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="eg-pillar">Pillar</Label>
+            <Label htmlFor="eg-pillar">{t("editGoal.pillarLabel")}</Label>
             <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
               <SelectTrigger id="eg-pillar" className="w-full">
                 <SelectValue>
@@ -179,15 +181,15 @@ export function EditGoalDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label>Deadline (optional)</Label>
+              <Label>{t("editGoal.deadlineLabel")}</Label>
               <DatePicker
                 value={deadline ? new Date(`${deadline}T00:00:00`) : null}
                 onChange={(d) => setDeadline(d ? format(d, "yyyy-MM-dd") : "")}
-                placeholder="Pick a deadline"
+                placeholder={t("editGoal.deadlinePlaceholder")}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="eg-status">Status</Label>
+              <Label htmlFor="eg-status">{t("editGoal.statusLabel")}</Label>
               <select
                 id="eg-status"
                 value={status}
@@ -196,7 +198,7 @@ export function EditGoalDialog({
               >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
-                    {s.charAt(0) + s.slice(1).toLowerCase()}
+                    {t(`status.${s.toLowerCase()}`)}
                   </option>
                 ))}
               </select>
@@ -207,7 +209,7 @@ export function EditGoalDialog({
         <DialogFooter>
           <Button onClick={handleSave} disabled={saving || !canSubmit} className="w-full sm:w-auto">
             {saving ? <Spinner className="mr-2" /> : null}
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? t("editGoal.saving") : t("common:saveChanges")}
           </Button>
         </DialogFooter>
       </DialogContent>

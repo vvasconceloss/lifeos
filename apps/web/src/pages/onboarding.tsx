@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ function StepDots({ step }: { step: number }) {
 }
 
 function OnboardingForm() {
+  const { t } = useTranslation("onboarding");
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -96,7 +98,7 @@ function OnboardingForm() {
       await refreshUser();
       return true;
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("error"));
       return false;
     } finally {
       setSubmitting(false);
@@ -127,7 +129,7 @@ function OnboardingForm() {
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         <img
           src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
-          alt="LifeOS logo"
+          alt={t("logoAlt")}
           className="mb-10 max-h-10 w-auto"
         />
         <div className="w-full max-w-xl">
@@ -141,13 +143,13 @@ function OnboardingForm() {
                   disabled={submitting}
                   className="text-sm font-medium text-foreground/50 transition-colors hover:text-foreground disabled:opacity-50"
                 >
-                  Skip
+                  {t("skip")}
                 </button>
               </div>
 
-              <h1 className="text-2xl font-semibold tracking-tight">Welcome to LifeOS</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
               <p className="mt-1.5 text-sm text-foreground/60">
-                What areas of your life do you want to track?
+                {t("subtitle")}
               </p>
 
               <div className="mt-8 grid gap-3.5 sm:grid-cols-2">
@@ -193,7 +195,7 @@ function OnboardingForm() {
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                 >
                   {submitting ? <Spinner className="size-4" /> : <ArrowRight className="size-4" />}
-                  Continue
+                  {t("common:continue")}
                 </button>
               </div>
             </section>
@@ -209,13 +211,13 @@ function OnboardingForm() {
                   disabled={submitting}
                   className="text-sm font-medium text-foreground/50 transition-colors hover:text-foreground disabled:opacity-50"
                 >
-                  Skip
+                  {t("skip")}
                 </button>
               </div>
 
-              <h1 className="text-2xl font-semibold tracking-tight">Your first habits</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{t("habitsTitle")}</h1>
               <p className="mt-1.5 text-sm text-foreground/60">
-                Pick a few to start. You can change them later.
+                {t("habitsSubtitle")}
               </p>
 
               <div className="mt-8 space-y-9">
@@ -271,7 +273,7 @@ function OnboardingForm() {
                   className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/60 transition-colors hover:text-foreground disabled:opacity-50"
                 >
                   <ArrowLeft className="size-4" />
-                  Back
+                  {t("common:back")}
                 </button>
                 <button
                   type="button"
@@ -280,7 +282,7 @@ function OnboardingForm() {
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                 >
                   {submitting ? <Spinner className="size-4" /> : <Check className="size-4" />}
-                  Finish setup
+                  {t("finishSetup")}
                 </button>
               </div>
             </section>
@@ -291,17 +293,16 @@ function OnboardingForm() {
               <div className="mx-auto mb-6 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Check className="size-7" />
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight">You&apos;re ready</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{t("ready")}</h1>
               <p className="mx-auto mt-2 max-w-sm text-sm text-foreground/60">
-                Your pillars and first habits are set up. Start tracking and build a life you can
-                measure, understand, and improve.
+                {t("readyDescription")}
               </p>
               <button
                 type="button"
                 onClick={() => navigate({ to: "/app" })}
                 className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                Start using LifeOS
+                {t("startUsing")}
                 <ArrowRight className="size-4" />
               </button>
             </section>

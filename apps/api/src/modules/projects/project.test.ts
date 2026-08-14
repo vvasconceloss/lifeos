@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, createPillar, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createPillar, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -37,7 +37,7 @@ async function addTask(
 describe('Project CRUD', () => {
   it('creates a project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
 
     const response = await app.inject({
@@ -62,7 +62,7 @@ describe('Project CRUD', () => {
 
   it('rejects a non-existent pillar', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'POST',
@@ -78,7 +78,7 @@ describe('Project CRUD', () => {
 
   it('lists projects with pillar info', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     await createProject(app, cookie, pillarId, 'Run a marathon');
 
@@ -100,7 +100,7 @@ describe('Project CRUD', () => {
 
   it('updates a project and sets completedAt when completed', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
 
@@ -120,7 +120,7 @@ describe('Project CRUD', () => {
 
   it('deletes a project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
 
@@ -139,7 +139,7 @@ describe('Project CRUD', () => {
 describe('Project tasks', () => {
   it('adds a task to a project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
 
@@ -153,7 +153,7 @@ describe('Project tasks', () => {
 
   it('toggles a task and reflects progress in the project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
     const taskId = (await addTask(app, cookie, projectId, 'Write copy')).json().task.id;
@@ -183,7 +183,7 @@ describe('Project tasks', () => {
 
   it('computes progress from completed tasks', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
 
@@ -231,7 +231,7 @@ describe('Project tasks', () => {
 
   it('reorders tasks by position', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     const projectId = (await createProject(app, cookie, pillarId)).json().project.id;
 
@@ -260,8 +260,8 @@ describe('Project tasks', () => {
 
   it('rejects adding a task to another user\'s project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarA = await createPillar(app, cookieA, 'Engineering');
     const projectId = (await createProject(app, cookieA, pillarA)).json().project.id;
 
@@ -276,8 +276,8 @@ describe('Project tasks', () => {
 describe('Project isolation', () => {
   it('prevents another user from reading or mutating a project', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarA = await createPillar(app, cookieA, 'Engineering');
     const projectId = (await createProject(app, cookieA, pillarA)).json().project.id;
 

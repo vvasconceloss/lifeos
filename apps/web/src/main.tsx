@@ -1,4 +1,5 @@
 import './index.css'
+import './i18n'
 import { Toaster } from 'sonner'
 import { StrictMode } from 'react'
 import { AppRouter } from './router'

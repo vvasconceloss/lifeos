@@ -1,7 +1,7 @@
 # LifeOS — Security Audit & Data Isolation
 
 > Result of the **Phase 1 — Security Audit and Isolation** pass
-> (see [`docs/roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md)).
+> (see [`docs/roadmap/v1.5.1_IMPROVE.md`](roadmap/v1.5.1_IMPROVE.md)).
 > Status: **audited and verified by tests**.
 
 ## Checklist
@@ -9,14 +9,18 @@
 | Area | Status | How it's guaranteed |
 |---|---|---|
 | Authentication | ✅ | Email + bcrypt password; JWT in `HttpOnly` cookie; **session expiry enforced (30 days)** |
+| Email verification | ✅ | New accounts start unverified; single-use 24 h token (SHA-256 hash stored); resend is anti-enumeration + rate-limited; sensitive actions gated by `requireVerified` |
+| Password recovery | ✅ | 1 h single-use token (hash stored); anti-enumeration `forgot-password`; reset bumps `passwordChangedAt` which invalidates all old sessions |
+| Account changes | ✅ | Change password/email require the current password; email change is verified at the new address + alerted at the old one; other sessions invalidated on sensitive changes |
+| Account deletion | ✅ | Soft-delete with a 15-day recovery window; single-use recovery token (hash stored); protected routes blocked while pending; daily job hard-deletes after the window |
 | Authorization | ✅ | `requireAuth` (`jwtVerify`) on every protected route; all queries scoped by `userId` |
 | IDOR / data isolation | ✅ | Cross-user access to every entity returns `404` — verified by per-entity tests (below) |
 | CSRF | ✅ | `@fastify/csrf-protection` on all state-changing requests (`csrf-token` header + signed cookie) |
 | XSS | ✅ | All user input rendered as text by React (no `dangerouslySetInnerHTML`); icon/description fields escaped |
 | SQL injection | ✅ | Prisma parameterized queries only; no raw user-input SQL (`$queryRaw` used solely for a constant `SELECT 1` health check) |
 | CORS | ✅ | Explicit origin allow-list (`ALLOWED_ORIGINS`), wildcard rejected, credentials allowed |
-| Rate limiting | ✅ | Global (300/min) + login (5/min) + register (10/min) |
-| Password policy | ✅ | Min 8 chars + at least one letter and one number (shared Zod schema) |
+| Rate limiting | ✅ | Global (300/min) + per-endpoint: login (5/min), register (10/min), resend-verification (3/h), forgot-password (3/h), reset-password (10/h), change-password (5/min), change-email request (5/min), change-email confirm/cancel (10/min), delete account (5/min), recover (10/min), cancel-deletion (5/min) |
+| Password policy | ✅ | **Strong policy** (shared Zod schema): 8–72 bytes, ≥1 lowercase, ≥1 uppercase, ≥1 number, ≥1 special char, not among the 1000 most common passwords, not equal to the email |
 | Cookie configuration | ✅ | `HttpOnly`, `SameSite=Strict`, `Secure` in production, `Max-Age` 30 days |
 | Session / JWT expiry | ✅ | Tokens signed with a 30-day `exp`; expired tokens rejected with `401` (tested) |
 | Secrets | ✅ | `.env` git-ignored; secrets never in code. Exception: the **public demo account** (`demo@lifeos.com`) credentials are intentionally committed — they are not real secrets |
@@ -35,6 +39,12 @@
   set to the same 30 days. `requireAuth` calls `jwtVerify()`, so an expired token returns `401`
   (covered by `auth.test.ts` → "rejects an expired token").
 - Login/register are rate-limited (5/min and 10/min respectively) to slow brute force.
+- Every account-management endpoint is rate-limited at its own sensitivity (see table): password
+  changes, email changes, deletion requests and recovery attempts all have per-endpoint limits.
+- Logger redaction (`app.ts`) covers passwords, current/new passwords, **tokens**, cookies and
+  authorization headers — verified by `logger.test.ts` (register, recovery token, change-password).
+- The `account-recovered` security notification is sent on both recovery paths (email token and
+  authenticated cancellation), closing the loop that every sensitive account change notifies the user.
 
 ### Authorization & IDOR
 
@@ -77,4 +87,4 @@ The global error handler maps validation failures to `400` with field details an
 
 ---
 
-_More docs: [Documentation index](README.md) · [Improve roadmap](roadmap/IMPROVE_ROADMAP.md) · [LifeOS README](../README.md)_
+_More docs: [Documentation index](README.md) · [Improve roadmap](roadmap/v1.5.1_IMPROVE.md) · [LifeOS README](../README.md)_

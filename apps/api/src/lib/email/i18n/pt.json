@@ -1,0 +1,61 @@
+{
+  "common": {
+    "receivedBecauseActivity": "Recebeu este email devido a atividade na sua conta LifeOS.",
+    "ignoreIfNotRequested": "Se não foi você, pode ignorá-lo com segurança.",
+    "privacyPolicy": "Política de Privacidade",
+    "support": "Apoio",
+    "keepMyAccount": "Manter a minha conta",
+    "resetPassword": "Repor palavra-passe",
+    "confirmEmail": "Confirmar endereço de email",
+    "confirmNewEmail": "Confirmar novo email",
+    "cancelEmailChange": "Cancelar alteração de email",
+    "linkFallback": "Se o botão acima não funcionar, cole este link no seu navegador:"
+  },
+  "verifyEmail": {
+    "subject": "Confirme o seu endereço de email",
+    "intro": "Bem-vindo ao LifeOS! Confirme o seu endereço de email para ativar a sua conta."
+  },
+  "passwordReset": {
+    "subject": "Repor a sua palavra-passe",
+    "intro": "Recebemos um pedido para repor a sua palavra-passe. Este link é válido durante 1 hora.",
+    "ignore": "Se não foi você, pode ignorar este email com segurança."
+  },
+  "passwordChanged": {
+    "subject": "A sua palavra-passe foi alterada",
+    "intro": "A sua palavra-passe LifeOS foi alterada com sucesso. Se não foi você, contacte-nos imediatamente para proteger a sua conta."
+  },
+  "emailChangeRequest": {
+    "subject": "Confirme o seu novo email",
+    "intro": "Pediu para alterar o email da sua conta LifeOS para este endereço.",
+    "validity": "Este link é válido durante 1 hora."
+  },
+  "emailChangeAlert": {
+    "subject": "Alteração de email pedida",
+    "intro": "Foi feito um pedido para alterar o endereço de email da sua conta LifeOS.",
+    "ifYou": "Se foi você, pode ignorar este alerta depois de confirmar o novo email.",
+    "ifNotYou": "Se não foi você, cancele o pedido imediatamente:"
+  },
+  "emailChanged": {
+    "subject": "O seu email foi alterado",
+    "intro": "O endereço de email da sua conta LifeOS foi atualizado. Se não foi você, contacte-nos imediatamente para proteger a sua conta."
+  },
+  "accountDeletionRequested": {
+    "subject": "A sua conta será eliminada",
+    "scheduledOn": "A sua conta LifeOS está agendada para eliminação permanente em {{date}}.",
+    "dataErased": "Todos os seus dados serão apagados permanentemente após essa data.",
+    "changeMind": "Se mudar de ideias, pode recuperar a sua conta antes disso:"
+  },
+  "accountDeletionReminder": {
+    "subject": "Lembrete: a sua conta será eliminada em breve",
+    "finalReminder": "Este é um lembrete final de que a sua conta LifeOS será eliminada permanentemente em {{date}}.",
+    "recoverNow": "Se quiser manter a sua conta, recupere-a agora:"
+  },
+  "accountDeleted": {
+    "subject": "A sua conta foi eliminada",
+    "intro": "A sua conta LifeOS e todos os seus dados foram eliminados permanentemente. Lamentamos vê-lo partir."
+  },
+  "accountRecovered": {
+    "subject": "A sua conta foi recuperada",
+    "intro": "A sua conta LifeOS está de volta e ativa. Todos os seus dados estão intactos — bem-vindo de volta!"
+  }
+}

@@ -5,7 +5,14 @@ import { RoutePending } from "@/components/route-pending";
 const AppPage = lazy(() => import("./pages/app"));
 const LandingPage = lazy(() => import("./pages/landing"));
 const LoginPage = lazy(() => import("./pages/login"));
+const ForgotPasswordPage = lazy(() => import("./pages/forgot-password"));
+const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
+const ConfirmEmailChangePage = lazy(() => import("./pages/confirm-email-change"));
+const CancelEmailChangePage = lazy(() => import("./pages/cancel-email-change"));
+const AccountRecoveryPage = lazy(() => import("./pages/account-recovery"));
+const RecoverAccountPage = lazy(() => import("./pages/recover-account"));
 const RegisterPage = lazy(() => import("./pages/register"));
+const VerifyEmailPage = lazy(() => import("./pages/verify-email"));
 const InsightsPage = lazy(() => import("./pages/insights"));
 const StatisticsPage = lazy(() => import("./pages/statistics"));
 const HabitDetailPage = lazy(() => import("./pages/habit-detail"));
@@ -41,6 +48,71 @@ const loginRoute = createRoute({
   path: "/login",
   component: LoginPage,
   pendingComponent: RoutePending,
+});
+
+const forgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/forgot-password",
+  component: ForgotPasswordPage,
+  pendingComponent: RoutePending,
+});
+
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reset-password",
+  component: ResetPasswordPage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const confirmEmailChangeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/email/confirm",
+  component: ConfirmEmailChangePage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const cancelEmailChangeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/email/cancel",
+  component: CancelEmailChangePage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const accountRecoveryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/recovery",
+  component: AccountRecoveryPage,
+  pendingComponent: RoutePending,
+});
+
+const recoverAccountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/recover",
+  component: RecoverAccountPage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const verifyEmailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/verify-email",
+  component: VerifyEmailPage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
 });
 
 const appRoute = createRoute({
@@ -141,7 +213,7 @@ const onboardingRoute = createRoute({
   pendingComponent: RoutePending,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute, resetPasswordRoute, confirmEmailChangeRoute, cancelEmailChangeRoute, accountRecoveryRoute, recoverAccountRoute, verifyEmailRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

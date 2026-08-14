@@ -2,6 +2,56 @@
 
 All notable changes to LifeOS.
 
+## v1.6.0 — Account Security, Lifecycle & i18n (2026-08)
+
+The v1.6 release is a surgical cycle over account management and security: a strong password policy,
+email verification, password recovery, password/email changes, account soft-delete with a 15-day
+recovery window, and full internationalization (Portuguese, English, Ukrainian). All work is tracked
+in [`docs/roadmap/v1.6_ACCOUNT_SECURITY.md`](docs/roadmap/v1.6_ACCOUNT_SECURITY.md).
+
+### Security
+
+- **Strong password policy** (shared Zod schema in `packages/shared`): 8–72 bytes, ≥1 lowercase,
+  ≥1 uppercase, ≥1 number, ≥1 special character, not among the 1000 most common passwords, and never
+  equal to the user's email. Enforced on register, password reset and password change.
+- **Email verification** — new accounts start unverified; single-use 24 h token (SHA-256 hash
+  stored), resend with anti-enumeration response and rate limit; advanced modules gated behind
+  `requireVerified` until the email is confirmed.
+- **Password recovery** — 1 h single-use reset token (hash stored), anti-enumeration
+  `forgot-password`, and `passwordChangedAt` bump that invalidates every old session after a reset.
+- **Sensitive account changes** — change password/email require the current password; an email
+  change is verified at the new address and alerted at the old one (with a no-login cancel link);
+  sessions are invalidated appropriately while the acting session is preserved.
+- **Account soft-delete** — 15-day grace period with single-use recovery token (hash stored),
+  a post-login recovery screen, a daily job that hard-deletes due accounts (final email sent first,
+  cascading delete, anonymized audit trail) and a documented data deletion policy.
+- **Hardening pass** — every account-management endpoint now has per-sensitivity rate limits
+  (change-password 5/min, email change 5–10/min, delete 5/min, recover 10/min, …); the
+  `account-recovered` notification is sent on both recovery paths; logger redaction now also covers
+  tokens (`req.body/query/params.token`), verified by tests.
+
+### Internationalization
+
+- **i18next + react-i18next** across the entire interface — no remaining hardcoded strings.
+- **Portuguese, English and Ukrainian** with correct Ukrainian plural rules (`one`/`few`/`many`/`other`).
+- **Language selector** in Profile → Preferences and in the landing header; instant switching with
+  no reload; the `<html lang>` attribute updates dynamically.
+- **Persistence** — the choice is stored in `localStorage` (pre-login) and in `User.locale`
+  (post-login), following the user across devices.
+- **Locale-aware formatting** — dates and numbers use `Intl.DateTimeFormat` / `Intl.NumberFormat`
+  respecting the active locale.
+- **Localized transactional emails** — verification, reset, change and deletion emails render in
+  the user's locale (en/pt/uk).
+- **CI guard** — `pnpm i18n:check` compares keys across languages and fails the build on missing
+  translations; an orphan-key check reports unused keys as warnings.
+
+### Docs
+
+- Roadmaps renamed with release-version prefixes (`v1.0_MVP`, `v1.5_PUBLIC_BETA`,
+  `v1.5.1_IMPROVE`, `v1.6_ACCOUNT_SECURITY`) to show the chronological path.
+- New `docs/features/INTERNATIONALIZATION.md`; `docs/SECURITY.md` updated with the per-endpoint
+  rate limits and logger redaction guarantees; `docs/email/EMAIL.md` documents localized emails.
+
 ## v1.5.2 — UX & Feedback (2026-08)
 
 A small product/UX release on top of the v1.5.1 hardening: the feedback entry point moved into the
@@ -27,7 +77,7 @@ header, the profile form got proper interactive states, and the release/PR proce
 ## v1.5.1 — Hardening & Quality (2026)
 
 A hardening cycle focused on security, engineering quality and operations — no new product
-features. Full roadmap and results in [`docs/roadmap/IMPROVE_ROADMAP.md`](docs/roadmap/IMPROVE_ROADMAP.md).
+features. Full roadmap and results in [`docs/roadmap/v1.5.1_IMPROVE.md`](docs/roadmap/v1.5.1_IMPROVE.md).
 
 ### Security
 

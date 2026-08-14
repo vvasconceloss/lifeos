@@ -35,8 +35,10 @@ export async function seedDemoUser(): Promise<{ id: string; email: string }> {
         timezone: "UTC",
         weekStart: 1,
         theme: "system",
+        locale: "en",
         onboarded: true,
         gamification: true,
+        emailVerified: true,
         passwordHash: hashPassword(DEMO_PASSWORD),
       },
     });
@@ -50,8 +52,10 @@ export async function seedDemoUser(): Promise<{ id: string; email: string }> {
         timezone: "UTC",
         weekStart: 1,
         theme: "system",
+        locale: "en",
         onboarded: true,
         gamification: true,
+        emailVerified: true,
       },
     });
     userId = user.id;

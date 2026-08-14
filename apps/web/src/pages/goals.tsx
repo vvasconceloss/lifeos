@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { Target } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { GoalCard } from "@/components/goals/goal-card";
@@ -19,6 +20,7 @@ interface Pillar {
 }
 
 export default function GoalsPage() {
+  const { t } = useTranslation("goals");
   const [goals, setGoals] = useState<Goal[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,9 +65,9 @@ export default function GoalsPage() {
     try {
       await api.delete(`/goals/${id}`);
       setGoals((prev) => prev.filter((g) => g.id !== id));
-      toast.success("Goal deleted");
+      toast.success(t("toast.deleted"));
     } catch {
-      toast.error("Failed to delete goal");
+      toast.error(t("toast.deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -81,7 +83,7 @@ export default function GoalsPage() {
       <AppLayout>
         <main className="mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">Goals</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t("title")}</h2>
             <NewGoalModal pillars={pillars} onCreated={handleCreated} />
           </div>
           {loading ? (
@@ -94,15 +96,15 @@ export default function GoalsPage() {
             <EmptyState
               className="flex-1"
               icon={<Target className="size-8" />}
-              title="No goals yet"
-              description="Define an outcome you want to achieve and link the habits that support it."
+              title={t("emptyState.title")}
+              description={t("emptyState.description")}
               action={<NewGoalModal pillars={pillars} onCreated={handleCreated} />}
             />
           ) : (
             <div className="flex min-h-0 flex-1 flex-col space-y-5">
               {ungrouped.length > 0 && (
                 <div>
-                  <h3 className="mb-2 text-sm font-semibold text-foreground/70">Other</h3>
+                  <h3 className="mb-2 text-sm font-semibold text-foreground/70">{t("other")}</h3>
                   <ul className="space-y-2">
                     {ungrouped.map((goal) => (
                       <GoalCard

@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { useState } from "react";
 import { AxiosError } from "axios";
 import { Check, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -37,6 +38,7 @@ export function NewPillarModal({
 }: {
   onCreated: (pillar: Pillar) => void;
 }) {
+  const { t } = useTranslation("habits");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("");
@@ -45,7 +47,7 @@ export function NewPillarModal({
   const [creating, setCreating] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
+  const nameError = nameTouched && !name.trim() ? t("newPillar.nameRequired") : undefined;
 
   function reset() {
     setName("");
@@ -70,9 +72,9 @@ export function NewPillarModal({
       setOpen(false);
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 400) {
-        toast.error("Check the pillar details and try again.");
+        toast.error(t("newPillar.checkDetailsError"));
       } else {
-        toast.error("Failed to create pillar");
+        toast.error(t("newPillar.createFailed"));
       }
     } finally {
       setCreating(false);
@@ -83,15 +85,15 @@ export function NewPillarModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-1.5 size-4" />
-        New Pillar
+        {t("newPillar.new")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-110.25">
         <DialogHeader>
-          <DialogTitle>Create new pillar</DialogTitle>
+          <DialogTitle>{t("newPillar.title")}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="np-name">Pillar name</Label>
+            <Label htmlFor="np-name">{t("newPillar.name")}</Label>
             <input
               id="np-name"
               value={name}
@@ -100,7 +102,7 @@ export function NewPillarModal({
                 setNameTouched(true);
               }}
               onBlur={() => setNameTouched(true)}
-              placeholder="e.g. Health"
+              placeholder={t("newPillar.namePlaceholder")}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "np-name-error" : undefined}
               className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 ${
@@ -116,28 +118,28 @@ export function NewPillarModal({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="np-icon">Icon (optional)</Label>
+            <Label htmlFor="np-icon">{t("newPillar.iconLabel")}</Label>
             <input
               id="np-icon"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              placeholder="e.g. 🏥"
+              placeholder={t("newPillar.iconPlaceholder")}
               className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="np-desc">Description (optional)</Label>
+            <Label htmlFor="np-desc">{t("newPillar.descriptionLabel")}</Label>
             <textarea
               id="np-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="What does this pillar mean to you?"
+              placeholder={t("newPillar.descriptionPlaceholder")}
               className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div className="grid gap-2">
-            <Label>Colors (Optional)</Label>
+            <Label>{t("newPillar.colorsLabel")}</Label>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => {
                 const active = selectedColor === c;
@@ -148,7 +150,7 @@ export function NewPillarModal({
                     onClick={() => setSelectedColor(active ? "" : c)}
                     className="relative flex size-8 items-center justify-center rounded-full transition-all"
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("newPillar.colorAria", { color: c })}
                   >
                     {active && (
                       <span className="absolute inset-0 flex items-center justify-center rounded-full ring-2 ring-foreground ring-offset-2 ring-offset-background">
@@ -168,7 +170,7 @@ export function NewPillarModal({
             className="w-full sm:w-auto"
           >
             {creating ? <Spinner className="mr-2" /> : null}
-            {creating ? "Saving..." : "Save Pillar"}
+            {creating ? t("newPillar.saving") : t("newPillar.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

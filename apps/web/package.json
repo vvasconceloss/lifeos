@@ -1,7 +1,7 @@
 {
   "name": "@lifeos/web",
   "private": true,
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Web application for LifeOS, a personal life management system for tracking habits, goals, projects, and long-term personal growth.",
   "type": "module",
   "scripts": {
@@ -12,6 +12,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "i18n:check": "node scripts/check-i18n-keys.mjs",
+    "i18n:check:orphans": "node scripts/check-i18n-keys.mjs --check-orphans",
     "audit": "pnpm audit --prod"
   },
   "keywords": [
@@ -37,11 +39,14 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "i18next": "^26.3.6",
+    "i18next-browser-languagedetector": "^8.2.1",
     "lucide-react": "^1.27.0",
     "motion": "^13.0.0",
     "react": "^19.2.7",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.11",
     "recharts": "^3.10.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { formatMonthLabel, type HabitStats } from "./types";
 
 function topBy(items: HabitStats[], key: (h: HabitStats) => number, limit: number): HabitStats[] {
@@ -13,22 +14,23 @@ export function TopHabits({
   year: number;
   month: number;
 }) {
+  const { t } = useTranslation("statistics");
   const topRate = topBy(habits, (h) => h.completionRate, 3);
   const topStreak = topBy(habits, (h) => h.bestStreak, 3);
 
   return (
     <div className="flex flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-baseline justify-between">
-        <span className="text-xs font-medium text-foreground/60">Top habits</span>
+        <span className="text-xs font-medium text-foreground/60">{t("topHabits.title")}</span>
         <span className="text-[10px] text-foreground/60">{formatMonthLabel(year, month)}</span>
       </div>
       {habits.length === 0 ? (
-        <p className="py-4 text-center text-sm text-foreground/60">No data yet.</p>
+        <p className="py-4 text-center text-sm text-foreground/60">{t("topHabits.noData")}</p>
       ) : (
         <div className="grid flex-1 grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/60">
-              Top rate
+              {t("topHabits.topRate")}
             </span>
             {topRate.map((habit) => (
               <div key={habit.habitId} className="flex items-center justify-between gap-2">
@@ -41,7 +43,7 @@ export function TopHabits({
           </div>
           <div className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-foreground/60">
-              Longest streak
+              {t("topHabits.longestStreak")}
             </span>
             {topStreak.map((habit) => (
               <div key={habit.habitId} className="flex items-center justify-between gap-2">

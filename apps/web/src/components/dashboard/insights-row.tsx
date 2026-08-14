@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell } from "recharts";
+import { useTranslation } from "react-i18next";
 import type { ChartData, HabitProgress } from "./types";
 import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer } from "recharts";
 
@@ -27,12 +28,13 @@ export function InsightsRow({
   momentumAvg: number;
   max7: number;
 }) {
+  const { t } = useTranslation("dashboard");
   const color = monthColor(successRate);
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex flex-1 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-        <span className="mb-2 text-xs font-medium text-foreground/60">Daily completions</span>
+        <span className="mb-2 text-xs font-medium text-foreground/60">{t("insights.dailyCompletions")}</span>
         <div className="flex-1" style={{ minHeight: 64 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
@@ -44,13 +46,13 @@ export function InsightsRow({
           </ResponsiveContainer>
         </div>
         <div className="mt-2 flex items-center gap-4 text-[10px] text-foreground/60">
-          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#22c55e]" /> On track</span>
-          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#eab308]" /> Partial</span>
-          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#ef4444]" /> Low month</span>
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#22c55e]" /> {t("insights.onTrack")}</span>
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#eab308]" /> {t("insights.partial")}</span>
+          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#ef4444]" /> {t("insights.lowMonth")}</span>
         </div>
       </div>
       <div className="hidden shrink-0 flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:flex lg:w-56">
-        <span className="mb-2 text-xs font-medium text-foreground/60">Per habit</span>
+        <span className="mb-2 text-xs font-medium text-foreground/60">{t("insights.perHabit")}</span>
         <div className="flex flex-1 flex-col justify-center gap-1.5">
           {habitProgress.slice(0, 5).map((hp) => (
             <div key={hp.habitId} className="flex items-center gap-2 text-xs">
@@ -72,7 +74,7 @@ export function InsightsRow({
           </PieChart>
           <div>
             <div className="text-xl font-bold tracking-tight text-foreground">{successRate}%</div>
-            <div className="text-[10px] text-foreground/60">monthly progress</div>
+            <div className="text-[10px] text-foreground/60">{t("insights.monthlyProgress")}</div>
           </div>
         </div>
         <div className="flex items-center gap-2 border-t border-border/40 pt-3">
@@ -82,8 +84,8 @@ export function InsightsRow({
             ))}
           </div>
           <div>
-            <div className="tabular-nums text-sm font-semibold text-foreground">{momentumAvg}/d</div>
-            <div className="text-[10px] text-foreground/60">7-day avg</div>
+            <div className="tabular-nums text-sm font-semibold text-foreground">{t("insights.momentumPerDay", { count: momentumAvg })}</div>
+            <div className="text-[10px] text-foreground/60">{t("insights.sevenDayAvg")}</div>
           </div>
         </div>
       </div>

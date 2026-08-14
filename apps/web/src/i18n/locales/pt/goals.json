@@ -1,0 +1,76 @@
+{
+  "title": "Objetivos",
+  "emptyState": {
+    "title": "Ainda não há objetivos",
+    "description": "Defina um resultado que queira alcançar e ligue os hábitos que o suportam."
+  },
+  "other": "Outros",
+  "toast": {
+    "deleted": "Objetivo eliminado",
+    "updated": "Objetivo atualizado",
+    "deleteFailed": "Não foi possível eliminar o objetivo",
+    "createFailed": "Não foi possível criar o objetivo",
+    "updateFailed": "Não foi possível atualizar o objetivo",
+    "addHabitFailed": "Não foi possível adicionar o hábito",
+    "removeHabitFailed": "Não foi possível remover o hábito",
+    "updateStatusFailed": "Não foi possível atualizar o estado"
+  },
+  "status": {
+    "active": "Ativo",
+    "completed": "Concluído",
+    "abandoned": "Abandonado"
+  },
+  "newGoal": {
+    "trigger": "Novo objetivo",
+    "title": "Criar novo objetivo",
+    "description": "Defina um resultado que queira alcançar e, em seguida, ligue os hábitos que o suportam.",
+    "titleLabel": "Título",
+    "titlePlaceholder": "ex.: Tornar-me um melhor engenheiro",
+    "titleRequired": "O título é obrigatório",
+    "descriptionLabel": "Descrição (opcional)",
+    "descriptionPlaceholder": "Como é o sucesso?",
+    "pillarLabel": "Pilar",
+    "pillarPlaceholder": "Selecionar um pilar",
+    "deadlineLabel": "Prazo (opcional)",
+    "deadlinePlaceholder": "Escolher uma data",
+    "saving": "A guardar...",
+    "create": "Criar objetivo"
+  },
+  "editGoal": {
+    "editLabel": "Editar {{name}}",
+    "title": "Editar objetivo",
+    "description": "Atualize o resultado, o seu pilar, o prazo ou o estado.",
+    "titleLabel": "Título",
+    "titlePlaceholder": "ex.: Tornar-me um melhor engenheiro",
+    "titleRequired": "O título é obrigatório",
+    "descriptionLabel": "Descrição (opcional)",
+    "pillarLabel": "Pilar",
+    "deadlineLabel": "Prazo (opcional)",
+    "deadlinePlaceholder": "Escolher uma data",
+    "statusLabel": "Estado",
+    "saving": "A guardar..."
+  },
+  "goalCard": {
+    "deleteLabel": "Eliminar {{name}}",
+    "deleteTitle": "Eliminar objetivo?",
+    "deleteDescription": "Isto removerá permanentemente <strong>{{name}}</strong> e as suas ligações a hábitos.",
+    "noHabitsAria": "Este objetivo ainda não tem hábitos de suporte",
+    "noHabits": "Este objetivo ainda não tem hábitos de suporte. Adicione hábitos do seu pilar para acompanhar o progresso.",
+    "habitCount_one": "{{count}} hábito de suporte",
+    "habitCount_other": "{{count}} hábitos de suporte",
+    "deadline": "· prazo {{date}}"
+  },
+  "goalDetail": {
+    "backToGoals": "Voltar aos objetivos",
+    "progress": "Progresso",
+    "habitCount_one": "{{count}} hábito de suporte",
+    "habitCount_other": "{{count}} hábitos de suporte",
+    "description": "Descrição",
+    "progressOverTime": "Progresso ao longo do tempo",
+    "last8Weeks": "últimas 8 semanas",
+    "supportingHabits": "Hábitos de suporte",
+    "noHabitsLinked": "Ainda não há hábitos ligados. Adicione um hábito abaixo para começar a acompanhar o progresso.",
+    "removeHabit": "Remover {{name}}",
+    "addHabitPlaceholder": "Adicionar um hábito…"
+  }
+}

@@ -1,7 +1,7 @@
 # LifeOS — OpenAPI & Swagger UI
 
 > Result of **Phase 5 — API Contract and Database Review**
-> (see [`docs/roadmap/IMPROVE_ROADMAP.md`](../roadmap/IMPROVE_ROADMAP.md)).
+> (see [`docs/roadmap/v1.5.1_IMPROVE.md`](../roadmap/v1.5.1_IMPROVE.md)).
 
 ## Browsing the API
 

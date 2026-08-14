@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useState } from "react";
 import { Check, Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { FrequencyFields } from "@/components/frequency-fields";
@@ -64,6 +65,7 @@ export function EditHabitDialog({
   pillars: Pillar[];
   onUpdated: (habit: Habit) => void;
 }) {
+  const { t } = useTranslation("habits");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -92,15 +94,15 @@ export function EditHabitDialog({
     setFreqTouched(false);
   }
 
-  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
+  const nameError = nameTouched && !name.trim() ? t("editHabit.nameRequired") : undefined;
   const freqError = !freqTouched
     ? undefined
     : frequency === "WEEKLY_DAYS" && daysOfWeek.length === 0
-      ? "Select at least one day of the week"
+      ? t("editHabit.selectDayOfWeek")
       : frequency === "TIMES_PER_WEEK" && !timesPerWeek
-        ? "Enter how many times per week"
+        ? t("editHabit.enterTimesPerWeek")
         : frequency === "TIMES_PER_MONTH" && !timesPerMonth
-          ? "Enter how many times per month"
+          ? t("editHabit.enterTimesPerMonth")
           : undefined;
 
   const canSubmit =
@@ -127,10 +129,10 @@ export function EditHabitDialog({
 
       const res = await api.patch<{ habit: Habit }>(`/habits/${habit.id}`, payload);
       onUpdated(res.data.habit);
-      toast.success("Habit updated");
+      toast.success(t("editHabit.updated"));
       setOpen(false);
     } catch {
-      toast.error("Failed to update habit");
+      toast.error(t("editHabit.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -151,7 +153,7 @@ export function EditHabitDialog({
           <button
             type="button"
             className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
-            aria-label={`Edit ${habit.name}`}
+            aria-label={t("editHabit.edit", { name: habit.name })}
           >
             <Pencil className="size-4" />
           </button>
@@ -159,13 +161,13 @@ export function EditHabitDialog({
       />
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Edit habit</DialogTitle>
-          <DialogDescription>Update the habit details and schedule.</DialogDescription>
+          <DialogTitle>{t("editHabit.title")}</DialogTitle>
+          <DialogDescription>{t("editHabit.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4 sm:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="eh-name">Habit name</Label>
+            <Label htmlFor="eh-name">{t("editHabit.name")}</Label>
             <input
               id="eh-name"
               value={name}
@@ -174,7 +176,7 @@ export function EditHabitDialog({
                 setNameTouched(true);
               }}
               onBlur={() => setNameTouched(true)}
-              placeholder="e.g. Morning run"
+              placeholder={t("editHabit.namePlaceholder")}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "eh-name-error" : undefined}
               className={`${inputClass} ${
@@ -190,27 +192,27 @@ export function EditHabitDialog({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="eh-desc">Description (optional)</Label>
+            <Label htmlFor="eh-desc">{t("editHabit.descriptionLabel")}</Label>
             <input
               id="eh-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Run 5km"
+              placeholder={t("editHabit.descriptionPlaceholder")}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="eh-icon">Icon (optional)</Label>
+            <Label htmlFor="eh-icon">{t("editHabit.iconLabel")}</Label>
             <input
               id="eh-icon"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              placeholder="e.g. 🏃"
+              placeholder={t("editHabit.iconPlaceholder")}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label>Color (optional)</Label>
+            <Label>{t("editHabit.colorLabel")}</Label>
             <div className="flex flex-wrap gap-2">
               {HABIT_COLORS.map((c) => {
                 const active = color === c;
@@ -221,7 +223,7 @@ export function EditHabitDialog({
                     onClick={() => setColor(active ? "" : c)}
                     className="relative flex size-7 items-center justify-center rounded-full transition-all"
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("editHabit.colorAria", { color: c })}
                     aria-pressed={active}
                   >
                     {active && (
@@ -235,7 +237,7 @@ export function EditHabitDialog({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="eh-pillar">Pillar</Label>
+            <Label htmlFor="eh-pillar">{t("editHabit.pillar")}</Label>
             <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
               <SelectTrigger id="eh-pillar" className="w-full">
                 <SelectValue>
@@ -289,7 +291,7 @@ export function EditHabitDialog({
         <DialogFooter>
           <Button onClick={handleSave} disabled={saving || !canSubmit} className="w-full sm:w-auto">
             {saving ? <Spinner className="mr-2" /> : null}
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? t("editHabit.saving") : t("editHabit.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

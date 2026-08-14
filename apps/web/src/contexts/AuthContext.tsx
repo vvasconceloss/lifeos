@@ -50,9 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const resendVerification = useCallback(async (email: string, redirect?: string) => {
+    await api.post("/auth/resend-verification", redirect ? { email, redirect } : { email });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, demoLogin, refreshUser, logout }
-    }>
+    <AuthContext.Provider
+      value={{ user, loading, register, login, demoLogin, refreshUser, logout, resendVerification }}
+    >
       {children}
     </AuthContext.Provider>
   );

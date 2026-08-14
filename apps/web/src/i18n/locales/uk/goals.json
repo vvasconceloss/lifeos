@@ -1,0 +1,80 @@
+{
+  "title": "Цілі",
+  "emptyState": {
+    "title": "Ще немає цілей",
+    "description": "Визначте результат, якого хочете досягти, і зв'яжіть звички, які його підтримують."
+  },
+  "other": "Інші",
+  "toast": {
+    "deleted": "Ціль видалено",
+    "updated": "Ціль оновлено",
+    "deleteFailed": "Не вдалося видалити ціль",
+    "createFailed": "Не вдалося створити ціль",
+    "updateFailed": "Не вдалося оновити ціль",
+    "addHabitFailed": "Не вдалося додати звичку",
+    "removeHabitFailed": "Не вдалося видалити звичку",
+    "updateStatusFailed": "Не вдалося оновити статус"
+  },
+  "status": {
+    "active": "Активна",
+    "completed": "Завершена",
+    "abandoned": "Відхилена"
+  },
+  "newGoal": {
+    "trigger": "Нова ціль",
+    "title": "Створити нову ціль",
+    "description": "Визначте результат, якого хочете досягти, а потім зв'яжіть звички, які його підтримують.",
+    "titleLabel": "Назва",
+    "titlePlaceholder": "напр., стати кращим інженером",
+    "titleRequired": "Назва обов'язкова",
+    "descriptionLabel": "Опис (необов'язково)",
+    "descriptionPlaceholder": "Як виглядає успіх?",
+    "pillarLabel": "Стовп",
+    "pillarPlaceholder": "Вибрати стовп",
+    "deadlineLabel": "Дедлайн (необов'язково)",
+    "deadlinePlaceholder": "Вибрати дату",
+    "saving": "Збереження...",
+    "create": "Створити ціль"
+  },
+  "editGoal": {
+    "editLabel": "Редагувати {{name}}",
+    "title": "Редагувати ціль",
+    "description": "Оновіть результат, його стовп, дедлайн або статус.",
+    "titleLabel": "Назва",
+    "titlePlaceholder": "напр., стати кращим інженером",
+    "titleRequired": "Назва обов'язкова",
+    "descriptionLabel": "Опис (необов'язково)",
+    "pillarLabel": "Стовп",
+    "deadlineLabel": "Дедлайн (необов'язково)",
+    "deadlinePlaceholder": "Вибрати дату",
+    "statusLabel": "Статус",
+    "saving": "Збереження..."
+  },
+  "goalCard": {
+    "deleteLabel": "Видалити {{name}}",
+    "deleteTitle": "Видалити ціль?",
+    "deleteDescription": "Це назавжди видалить <strong>{{name}}</strong> та її зв'язки зі звичками.",
+    "noHabitsAria": "Ця ціль ще не має підтримувальних звичок",
+    "noHabits": "Ця ціль ще не має підтримувальних звичок. Додайте звички з її стовпа, щоб відстежувати прогрес.",
+    "habitCount_one": "{{count}} підтримувальна звичка",
+    "habitCount_few": "{{count}} підтримувальні звички",
+    "habitCount_many": "{{count}} підтримувальних звичок",
+    "habitCount_other": "{{count}} підтримувальна звичка",
+    "deadline": "· дедлайн {{date}}"
+  },
+  "goalDetail": {
+    "backToGoals": "Назад до цілей",
+    "progress": "Прогрес",
+    "habitCount_one": "{{count}} підтримувальна звичка",
+    "habitCount_few": "{{count}} підтримувальні звички",
+    "habitCount_many": "{{count}} підтримувальних звичок",
+    "habitCount_other": "{{count}} підтримувальна звичка",
+    "description": "Опис",
+    "progressOverTime": "Прогрес з часом",
+    "last8Weeks": "останні 8 тижнів",
+    "supportingHabits": "Підтримувальні звички",
+    "noHabitsLinked": "Ще немає зв'язаних звичок. Додайте звичку нижче, щоб почати відстежувати прогрес.",
+    "removeHabit": "Видалити {{name}}",
+    "addHabitPlaceholder": "Додати звичку…"
+  }
+}

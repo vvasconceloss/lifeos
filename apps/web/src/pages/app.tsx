@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { HabitGrid } from "@/components/dashboard/habit-grid";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -9,13 +10,14 @@ import { useDashboard } from "@/components/dashboard/use-dashboard";
 import { MonthNavigation } from "@/components/dashboard/month-navigation";
 import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { formatLongDate, formatMonthYear } from "@/lib/i18n-format";
 import { ErrorState } from "@/components/error-state";
 
-function getGreeting(): string {
+function getGreetingKey(): string {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return "Good morning";
-  if (hour >= 12 && hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour >= 5 && hour < 12) return "greeting.morning";
+  if (hour >= 12 && hour < 18) return "greeting.afternoon";
+  return "greeting.evening";
 }
 
 function getDisplayName(user: { name: string | null; email: string }): string {
@@ -26,6 +28,7 @@ function getDisplayName(user: { name: string | null; email: string }): string {
 export default function DashboardPage() {
   const d = useDashboard();
   const { user } = useAuth();
+  const { t } = useTranslation("dashboard");
 
   return (
     <ProtectedRoute>
@@ -39,11 +42,11 @@ export default function DashboardPage() {
             <EmptyState
               className="flex-1"
               icon={<Sparkles className="size-8" />}
-              title="Welcome to LifeOS"
+              title={t("empty.title")}
               description={
                 d.pillars.length === 0
-                  ? "Start by creating your first pillar — habits need a pillar to live in."
-                  : "Start by creating your first habit."
+                  ? t("empty.noPillarDescription")
+                  : t("empty.description")
               }
               action={
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -52,14 +55,14 @@ export default function DashboardPage() {
                       to="/onboarding"
                       className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                      Set up LifeOS
+                      {t("empty.setup")}
                     </Link>
                   )}
                   <Link
                     to={d.pillars.length === 0 ? "/settings/pillars" : "/settings/habits"}
                     className="inline-flex rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent/50"
                   >
-                    {d.pillars.length === 0 ? "Create pillar" : "Create habit"}
+                    {d.pillars.length === 0 ? t("empty.createPillar") : t("empty.createHabit")}
                   </Link>
                 </div>
               }
@@ -69,15 +72,15 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                 <div>
                   <p className="text-sm text-foreground/65">
-                    {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                    {formatLongDate(new Date())}
                   </p>
                   <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                    {getGreeting()}, {user ? getDisplayName(user) : ""}
+                    {t(getGreetingKey())}, {user ? getDisplayName(user) : ""}
                   </h2>
                 </div>
                 <MonthNavigation
                   monthOffset={d.monthOffset}
-                  label={d.targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  label={formatMonthYear(d.targetDate)}
                   onPrev={() => d.setMonthOffset(d.monthOffset - 1)}
                   onNext={() => d.setMonthOffset(d.monthOffset + 1)}
                   onToday={() => d.setMonthOffset(0)}

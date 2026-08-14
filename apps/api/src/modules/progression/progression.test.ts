@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -35,7 +35,7 @@ async function getProgression(
 describe('POST /v1/auth/me gamification', () => {
   it('is disabled by default', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const me = await app.inject({
       method: 'GET',
@@ -50,7 +50,7 @@ describe('POST /v1/auth/me gamification', () => {
 
   it('can be toggled on and off', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const on = await app.inject({
       method: 'PATCH',
@@ -75,7 +75,7 @@ describe('POST /v1/auth/me gamification', () => {
 describe('GET /v1/progression', () => {
   it('returns disabled when gamification is off', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const progression = await getProgression(app, cookie);
 
@@ -86,7 +86,7 @@ describe('GET /v1/progression', () => {
 
   it('returns a zeroed, level-1 progression for an empty enabled account', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     await enableGamification(app, cookie);
 
     const progression = await getProgression(app, cookie);
@@ -100,7 +100,7 @@ describe('GET /v1/progression', () => {
 
   it('awards habit XP from completions', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
     await enableGamification(app, cookie);
@@ -125,7 +125,7 @@ describe('GET /v1/progression', () => {
 
   it('awards project XP from completed tasks', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Engineering');
     await enableGamification(app, cookie);
 
@@ -162,7 +162,7 @@ describe('GET /v1/progression', () => {
 
   it('awards goal XP from goal progress', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Knowledge');
     await enableGamification(app, cookie);
 
@@ -192,7 +192,7 @@ describe('GET /v1/progression', () => {
 
   it('excludes abandoned goals from goal XP', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Knowledge');
     await enableGamification(app, cookie);
 
@@ -231,8 +231,8 @@ describe('GET /v1/progression', () => {
 
   it('scopes progression to the authenticated user', async () => {
     const app = await buildApp({ csrf: false });
-    const cookieA = await registerAndGetCookie(app, uniqueEmail());
-    const cookieB = await registerAndGetCookie(app, uniqueEmail());
+    const cookieA = await registerAndGetCookieVerified(app, uniqueEmail());
+    const cookieB = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarA = await createPillar(app, cookieA, 'Health');
     await createHabit(app, cookieA, 'Run', pillarA);
     await enableGamification(app, cookieA);

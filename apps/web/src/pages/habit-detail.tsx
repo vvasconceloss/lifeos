@@ -3,6 +3,7 @@ import { isUnauthorizedError } from "@/lib/errors";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { HabitHistory, HabitHistoryDay } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -10,8 +11,9 @@ import { MonthNavigation } from "@/components/dashboard/month-navigation";
 import { FrequencyBadge } from "@/components/frequency-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorState } from "@/components/error-state";
+import { formatMonthYear } from "@/lib/i18n-format";
 
-const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 function buildMonthCells(days: HabitHistoryDay[]): (HabitHistoryDay | null)[] {
   const first = days[0];
@@ -40,6 +42,7 @@ export default function HabitDetailPage() {
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [monthOffset, setMonthOffset] = useState(0);
+  const { t } = useTranslation("habits");
 
   const targetDate = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + monthOffset, 1));
   const year = targetDate.getUTCFullYear();
@@ -96,7 +99,7 @@ export default function HabitDetailPage() {
                   <Link
                     to="/settings/habits"
                     className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/80 text-foreground/60 hover:text-foreground"
-                    aria-label="Back to habits"
+                    aria-label={t("habitDetail.backToHabits")}
                   >
                     <ArrowLeft className="size-4" />
                   </Link>
@@ -115,7 +118,7 @@ export default function HabitDetailPage() {
                 </div>
                 <MonthNavigation
                   monthOffset={monthOffset}
-                  label={targetDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  label={formatMonthYear(targetDate)}
                   onPrev={() => setMonthOffset(monthOffset - 1)}
                   onNext={() => setMonthOffset(monthOffset + 1)}
                   onToday={() => setMonthOffset(0)}
@@ -124,31 +127,31 @@ export default function HabitDetailPage() {
 
               <div className="grid shrink-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <SummaryCard
-                  label="Completion rate"
+                  label={t("habitDetail.completionRate")}
                   value={`${history.completionRate}%`}
-                  sub={`${history.actual} / ${history.expected} expected`}
+                  sub={t("habitDetail.actualExpected", { actual: history.actual, expected: history.expected })}
                 />
-                <SummaryCard label="Current streak" value={`${history.currentStreak}`} />
-                <SummaryCard label="Best streak" value={`${history.bestStreak}`} />
+                <SummaryCard label={t("habitDetail.currentStreak")} value={`${history.currentStreak}`} />
+                <SummaryCard label={t("habitDetail.bestStreak")} value={`${history.bestStreak}`} />
                 <div className="flex flex-col justify-center gap-0.5 rounded-2xl border border-border/80 bg-card px-4 py-3 shadow-sm">
-                  <span className="text-[11px] font-medium text-foreground/60">vs. previous period</span>
+                  <span className="text-[11px] font-medium text-foreground/60">{t("habitDetail.vsPreviousPeriod")}</span>
                   <span className="flex items-center gap-1 text-xl font-bold tracking-tight tabular-nums">
                     {history.comparison.delta > 0 && <ArrowUpRight className="size-5 text-emerald-500" aria-hidden />}
                     {history.comparison.delta < 0 && <ArrowDownRight className="size-5 text-destructive" aria-hidden />}
                     <span className="text-foreground">{history.comparison.delta > 0 ? "+" : ""}{history.comparison.delta}%</span>
                   </span>
                   <span className="text-[10px] text-foreground/60">
-                    {history.comparison.current}% now · {history.comparison.previous}% before
+                    {t("habitDetail.comparison", { current: history.comparison.current, previous: history.comparison.previous })}
                   </span>
                 </div>
               </div>
 
               <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
-                <span className="mb-2 shrink-0 text-xs font-medium text-foreground/60">Monthly calendar</span>
+                <span className="mb-2 shrink-0 text-xs font-medium text-foreground/60">{t("habitDetail.monthlyCalendar")}</span>
                 <div className="grid shrink-0 grid-cols-7 gap-1.5 text-[10px] font-medium text-foreground/40">
-                  {WEEKDAY_LABELS.map((label) => (
-                    <div key={label} className="text-center">
-                      {label}
+                  {WEEKDAY_KEYS.map((key) => (
+                    <div key={key} className="text-center">
+                      {t(`dashboard:daysOfWeek.${key}`)}
                     </div>
                   ))}
                 </div>
@@ -167,7 +170,13 @@ export default function HabitDetailPage() {
                               : "text-foreground/30"
                         }`}
                         role="img"
-                        aria-label={`${cell.date}: ${cell.completed ? "completed" : cell.scheduled ? "scheduled, not completed" : "not scheduled"}`}
+                        aria-label={
+                          cell.completed
+                            ? t("habitDetail.cellCompleted", { date: cell.date })
+                            : cell.scheduled
+                              ? t("habitDetail.cellScheduledMissed", { date: cell.date })
+                              : t("habitDetail.cellNotScheduled", { date: cell.date })
+                        }
                       >
                         {parseInt(cell.date.split("-")[2]!, 10)}
                       </div>
@@ -177,10 +186,10 @@ export default function HabitDetailPage() {
                   )}
                 </div>
                 <div className="mt-3 flex shrink-0 flex-wrap gap-4 text-[10px] text-foreground/60">
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-emerald-500" /> Completed</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] border border-destructive/40" /> Scheduled, missed</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-border/50" /> Scheduled, future</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-foreground/10" /> Not scheduled</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-emerald-500" /> {t("common:completed")}</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] border border-destructive/40" /> {t("habitDetail.legend.scheduledMissed")}</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-border/50" /> {t("habitDetail.legend.scheduledFuture")}</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-[3px] bg-foreground/10" /> {t("habitDetail.legend.notScheduled")}</span>
                 </div>
               </div>
             </div>

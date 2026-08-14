@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { server } from './server';
+import '../i18n';
 
 // Routes are code-split (React.lazy) and pages fetch on mount — give async queries
 // enough time, especially when many test files run in parallel.

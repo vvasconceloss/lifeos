@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useState } from "react";
 import { Check, Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -39,6 +40,7 @@ export function EditPillarDialog({
   pillar: Pillar;
   onUpdated: (pillar: Pillar) => void;
 }) {
+  const { t } = useTranslation("habits");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("");
@@ -55,7 +57,7 @@ export function EditPillarDialog({
     setNameTouched(false);
   }
 
-  const nameError = nameTouched && !name.trim() ? "Name is required" : undefined;
+  const nameError = nameTouched && !name.trim() ? t("editPillar.nameRequired") : undefined;
   const canSubmit = name.trim().length > 0;
 
   async function handleSave() {
@@ -68,10 +70,10 @@ export function EditPillarDialog({
       body.description = description.trim() || null;
       const res = await api.patch<{ pillar: Pillar }>(`/pillars/${pillar.id}`, body);
       onUpdated(res.data.pillar);
-      toast.success("Pillar updated");
+      toast.success(t("editPillar.updated"));
       setOpen(false);
     } catch {
-      toast.error("Failed to update pillar");
+      toast.error(t("editPillar.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -90,7 +92,7 @@ export function EditPillarDialog({
           <button
             type="button"
             className="rounded-md p-1.5 text-foreground/60 hover:text-foreground"
-            aria-label={`Edit ${pillar.name}`}
+            aria-label={t("editPillar.edit", { name: pillar.name })}
           >
             <Pencil className="size-4" />
           </button>
@@ -98,12 +100,12 @@ export function EditPillarDialog({
       />
       <DialogContent className="sm:max-w-110.25">
         <DialogHeader>
-          <DialogTitle>Edit pillar</DialogTitle>
-          <DialogDescription>Rename the pillar or pick a new color.</DialogDescription>
+          <DialogTitle>{t("editPillar.title")}</DialogTitle>
+          <DialogDescription>{t("editPillar.description")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="ep-name">Pillar name</Label>
+            <Label htmlFor="ep-name">{t("editPillar.name")}</Label>
             <input
               id="ep-name"
               value={name}
@@ -112,7 +114,7 @@ export function EditPillarDialog({
                 setNameTouched(true);
               }}
               onBlur={() => setNameTouched(true)}
-              placeholder="e.g. Health"
+              placeholder={t("editPillar.namePlaceholder")}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "ep-name-error" : undefined}
               className={`rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 ${
@@ -128,17 +130,17 @@ export function EditPillarDialog({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ep-icon">Icon (optional)</Label>
+            <Label htmlFor="ep-icon">{t("editPillar.iconLabel")}</Label>
             <input
               id="ep-icon"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              placeholder="e.g. 🏥"
+              placeholder={t("editPillar.iconPlaceholder")}
               className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ep-desc">Description (optional)</Label>
+            <Label htmlFor="ep-desc">{t("editPillar.descriptionLabel")}</Label>
             <textarea
               id="ep-desc"
               value={description}
@@ -148,7 +150,7 @@ export function EditPillarDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label>Color</Label>
+            <Label>{t("editPillar.color")}</Label>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => {
                 const active = color === c;
@@ -159,7 +161,7 @@ export function EditPillarDialog({
                     onClick={() => setColor(active ? "" : c)}
                     className="relative flex size-8 items-center justify-center rounded-full transition-all"
                     style={{ backgroundColor: c }}
-                    aria-label={`Color ${c}`}
+                    aria-label={t("editPillar.colorAria", { color: c })}
                     aria-pressed={active}
                   >
                     {active && (
@@ -176,7 +178,7 @@ export function EditPillarDialog({
         <DialogFooter>
           <Button onClick={handleSave} disabled={saving || !canSubmit} className="w-full sm:w-auto">
             {saving ? <Spinner className="mr-2" /> : null}
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? t("editPillar.saving") : t("editPillar.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

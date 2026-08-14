@@ -1,0 +1,35 @@
+{
+  "title": "Daily journal",
+  "form": {
+    "logEntry": "Log entry",
+    "mood": "Mood",
+    "energy": "Energy",
+    "sleep": "Sleep",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "notes": "Notes",
+    "notesPlaceholder": "How did the day go?",
+    "save": "Save entry",
+    "update": "Update entry",
+    "saving": "Saving...",
+    "futureDisabled": "Future days can't be logged",
+    "savedToast": "Journal saved",
+    "errorToast": "Failed to save journal"
+  },
+  "calendar": {
+    "title": "Monthly calendar",
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "logged": "(logged)",
+    "hint": "Logged days are colored by mood & energy (the stronger the green, the better the day)."
+  },
+  "correlations": {
+    "title": "Your logged days by state",
+    "empty": "Log a few days (mood, energy or sleep) to see how your days are distributed across these buckets."
+  },
+  "monthlyState": {
+    "title": "Your daily state this month",
+    "loggedDays_one": "{{count}} logged day",
+    "loggedDays_other": "{{count}} logged days",
+    "hint": "Monthly averages of the values you logged. Bars are drawn on each metric's own scale (mood/energy 1–10, sleep 0–12h) and colored by how good the value is."
+  }
+}

@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { isUnauthorizedError } from "@/lib/errors";
 import { ChevronDown, ListChecks } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { HabitFrequency } from "@lifeos/shared";
 import { AppLayout } from "@/components/app-layout";
 import { HabitCard } from "@/components/habit-card";
@@ -36,6 +37,7 @@ interface Habit {
 }
 
 export default function SettingsHabitsPage() {
+  const { t } = useTranslation("habits");
   const [habits, setHabits] = useState<Habit[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +112,7 @@ export default function SettingsHabitsPage() {
     try {
       await api.post("/habits/reorder", { ids });
     } catch {
-      toast.error("Failed to reorder habits");
+      toast.error(t("settingsHabits.reorderFailed"));
       reload();
     }
   }
@@ -122,9 +124,9 @@ export default function SettingsHabitsPage() {
       setHabits((prev) =>
         prev.map((h) => (h.id === id ? res.data.habit : h)),
       );
-      toast.success("Habit archived");
+      toast.success(t("settingsHabits.archived"));
     } catch {
-      toast.error("Failed to archive habit");
+      toast.error(t("settingsHabits.archiveFailed"));
     } finally {
       setArchivingId(null);
     }
@@ -135,9 +137,9 @@ export default function SettingsHabitsPage() {
     try {
       await api.delete(`/habits/${id}`);
       setHabits((prev) => prev.filter((h) => h.id !== id));
-      toast.success("Habit deleted");
+      toast.success(t("settingsHabits.deleted"));
     } catch {
-      toast.error("Failed to delete habit");
+      toast.error(t("settingsHabits.deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -149,7 +151,7 @@ export default function SettingsHabitsPage() {
         <main className="mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle px-6 py-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-              Habits
+              {t("common:habits")}
             </h2>
             <NewHabitModal pillars={pillars} onCreated={handleCreated} />
           </div>
@@ -162,7 +164,7 @@ export default function SettingsHabitsPage() {
               <ChevronDown
                 className={`size-4 transition-transform ${showArchived ? "rotate-180" : ""}`}
               />
-              Show archived
+              {t("settingsHabits.showArchived")}
             </button>
           </div>
 
@@ -176,11 +178,11 @@ export default function SettingsHabitsPage() {
             <EmptyState
               className="flex-1"
               icon={<ListChecks className="size-8" />}
-              title={showArchived ? "No habits yet" : "No active habits"}
+              title={showArchived ? t("settingsHabits.noHabits") : t("settingsHabits.noActiveHabits")}
               description={
                 showArchived
-                  ? "Habits you archive will appear here."
-                  : "Create your first habit and associate it with a pillar."
+                  ? t("settingsHabits.noHabitsDescription")
+                  : t("settingsHabits.noActiveHabitsDescription")
               }
               action={<NewHabitModal pillars={pillars} onCreated={handleCreated} />}
             />

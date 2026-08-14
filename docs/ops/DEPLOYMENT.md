@@ -1,6 +1,6 @@
 # LifeOS — Deployment
 
-How LifeOS is deployed and configured for production (Phase 14 of [`ROADMAP.md`](../roadmap/ROADMAP.md)).
+How LifeOS is deployed and configured for production (Phase 14 of [`v1.5_PUBLIC_BETA.md`](../roadmap/v1.5_PUBLIC_BETA.md)).
 
 ## Architecture
 
@@ -49,6 +49,14 @@ Set these in the Render dashboard (or they come from `render.yaml`):
 | `RATE_LIMIT_MAX` / `RATE_LIMIT_WINDOW` | `300` / `1 minute` |
 | `LOGIN_RATE_LIMIT_MAX` / `LOGIN_RATE_LIMIT_WINDOW` | `5` / `1 minute` |
 | `REGISTER_RATE_LIMIT_MAX` / `REGISTER_RATE_LIMIT_WINDOW` | `10` / `1 minute` |
+| `EMAIL_ENABLED` | `true` only once real Gmail app-password credentials are set (see `docs/email/EMAIL.md`) |
+| `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_SECURE` | `smtp.gmail.com` / `465` / `true` |
+| `EMAIL_USER` | `noreplylifeos.focus@gmail.com` (SMTP username) |
+| `EMAIL_PASS` | Gmail app password (secret) |
+| `EMAIL_FROM_NAME` / `EMAIL_FROM_ADDRESS` | `LifeOS` / `noreplylifeos.focus@gmail.com` |
+| `EMAIL_REPLY_TO` | `noreplylifeos.focus+support@gmail.com` |
+| `WEB_URL` | web origin used to build verification/reset links, e.g. `https://your-app.vercel.app` |
+| `RESEND_VERIFICATION_RATE_LIMIT_MAX` / `_WINDOW` | `3` / `1 hour` |
 
 ### Vercel (web)
 

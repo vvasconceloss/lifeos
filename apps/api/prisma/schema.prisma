@@ -15,16 +15,81 @@ model User {
   timezone     String?
   weekStart    Int      @default(1)
   theme        String   @default("system")
+  locale       String   @default("en")
   onboarded    Boolean  @default(false)
   gamification Boolean  @default(false)
+  emailVerified Boolean  @default(false)
+  passwordChangedAt DateTime?
+  status              UserStatus @default(ACTIVE)
+  deletionRequestedAt DateTime?
+  scheduledDeletionAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  pillars   Pillar[]
-  habits    Habit[]
-  goals     Goal[]
-  projects  Project[]
-  dailyLogs DailyLog[]
+  pillars       Pillar[]
+  habits        Habit[]
+  goals         Goal[]
+  projects      Project[]
+  dailyLogs     DailyLog[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  emailChangeTokens       EmailChangeToken[]
+  accountDeletionTokens   AccountDeletionToken[]
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING_DELETION
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailChangeToken {
+  id               String   @id @default(uuid())
+  userId           String
+  newEmail         String
+  confirmTokenHash String   @unique
+  cancelTokenHash  String?  @unique
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AccountDeletionToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Pillar {

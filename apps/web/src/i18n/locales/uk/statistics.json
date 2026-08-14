@@ -1,0 +1,66 @@
+{
+  "summaryCards": {
+    "summary": "Підсумок",
+    "totalCompletions": "Усього завершень",
+    "monthlyProgress": "Місячний прогрес",
+    "habitsTracked": "Відстежувані звички",
+    "avgStreak": "Середня серія",
+    "empty": "Ще немає звичок — створіть одну, щоб почати відстеження."
+  },
+  "pillarStats": {
+    "byPillar": "За стовпами",
+    "noData": "Ще немає даних."
+  },
+  "topHabits": {
+    "title": "Найкращі звички",
+    "noData": "Ще немає даних.",
+    "topRate": "Найкращий показник",
+    "longestStreak": "Найдовша серія"
+  },
+  "habitsTable": {
+    "habit": "Звичка",
+    "monthRate": "Місячний показник",
+    "streak": "Серія",
+    "best": "Найкращий"
+  },
+  "heatmap": {
+    "activity": "Активність",
+    "emptyMonth": "Не зафіксовано завершень за {{month}} {{year}}.",
+    "emptyYear": "Не зафіксовано завершень за {{year}}.",
+    "less": "Менше",
+    "more": "Більше",
+    "dayCompletions_one": "{{count}} завершення",
+    "dayCompletions_few": "{{count}} завершення",
+    "dayCompletions_many": "{{count}} завершень",
+    "dayCompletions_other": "{{count}} завершення",
+    "weekdays": ["", "Пн", "", "Ср", "", "Пт", ""],
+    "months": ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"],
+    "errorToast": "Не вдалося завантажити теплову карту"
+  },
+  "insightsSection": {
+    "howAmIProgressing": "Як я прогресую?",
+    "lastWeeks": "останні {{weeks}} тижнів · цей тиждень триває",
+    "thisWeekSub": "{{completed}}/{{expected}} завершень · {{range}}",
+    "trend": "Тенденція",
+    "trendSub": "останні 4 тижні проти попередніх 4",
+    "consistency": "Послідовність",
+    "consistencySub": "стабільність щоденних зусиль · останні 12 тижнів",
+    "dailyAverage": "Середня за день",
+    "dailyAverageSub": "завершень на день · останні 12 тижнів",
+    "completionRateOverTime": "Динаміка показника завершення",
+    "last12Weeks": "останні 12 тижнів",
+    "completionRateQuestion": "Як мій показник завершення змінюється тиждень за тижнем?",
+    "progressionByPillar": "Прогрес за стовпами",
+    "thisMonth": "цей місяць",
+    "focusQuestion": "На якому стовпі мені зосередитися цього місяця?",
+    "noHabits": "Ще немає звичок.",
+    "focusLabel": "Фокус:",
+    "focusText": "{{pillarName}} — ваш найслабший стовп цього місяця ({{rate}}%).",
+    "rate": "Показник"
+  },
+  "errorState": {
+    "title": "Щось пішло не так",
+    "description": "Не вдалося завантажити ваші дані.",
+    "retry": "Спробувати ще раз"
+  }
+}

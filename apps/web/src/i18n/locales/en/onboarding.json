@@ -1,0 +1,13 @@
+{
+  "logoAlt": "LifeOS logo",
+  "title": "Welcome to LifeOS",
+  "subtitle": "What areas of your life do you want to track?",
+  "skip": "Skip",
+  "habitsTitle": "Your first habits",
+  "habitsSubtitle": "Pick a few to start. You can change them later.",
+  "finishSetup": "Finish setup",
+  "ready": "You're ready",
+  "readyDescription": "Your pillars and first habits are set up. Start tracking and build a life you can measure, understand, and improve.",
+  "startUsing": "Start using LifeOS",
+  "error": "Something went wrong. Please try again."
+}
