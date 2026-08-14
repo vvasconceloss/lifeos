@@ -7,6 +7,10 @@ export {
   resendVerificationBodySchema,
   forgotPasswordBodySchema,
   resetPasswordBodySchema,
+  changePasswordBodySchema,
+  changeEmailRequestBodySchema,
+  changeEmailConfirmBodySchema,
+  changeEmailCancelBodySchema,
 } from "@lifeos/shared";
 
 export type {
@@ -19,6 +23,10 @@ export type {
   ResendVerificationBody,
   ForgotPasswordBody,
   ResetPasswordBody,
+  ChangePasswordBody,
+  ChangeEmailRequestBody,
+  ChangeEmailConfirmBody,
+  ChangeEmailCancelBody,
   UserResponse,
   AuthResponse,
   MeResponse,

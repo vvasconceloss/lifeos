@@ -26,6 +26,11 @@ const MESSAGE_TO_CODE: Record<string, string> = {
   "Invalid or expired verification link": "INVALID_VERIFICATION_TOKEN",
   "Invalid or expired reset link": "INVALID_RESET_TOKEN",
   "Reset link has expired": "RESET_EXPIRED",
+  "Current password is incorrect": "INCORRECT_PASSWORD",
+  "New password must be different from the current one": "SAME_PASSWORD",
+  "New email must be different from the current one": "NEW_EMAIL_SAME",
+  "Confirmation link has expired": "EMAIL_CHANGE_EXPIRED",
+  "Invalid or used confirmation link": "INVALID_EMAIL_CHANGE_TOKEN",
 };
 
 /**

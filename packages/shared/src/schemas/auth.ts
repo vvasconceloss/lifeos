@@ -85,6 +85,32 @@ export const resetPasswordBodySchema = z.object({
 
 export type ResetPasswordBody = z.infer<typeof resetPasswordBodySchema>;
 
+export const changePasswordBodySchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: passwordSchema,
+});
+
+export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;
+
+export const changeEmailRequestBodySchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newEmail: z.email().min(5).max(254),
+});
+
+export type ChangeEmailRequestBody = z.infer<typeof changeEmailRequestBodySchema>;
+
+export const changeEmailConfirmBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
+export type ChangeEmailConfirmBody = z.infer<typeof changeEmailConfirmBodySchema>;
+
+export const changeEmailCancelBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
+export type ChangeEmailCancelBody = z.infer<typeof changeEmailCancelBodySchema>;
+
 export const updateMeBodySchema = z.object({
   name: z.string().min(1).max(100).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),

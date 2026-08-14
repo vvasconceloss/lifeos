@@ -29,6 +29,7 @@ model User {
   dailyLogs     DailyLog[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
+  emailChangeTokens       EmailChangeToken[]
 }
 
 model EmailVerificationToken {
@@ -49,6 +50,20 @@ model PasswordResetToken {
   tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailChangeToken {
+  id               String   @id @default(uuid())
+  userId           String
+  newEmail         String
+  confirmTokenHash String   @unique
+  cancelTokenHash  String?  @unique
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
