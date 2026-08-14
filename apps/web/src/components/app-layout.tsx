@@ -59,6 +59,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, pathname, navigate]);
 
+  // Accounts in the 15-day deletion grace period only see the recovery screen.
+  useEffect(() => {
+    if (!loading && user && user.status === "PENDING_DELETION" && pathname !== "/account/recovery") {
+      navigate({ to: "/account/recovery", replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
+
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
       <a

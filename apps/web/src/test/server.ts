@@ -11,6 +11,9 @@ export const loggedInUser = {
   onboarded: true,
   gamification: false,
   emailVerified: true,
+  status: 'ACTIVE',
+  deletionRequestedAt: null,
+  scheduledDeletionAt: null,
   isDemo: false,
   createdAt: '2026-01-01T00:00:00.000Z',
 };

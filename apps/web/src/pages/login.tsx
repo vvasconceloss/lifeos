@@ -33,6 +33,10 @@ export default function LoginPage() {
       void logout();
       return;
     }
+    if (user.status === "PENDING_DELETION") {
+      navigate({ to: "/account/recovery", replace: true });
+      return;
+    }
     navigate({ to: user.onboarded ? "/app" : "/onboarding" });
   }, [user, loading, logout, navigate]);
 
