@@ -2,6 +2,28 @@
 
 All notable changes to LifeOS.
 
+## v1.5.2 — UX & Feedback (2026-08)
+
+A small product/UX release on top of the v1.5.1 hardening: the feedback entry point moved into the
+header, the profile form got proper interactive states, and the release/PR process is now formalized.
+
+### New features
+
+- **Feedback in the header** — a GitHub icon button next to the theme toggle opens a dropdown with
+  "Report a bug" and "Suggest a feature" links (matching the profile/logout popover, fully
+  responsive). Replaces the Feedback card on the Profile page, which was overlapping the settings
+  and the "Save changes" button.
+
+### UX
+
+- **Profile form polish** —
+  - "Save changes" now shows a clear success state: the button turns green with a check, keeps its
+    size, and is not clickable while saving or right after saving (in addition to the toast).
+  - Name field has well-defined hover / focus / disabled states.
+  - Empty name on save is blocked with an inline error (red border + "Name is required"), cleared
+    as the user types.
+  - The save button lives in a sticky bar aligned with the cards grid at the bottom right.
+
 ## v1.5.1 — Hardening & Quality (2026)
 
 A hardening cycle focused on security, engineering quality and operations — no new product
