@@ -42,6 +42,7 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | [`SECURITY.md`](SECURITY.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
 | [`roadmap/IMPROVE_ROADMAP.md`](roadmap/IMPROVE_ROADMAP.md) | The "Improve" hardening roadmap (security, error contract, coverage, architecture, API/db review, CI/CD, frontend, polish). |
 | [`email/EMAIL.md`](email/EMAIL.md) | The transactional email infrastructure: Gmail SMTP provider, env vars, the `EmailService` abstraction, supported templates and expected data. |
+| [`legal/data-deletion-policy.md`](legal/data-deletion-policy.md) | The account soft-delete policy: the 15-day recovery window, what gets deleted, and the anonymized audit trail. |
 
 ## API
 

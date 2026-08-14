@@ -131,6 +131,20 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 - Cancellation is possible via `DELETE /account/change-email/cancel` (authenticated) or
   `POST /account/change-email/cancel` (no-login link token from the old email).
 
+## Account soft-delete (Phase 6)
+
+- `POST /account/delete` (verified users) requires the current password, sets `status =
+  PENDING_DELETION`, schedules deletion in **15 days**, issues a single-use recovery token and
+  invalidates all sessions (the token cookie is cleared).
+- During the grace period the user can still log in, but only sees the recovery screen
+  (`ACCOUNT_PENDING_DELETION` on protected routes). Recovery is idempotent:
+  - Path A: `POST /account/recover` with the single-use email-link token (no login).
+  - Path B: `POST /account/cancel-deletion` from the post-login recovery screen.
+- A daily job (`pnpm --filter @lifeos/api jobs:process-account-deletions`) permanently deletes
+  accounts whose window elapsed — the `account-deleted` email is sent first, then the user row is
+  hard-deleted (cascading to all data) and an anonymized `{ userIdHash, deletedAt }` audit event is
+  logged. Idempotent.
+
 ## Supported templates & expected data
 
 | Template | Data fields |
@@ -144,6 +158,7 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 | `account-deletion-requested` | `recoveryUrl` (string), `deletionDate` (string, YYYY-MM-DD) |
 | `account-deletion-reminder` | `recoveryUrl` (string), `deletionDate` (string, YYYY-MM-DD) |
 | `account-deleted` | — (notification only) |
+| `account-recovered` | — (recovery confirmation) |
 
 Every template renders an HTML version (shared LifeOS header/footer layout) and a plain-text
 fallback. The `locale` field is accepted but not yet used — localization lands in Phase 7.

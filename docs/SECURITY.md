@@ -12,6 +12,7 @@
 | Email verification | ✅ | New accounts start unverified; single-use 24 h token (SHA-256 hash stored); resend is anti-enumeration + rate-limited; sensitive actions gated by `requireVerified` |
 | Password recovery | ✅ | 1 h single-use token (hash stored); anti-enumeration `forgot-password`; reset bumps `passwordChangedAt` which invalidates all old sessions |
 | Account changes | ✅ | Change password/email require the current password; email change is verified at the new address + alerted at the old one; other sessions invalidated on sensitive changes |
+| Account deletion | ✅ | Soft-delete with a 15-day recovery window; single-use recovery token (hash stored); protected routes blocked while pending; daily job hard-deletes after the window |
 | Authorization | ✅ | `requireAuth` (`jwtVerify`) on every protected route; all queries scoped by `userId` |
 | IDOR / data isolation | ✅ | Cross-user access to every entity returns `404` — verified by per-entity tests (below) |
 | CSRF | ✅ | `@fastify/csrf-protection` on all state-changing requests (`csrf-token` header + signed cookie) |

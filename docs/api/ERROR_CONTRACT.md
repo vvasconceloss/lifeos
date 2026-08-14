@@ -48,8 +48,9 @@ from the message via a central map (default `APP_ERROR`).
 | 401 | Unauthenticated / expired session | `UNAUTHORIZED` |
 | 401 | Invalid credentials | `INVALID_CREDENTIALS` |
 | 403 | Action requires a verified email | `EMAIL_NOT_VERIFIED` |
+| 403 | Account is in the deletion grace period | `ACCOUNT_PENDING_DELETION` |
 | 404 | Resource not found (incl. cross-user access, which is indistinguishable) | `*_NOT_FOUND` |
-| 409 | Conflict (duplicate email, already onboarded, pillar with habits) | `EMAIL_ALREADY_EXISTS` · `ALREADY_ONBOARDED` · `PILLAR_HAS_HABITS` |
+| 409 | Conflict (duplicate email, already onboarded, pillar with habits, deletion already requested) | `EMAIL_ALREADY_EXISTS` · `ALREADY_ONBOARDED` · `PILLAR_HAS_HABITS` · `ALREADY_PENDING_DELETION` |
 | 429 | Rate limited | `RATE_LIMIT_EXCEEDED` |
 | 500 | Internal error (no internal details leaked) | `INTERNAL_ERROR` |
 
@@ -86,6 +87,10 @@ from the message via a central map (default `APP_ERROR`).
 | `NEW_EMAIL_SAME` | New email must be different from the current one |
 | `EMAIL_CHANGE_EXPIRED` | Confirmation link has expired |
 | `INVALID_EMAIL_CHANGE_TOKEN` | Invalid or used confirmation link |
+| `ALREADY_PENDING_DELETION` | Account deletion has already been requested |
+| `ACCOUNT_PENDING_DELETION` | This account is scheduled for deletion. Please recover it first. |
+| `RECOVERY_EXPIRED` | Recovery link has expired |
+| `INVALID_RECOVERY_TOKEN` | Invalid or used recovery link |
 | `RATE_LIMIT_EXCEEDED` | Rate limit exceeded, retry in … |
 | `APP_ERROR` | Fallback for any unlisted message |
 

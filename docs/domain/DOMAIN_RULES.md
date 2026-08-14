@@ -45,6 +45,9 @@ User (1) ──── (N) DailyLog
 | gamification| Boolean  | Default `false`; opt-in XP/levels   |
 | emailVerified | Boolean | Default `false`; `true` after the user confirms their email |
 | passwordChangedAt | DateTime? | Set on password reset/change; sessions issued before it are rejected |
+| status | Enum | `ACTIVE` (default) or `PENDING_DELETION` |
+| deletionRequestedAt | DateTime? | Set when account deletion is requested |
+| scheduledDeletionAt | DateTime? | `deletionRequestedAt + 15 days`; the daily job deletes when it passes |
 | createdAt   | DateTime | Auto-generated                      |
 | updatedAt   | DateTime | Auto-updated                        |
 
@@ -59,6 +62,11 @@ User (1) ──── (N) DailyLog
    as confirmation. An email change is a two-step flow (single-use token, 1 h TTL, confirm at the
    new address + alert with a cancel link at the old one). Successful password/email changes bump
    `passwordChangedAt`, invalidating all other sessions; the acting session gets a fresh JWT.
+4. **Account soft-delete** — Deleting an account requires the current password and sets
+   `status = PENDING_DELETION` with a **15-day** grace period (`scheduledDeletionAt`). During the
+   window the user can log in but only sees the recovery screen; recovery is idempotent (email link
+   or authenticated cancellation). After the window a daily job permanently deletes the user
+   (cascading to all data) and logs an anonymized audit event.
 2. **Password storage** — Password is never stored in plaintext. Must be hashed using bcrypt before persistence. Only the hash is stored.
 3. **Password strength** — Strong policy enforced by a single shared Zod schema
    (`packages/shared/src/schemas/password.ts`) at every point a password is set or changed:
