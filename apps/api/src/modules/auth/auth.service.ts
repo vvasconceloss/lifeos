@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../db/client";
 import { generateToken, hashToken, TOKEN_TTLS } from "../../lib/tokens";
-import type { RegisterBody, UpdateMeBody, UserResponse } from "./auth.schemas";
+import type { RegisterBody, UpdateMeBody, UserResponse, SupportedLocale } from "./auth.schemas";
 const SALT_ROUNDS = 10;
 
 export const DEMO_EMAIL = "demo@lifeos.com";
@@ -27,6 +27,7 @@ export function toUserResponse(user: {
   timezone: string | null;
   weekStart: number;
   theme: string;
+  locale: string;
   onboarded: boolean;
   gamification: boolean;
   emailVerified: boolean;
@@ -42,6 +43,7 @@ export function toUserResponse(user: {
     timezone: user.timezone,
     weekStart: user.weekStart,
     theme: user.theme,
+    locale: user.locale as SupportedLocale,
     onboarded: user.onboarded,
     gamification: user.gamification,
     emailVerified: user.emailVerified,
@@ -121,6 +123,7 @@ export async function updateUser(
       ...(data.timezone !== undefined && { timezone: data.timezone }),
       ...(data.weekStart !== undefined && { weekStart: data.weekStart }),
       ...(data.theme !== undefined && { theme: data.theme }),
+      ...(data.locale !== undefined && { locale: data.locale }),
       ...(data.onboarded !== undefined && { onboarded: data.onboarded }),
       ...(data.gamification !== undefined && { gamification: data.gamification }),
     },
@@ -193,13 +196,13 @@ export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
  */
 export async function resendVerification(
   email: string,
-  sendEmail: (token: string, email: string) => Promise<void>,
+  sendEmail: (token: string, email: string, locale: string) => Promise<void>,
 ): Promise<void> {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || user.emailVerified) return;
 
   const token = await createVerificationToken(user.id);
-  await sendEmail(token, user.email);
+  await sendEmail(token, user.email, user.locale);
 }
 
 /**
@@ -222,7 +225,7 @@ export async function createPasswordResetToken(userId: string): Promise<string> 
 }
 
 export type ResetPasswordResult =
-  | { status: "reset"; email: string }
+  | { status: "reset"; email: string; locale: string }
   | { status: "expired" }
   | { status: "invalid" };
 
@@ -257,7 +260,7 @@ export async function resetPassword(
     prisma.passwordResetToken.delete({ where: { id: record.id } }),
   ]);
 
-  return { status: "reset", email: user.email };
+  return { status: "reset", email: user.email, locale: user.locale };
 }
 
 /**
@@ -267,13 +270,13 @@ export async function resetPassword(
  */
 export async function forgotPassword(
   email: string,
-  sendEmail: (token: string, email: string) => Promise<void>,
+  sendEmail: (token: string, email: string, locale: string) => Promise<void>,
 ): Promise<void> {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (user && !isDemoEmail(user.email)) {
     const token = await createPasswordResetToken(user.id);
-    await sendEmail(token, user.email);
+    await sendEmail(token, user.email, user.locale);
     return;
   }
 

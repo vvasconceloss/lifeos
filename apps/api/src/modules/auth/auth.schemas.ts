@@ -14,6 +14,7 @@ export {
   deleteAccountBodySchema,
   recoverAccountBodySchema,
   cancelDeletionBodySchema,
+  SUPPORTED_LOCALES,
 } from "@lifeos/shared";
 
 export type {
@@ -35,6 +36,7 @@ export type {
   CancelDeletionBody,
   UserResponse,
   UserStatus,
+  SupportedLocale,
   AuthResponse,
   MeResponse,
 } from "@lifeos/shared";

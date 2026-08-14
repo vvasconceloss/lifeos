@@ -127,11 +127,16 @@ export const cancelDeletionBodySchema = z.object({});
 
 export type CancelDeletionBody = z.infer<typeof cancelDeletionBodySchema>;
 
+export const SUPPORTED_LOCALES = ["en", "pt", "uk"] as const;
+
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
 export const updateMeBodySchema = z.object({
   name: z.string().min(1).max(100).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),
   weekStart: z.number().int().min(0).max(6).optional(),
   theme: z.enum(["light", "dark", "system"]).optional(),
+  locale: z.enum(SUPPORTED_LOCALES).optional(),
   onboarded: z.boolean().optional(),
   gamification: z.boolean().optional(),
 });
@@ -147,6 +152,7 @@ export interface UserResponse {
   timezone: string | null;
   weekStart: number;
   theme: string;
+  locale: SupportedLocale;
   onboarded: boolean;
   gamification: boolean;
   emailVerified: boolean;
