@@ -26,6 +26,7 @@ This is the entry point for LifeOS documentation. Start here to find what you ne
 | Document | What it is |
 |---|---|
 | [`features/GAMIFICATION.md`](features/GAMIFICATION.md) | The optional XP/level/rank system: the transparent formula, level curve and ranks. |
+| [`features/INTERNATIONALIZATION.md`](features/INTERNATIONALIZATION.md) | The i18n system: supported languages, translation structure, plural rules, and how to add a new language. |
 
 ## Operations & deployment
 

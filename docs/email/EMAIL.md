@@ -160,8 +160,11 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
 | `account-deleted` | — (notification only) |
 | `account-recovered` | — (recovery confirmation) |
 
-Every template renders an HTML version (shared LifeOS header/footer layout) and a plain-text
-fallback. The `locale` field is accepted but not yet used — localization lands in Phase 7.
+ Every template renders an HTML version (shared LifeOS header/footer layout) and a plain-text
+ fallback. The `locale` field selects the copy language — **en**, **pt** and **uk** are supported,
+ falling back to **en** for any other value. The user's `User.locale` is passed at send time, so a
+ user who speaks Portuguese receives localized verification, reset, change, deletion and recovery
+ emails. Copy lives in `apps/api/src/lib/email/i18n/{en,pt,uk}.json`.
 
 ## Tests
 
@@ -169,6 +172,7 @@ fallback. The `locale` field is accepted but not yet used — localization lands
 
 - Config parsing and From-header formatting.
 - Rendering of all 8 templates (HTML + plain text) and HTML escaping.
+- Localized rendering in `pt`/`uk` (subjects, body and the `<html lang>` attribute) and fallback to English.
 - Dry-run mode does not call the transport.
 - Successful send with correct From/Reply-To/To.
 - Retry-once-on-failure and give-up-after-limit (payload never logged).
