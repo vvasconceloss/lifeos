@@ -1,0 +1,93 @@
+{
+  "title": "Projects",
+  "emptyState": {
+    "title": "No projects yet",
+    "description": "Organize structured work — define tasks and watch the project's progress update as you complete them."
+  },
+  "other": "Other",
+  "toast": {
+    "deleted": "Project deleted",
+    "deleteFailed": "Failed to delete project",
+    "createFailed": "Failed to create project",
+    "updated": "Project updated",
+    "updateFailed": "Failed to update project",
+    "createTaskFailed": "Failed to create task",
+    "updateStatusFailed": "Failed to update status",
+    "updateTaskFailed": "Failed to update task",
+    "deleteTaskFailed": "Failed to delete task",
+    "reorderTasksFailed": "Failed to reorder tasks"
+  },
+  "status": {
+    "planning": "Planning",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "paused": "Paused"
+  },
+  "projectCard": {
+    "deleteLabel": "Delete {{name}}",
+    "deleteTitle": "Delete project?",
+    "deleteDescription": "This will permanently remove <strong>{{name}}</strong> and all of its tasks.",
+    "taskCount_one": "{{count}} task",
+    "taskCount_other": "{{count}} tasks",
+    "deadline": "· deadline {{date}}"
+  },
+  "newProject": {
+    "trigger": "New Project",
+    "title": "Create new project",
+    "description": "Define structured work to produce an outcome, then add tasks to it.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Build the landing page",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "What is this work about?",
+    "pillarLabel": "Pillar",
+    "pillarPlaceholder": "Select a pillar",
+    "deadlineLabel": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
+    "saving": "Saving...",
+    "create": "Create Project"
+  },
+  "editProject": {
+    "editLabel": "Edit {{name}}",
+    "title": "Edit project",
+    "description": "Update the work, its pillar, deadline or status.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Build the landing page",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description (optional)",
+    "pillarLabel": "Pillar",
+    "deadlineLabel": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
+    "statusLabel": "Status",
+    "saving": "Saving..."
+  },
+  "projectDetail": {
+    "backToProjects": "Back to projects",
+    "progress": "Progress",
+    "tasksDone": "{{done}} of {{total}} tasks done",
+    "description": "Description",
+    "tasks": "Tasks",
+    "noTasks": "No tasks yet. Add a task to get started.",
+    "taskRow": {
+      "markNotDone": "Mark \"{{title}}\" as not done",
+      "markDone": "Mark \"{{title}}\" as done",
+      "editTask": "Edit task {{title}}",
+      "moveUp": "Move \"{{title}}\" up",
+      "moveDown": "Move \"{{title}}\" down",
+      "saveTitle": "Save task title",
+      "cancelEditing": "Cancel editing",
+      "edit": "Edit \"{{title}}\"",
+      "delete": "Delete \"{{title}}\""
+    }
+  },
+  "newTask": {
+    "trigger": "New Task",
+    "title": "Create new task",
+    "description": "Add a task to this project.",
+    "taskTitleLabel": "Task title",
+    "placeholder": "e.g. Design the landing page",
+    "titleRequired": "Title is required",
+    "saving": "Saving...",
+    "create": "Create Task"
+  }
+}

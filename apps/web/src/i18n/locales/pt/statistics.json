@@ -1,0 +1,64 @@
+{
+  "summaryCards": {
+    "summary": "Resumo",
+    "totalCompletions": "Total de conclusões",
+    "monthlyProgress": "Progresso mensal",
+    "habitsTracked": "Hábitos monitorizados",
+    "avgStreak": "Série média",
+    "empty": "Ainda sem hábitos — crie um para começar a monitorizar."
+  },
+  "pillarStats": {
+    "byPillar": "Por pilar",
+    "noData": "Ainda sem dados."
+  },
+  "topHabits": {
+    "title": "Principais hábitos",
+    "noData": "Ainda sem dados.",
+    "topRate": "Melhor taxa",
+    "longestStreak": "Maior série"
+  },
+  "habitsTable": {
+    "habit": "Hábito",
+    "monthRate": "Taxa mensal",
+    "streak": "Série",
+    "best": "Melhor"
+  },
+  "heatmap": {
+    "activity": "Atividade",
+    "emptyMonth": "Sem conclusões registadas em {{month}} de {{year}}.",
+    "emptyYear": "Sem conclusões registadas em {{year}}.",
+    "less": "Menos",
+    "more": "Mais",
+    "dayCompletions_one": "{{count}} conclusão",
+    "dayCompletions_other": "{{count}} conclusões",
+    "weekdays": ["", "Seg", "", "Qua", "", "Sex", ""],
+    "months": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+    "errorToast": "Falha ao carregar o mapa de calor"
+  },
+  "insightsSection": {
+    "howAmIProgressing": "Como estou a progredir?",
+    "lastWeeks": "últimas {{weeks}} semanas · esta semana em curso",
+    "thisWeekSub": "{{completed}}/{{expected}} conclusões · {{range}}",
+    "trend": "Tendência",
+    "trendSub": "últimas 4 semanas vs 4 anteriores",
+    "consistency": "Consistência",
+    "consistencySub": "estabilidade do esforço diário · últimas 12 semanas",
+    "dailyAverage": "Média diária",
+    "dailyAverageSub": "conclusões por dia · últimas 12 semanas",
+    "completionRateOverTime": "Taxa de conclusão ao longo do tempo",
+    "last12Weeks": "últimas 12 semanas",
+    "completionRateQuestion": "Como está a evoluir a minha taxa de conclusão semana a semana?",
+    "progressionByPillar": "Progressão por pilar",
+    "thisMonth": "este mês",
+    "focusQuestion": "Em que pilar devo focar-me este mês?",
+    "noHabits": "Ainda sem hábitos.",
+    "focusLabel": "Foco:",
+    "focusText": "{{pillarName}} é o seu pilar mais fraco este mês ({{rate}}%).",
+    "rate": "Taxa"
+  },
+  "errorState": {
+    "title": "Algo correu mal",
+    "description": "Não foi possível carregar os seus dados.",
+    "retry": "Tentar novamente"
+  }
+}

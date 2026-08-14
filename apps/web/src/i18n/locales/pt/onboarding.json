@@ -1,0 +1,13 @@
+{
+  "logoAlt": "Logótipo da LifeOS",
+  "title": "Bem-vindo à LifeOS",
+  "subtitle": "Que áreas da tua vida queres acompanhar?",
+  "skip": "Saltar",
+  "habitsTitle": "Os teus primeiros hábitos",
+  "habitsSubtitle": "Escolhe alguns para começar. Podes alterá-los mais tarde.",
+  "finishSetup": "Concluir configuração",
+  "ready": "Estás pronto",
+  "readyDescription": "Os teus pilares e primeiros hábitos estão configurados. Começa a registar e constrói uma vida que possas medir, compreender e melhorar.",
+  "startUsing": "Começar a usar a LifeOS",
+  "error": "Algo correu mal. Tenta novamente."
+}

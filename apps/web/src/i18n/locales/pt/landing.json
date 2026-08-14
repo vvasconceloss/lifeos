@@ -1,0 +1,125 @@
+{
+  "logoAlt": "Logótipo da LifeOS",
+  "login": "Iniciar sessão",
+  "getStarted": "Começar",
+  "demoLoading": "A carregar a demo…",
+  "viewDemo": "Ver Demo",
+  "nav": {
+    "features": "Funcionalidades",
+    "howItWorks": "Como funciona",
+    "technology": "Tecnologia",
+    "project": "Projeto"
+  },
+  "heroBadge": "Regista hábitos · Constrói objetivos · Compreende-te",
+  "heroTitle1": "Constrói uma vida que possas medir,",
+  "heroTitle2": "compreender e melhorar.",
+  "heroDescription": "A LifeOS é um sistema pessoal para transformar a vida que queres em hábitos que realmente consegues manter — e mostrar-te o que está a funcionar.",
+  "stats": {
+    "frequencies": {
+      "label": "frequências de hábitos registáveis",
+      "description": "Diariamente, em dias específicos da semana, ou um número-alvo de vezes por semana ou por mês — escolhe o que realmente se adequa à tua vida."
+    },
+    "pillars": {
+      "label": "pilares de vida predefinidos",
+      "description": "Saúde, Engenharia, Relações e mais — ou cria as tuas próprias áreas do zero."
+    },
+    "tap": {
+      "label": "toque para registar uma conclusão",
+      "description": "Um toque para marcar um hábito como concluído. Tudo o resto — sequências, taxas e informações — é calculado por ti."
+    }
+  },
+  "problem": {
+    "eyebrow": "O problema",
+    "title": "Outra lista de tarefas não é a resposta",
+    "points": [
+      "As listas dizem-te o que fazer, mas nada sobre se estás a melhorar.",
+      "Sequências de tudo-ou-nada fazem com que um dia falhado pareça uma derrota.",
+      "Um horário diário rígido desmorona-se assim que a vida fica ocupada."
+    ],
+    "toDoListTells": "Uma lista de tarefas diz-te:",
+    "toDoListQuote": "\"Faz esta tarefa.\"",
+    "lifeOSTells": "A LifeOS diz-te:",
+    "lifeOSTellPoints": [
+      "Quão consistente és realmente",
+      "Se os teus hábitos correspondem a uma frequência realista",
+      "Qual o pilar que merece a tua atenção esta semana"
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "Como a LifeOS funciona",
+    "title": "De notas dispersas a um sistema que se multiplica",
+    "steps": [
+      {
+        "title": "Define os teus pilares",
+        "description": "Começa pelas áreas da tua vida que te importam — ou cria as tuas do zero."
+      },
+      {
+        "title": "Adiciona hábitos realistas",
+        "description": "Escolhe uma frequência que se adapte à tua vida, não uma sequência diária impossível."
+      },
+      {
+        "title": "Regista em segundos",
+        "description": "Marca uma conclusão com um toque. É isso — o resto é calculado por ti."
+      },
+      {
+        "title": "Revê e ajusta",
+        "description": "Usa sequências, taxas e informações para ver o que funciona e corrigir o rumo."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Funcionalidades",
+    "title": "Tudo o que precisas para gerir a tua vida como um sistema",
+    "description": "Feito para profundidade sem cerimónias — cada funcionalidade responde a uma pergunta concreta sobre o teu progresso.",
+    "items": [
+      {
+        "title": "Pilares",
+        "description": "Organiza a tua vida em áreas que importam — Saúde, Engenharia, Relações e qualquer outra que definas."
+      },
+      {
+        "title": "Hábitos flexíveis",
+        "description": "Regista hábitos diariamente, em dias específicos da semana, ou um número-alvo de vezes por semana ou por mês."
+      },
+      {
+        "title": "Progresso e sequências",
+        "description": "Vê taxas de conclusão, sequências atuais e recordes, e como a tua consistência evolui ao longo do tempo."
+      },
+      {
+        "title": "Objetivos",
+        "description": "Define objetivos, associa hábitos de apoio e vê o progresso atualizar-se à medida que concluis as tuas rotinas."
+      },
+      {
+        "title": "Insights",
+        "description": "Compreende qual o pilar que precisa de foco esta semana e quão consistente é realmente o teu esforço diário."
+      },
+      {
+        "title": "Diário",
+        "description": "Regista humor, energia e sono, e revê o teu estado mensal juntamente com os teus dados de hábitos."
+      }
+    ]
+  },
+  "screenshots": {
+    "eyebrow": "Capturas de ecrã",
+    "title": "Um espaço de trabalho calmo e focado",
+    "description": "A mesma interface que usarás todos os dias — clara nos modos claro e escuro.",
+    "dashboard": "Painel",
+    "liveDemo": "Demo ao vivo",
+    "imageAlt": "Painel da LifeOS com a grelha mensal de hábitos"
+  },
+  "technology": {
+    "eyebrow": "Tecnologia",
+    "title": "Moderno, simples, fiável",
+    "description": "Uma base full-stack focada que não se intromete."
+  },
+  "project": {
+    "eyebrow": "Código aberto",
+    "title": "Um projeto pessoal, construído em aberto",
+    "description": "A LifeOS começou como uma forma de uma pessoa melhorar sistematicamente a sua vida — e o código está disponível para qualquer pessoa aprender ou construir a partir dele.",
+    "philosophy": "A filosofia é simples: regista o que fazes, compreende o que funciona e melhora uma coisa de cada vez. Sem marketing agressivo, sem sequências de jogo — apenas uma imagem mais clara da tua própria vida."
+  },
+  "cta": {
+    "title": "Começa com um hábito hoje.",
+    "description": "Cria uma conta gratuita, define os teus pilares e deixa a LifeOS mostrar-te o progresso que estás a fazer."
+  },
+  "footer": "© {{year}} LifeOS — constrói uma vida que possas medir."
+}

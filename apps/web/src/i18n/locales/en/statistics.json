@@ -1,0 +1,64 @@
+{
+  "summaryCards": {
+    "summary": "Summary",
+    "totalCompletions": "Total completions",
+    "monthlyProgress": "Monthly progress",
+    "habitsTracked": "Habits tracked",
+    "avgStreak": "Avg streak",
+    "empty": "No habits yet — create one to start tracking."
+  },
+  "pillarStats": {
+    "byPillar": "By pillar",
+    "noData": "No data yet."
+  },
+  "topHabits": {
+    "title": "Top habits",
+    "noData": "No data yet.",
+    "topRate": "Top rate",
+    "longestStreak": "Longest streak"
+  },
+  "habitsTable": {
+    "habit": "Habit",
+    "monthRate": "Month rate",
+    "streak": "Streak",
+    "best": "Best"
+  },
+  "heatmap": {
+    "activity": "Activity",
+    "emptyMonth": "No completions recorded in {{month}} {{year}}.",
+    "emptyYear": "No completions recorded in {{year}}.",
+    "less": "Less",
+    "more": "More",
+    "dayCompletions_one": "{{count}} completion",
+    "dayCompletions_other": "{{count}} completions",
+    "weekdays": ["", "Mon", "", "Wed", "", "Fri", ""],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "errorToast": "Failed to load heatmap"
+  },
+  "insightsSection": {
+    "howAmIProgressing": "How am I progressing?",
+    "lastWeeks": "last {{weeks}} weeks · this week in progress",
+    "thisWeekSub": "{{completed}}/{{expected}} completions · {{range}}",
+    "trend": "Trend",
+    "trendSub": "last 4 weeks vs previous 4",
+    "consistency": "Consistency",
+    "consistencySub": "daily-effort stability · last 12 weeks",
+    "dailyAverage": "Daily average",
+    "dailyAverageSub": "completions per day · last 12 weeks",
+    "completionRateOverTime": "Completion rate over time",
+    "last12Weeks": "last 12 weeks",
+    "completionRateQuestion": "How is my completion rate evolving week over week?",
+    "progressionByPillar": "Progression by pillar",
+    "thisMonth": "this month",
+    "focusQuestion": "Which pillar should I focus on this month?",
+    "noHabits": "No habits yet.",
+    "focusLabel": "Focus:",
+    "focusText": "{{pillarName}} is your weakest pillar this month ({{rate}}%).",
+    "rate": "Rate"
+  },
+  "errorState": {
+    "title": "Something went wrong",
+    "description": "We couldn't load your data.",
+    "retry": "Try again"
+  }
+}

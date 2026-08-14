@@ -1,0 +1,47 @@
+{
+  "title": "Progression",
+  "subtitle": "Your XP is derived from real progress across habits, goals and projects. Your rank reflects how consistent you've been.",
+  "xp": "XP",
+  "rank": "Rank",
+  "overall": "Overall",
+  "ranks": {
+    "title": "How ranks work",
+    "description": "Your rank goes up as your XP grows. Ranks reflect how consistently you've been building your life across habits, goals and projects.",
+    "seeHow": "Rank {{rank}}. See how ranks work.",
+    "titles": {
+      "E": "Starting",
+      "D": "Steady",
+      "C": "Growing",
+      "B": "Strong",
+      "A": "Excellent",
+      "S": "Mastery"
+    },
+    "descriptions": {
+      "E": "You're getting started — every little bit counts.",
+      "D": "You're building a rhythm.",
+      "C": "Making consistent progress.",
+      "B": "Solid, reliable performance.",
+      "A": "Outstanding consistency.",
+      "S": "Exceptional, sustained mastery."
+    }
+  },
+  "pillars": {
+    "previous": "Previous pillar",
+    "next": "Next pillar",
+    "paginationLabel": "Pillars",
+    "goTo": "Go to {{pillarName}}"
+  },
+  "rates": {
+    "habits": "Habits",
+    "goals": "Goals",
+    "projects": "Projects",
+    "consistency": "Consistency"
+  },
+  "emptyState": {
+    "disabledTitle": "Gamification is off",
+    "disabledDescription": "XP, ranks and levels are disabled. You can turn them on from your profile.",
+    "enableAction": "Enable from Profile",
+    "noPillarsTitle": "No pillars yet",
+    "noPillarsDescription": "Create a pillar with habits, goals or projects to start earning XP."
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "title": "Progressão",
+  "subtitle": "O seu XP deriva do progresso real em hábitos, objetivos e projetos. A sua classificação reflete a sua consistência.",
+  "xp": "XP",
+  "rank": "Rank",
+  "overall": "Geral",
+  "ranks": {
+    "title": "Como funcionam os ranks",
+    "description": "O seu rank aumenta à medida que o seu XP cresce. Os ranks refletem a consistência com que tem vindo a construir a sua vida em hábitos, objetivos e projetos.",
+    "seeHow": "Rank {{rank}}. Veja como funcionam os ranks.",
+    "titles": {
+      "E": "A começar",
+      "D": "Constante",
+      "C": "Em crescimento",
+      "B": "Forte",
+      "A": "Excelente",
+      "S": "Maestria"
+    },
+    "descriptions": {
+      "E": "Está a começar — cada pequeno passo conta.",
+      "D": "Está a criar um ritmo.",
+      "C": "Progresso consistente.",
+      "B": "Desempenho sólido e fiável.",
+      "A": "Consistência excecional.",
+      "S": "Maestria excecional e sustentada."
+    }
+  },
+  "pillars": {
+    "previous": "Pilar anterior",
+    "next": "Pilar seguinte",
+    "paginationLabel": "Pilares",
+    "goTo": "Ir para {{pillarName}}"
+  },
+  "rates": {
+    "habits": "Hábitos",
+    "goals": "Objetivos",
+    "projects": "Projetos",
+    "consistency": "Consistência"
+  },
+  "emptyState": {
+    "disabledTitle": "Gamificação desligada",
+    "disabledDescription": "O XP, os ranks e os níveis estão desativados. Pode ativá-los a partir do seu perfil.",
+    "enableAction": "Ativar a partir do Perfil",
+    "noPillarsTitle": "Ainda sem pilares",
+    "noPillarsDescription": "Crie um pilar com hábitos, objetivos ou projetos para começar a ganhar XP."
+  }
+}

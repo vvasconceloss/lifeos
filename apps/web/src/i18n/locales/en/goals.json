@@ -1,0 +1,76 @@
+{
+  "title": "Goals",
+  "emptyState": {
+    "title": "No goals yet",
+    "description": "Define an outcome you want to achieve and link the habits that support it."
+  },
+  "other": "Other",
+  "toast": {
+    "deleted": "Goal deleted",
+    "updated": "Goal updated",
+    "deleteFailed": "Failed to delete goal",
+    "createFailed": "Failed to create goal",
+    "updateFailed": "Failed to update goal",
+    "addHabitFailed": "Failed to add habit",
+    "removeHabitFailed": "Failed to remove habit",
+    "updateStatusFailed": "Failed to update status"
+  },
+  "status": {
+    "active": "Active",
+    "completed": "Completed",
+    "abandoned": "Abandoned"
+  },
+  "newGoal": {
+    "trigger": "New Goal",
+    "title": "Create new goal",
+    "description": "Define an outcome you want to achieve, then link the habits that support it.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Become a better engineer",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "What does success look like?",
+    "pillarLabel": "Pillar",
+    "pillarPlaceholder": "Select a pillar",
+    "deadlineLabel": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
+    "saving": "Saving...",
+    "create": "Create Goal"
+  },
+  "editGoal": {
+    "editLabel": "Edit {{name}}",
+    "title": "Edit goal",
+    "description": "Update the outcome, its pillar, deadline or status.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Become a better engineer",
+    "titleRequired": "Title is required",
+    "descriptionLabel": "Description (optional)",
+    "pillarLabel": "Pillar",
+    "deadlineLabel": "Deadline (optional)",
+    "deadlinePlaceholder": "Pick a deadline",
+    "statusLabel": "Status",
+    "saving": "Saving..."
+  },
+  "goalCard": {
+    "deleteLabel": "Delete {{name}}",
+    "deleteTitle": "Delete goal?",
+    "deleteDescription": "This will permanently remove <strong>{{name}}</strong> and its habit links.",
+    "noHabitsAria": "This goal has no supporting habits yet",
+    "noHabits": "This goal has no supporting habits yet. Add habits from its pillar to track progress.",
+    "habitCount_one": "{{count}} supporting habit",
+    "habitCount_other": "{{count}} supporting habits",
+    "deadline": "· deadline {{date}}"
+  },
+  "goalDetail": {
+    "backToGoals": "Back to goals",
+    "progress": "Progress",
+    "habitCount_one": "{{count}} supporting habit",
+    "habitCount_other": "{{count}} supporting habits",
+    "description": "Description",
+    "progressOverTime": "Progress over time",
+    "last8Weeks": "last 8 weeks",
+    "supportingHabits": "Supporting habits",
+    "noHabitsLinked": "No habits linked yet. Add a habit below to start tracking progress.",
+    "removeHabit": "Remove {{name}}",
+    "addHabitPlaceholder": "Add a habit…"
+  }
+}

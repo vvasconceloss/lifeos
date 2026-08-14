@@ -1,0 +1,63 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "empty": {
+    "title": "Welcome to LifeOS",
+    "noPillarDescription": "Start by creating your first pillar — habits need a pillar to live in.",
+    "description": "Start by creating your first habit.",
+    "setup": "Set up LifeOS",
+    "createPillar": "Create pillar",
+    "createHabit": "Create habit"
+  },
+  "pageTitles": {
+    "goal": "Goal",
+    "project": "Project",
+    "habit": "Habit"
+  },
+  "skipToContent": "Skip to content",
+  "verifyEmailBanner": "Please verify your email to fully activate your account.",
+  "verifyNow": "Verify now",
+  "logoAlt": "LifeOS logo",
+  "openProfileMenu": "Open profile menu",
+  "habitGrid": {
+    "habit": "Habit",
+    "goal": "Goal",
+    "total": "Total",
+    "markOn": "Mark {{habit}} on {{date}}",
+    "unmarkOn": "Unmark {{habit}} on {{date}}"
+  },
+  "mobileHabitList": {
+    "today": "Today",
+    "monthProgress": "{{completed}}/{{goal}} this month · {{pct}}%",
+    "markToday": "Mark {{habit}} for today",
+    "unmarkToday": "Unmark {{habit}} for today"
+  },
+  "monthNav": {
+    "today": "Today",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month"
+  },
+  "insights": {
+    "dailyCompletions": "Daily completions",
+    "onTrack": "On track",
+    "partial": "Partial",
+    "lowMonth": "Low month",
+    "perHabit": "Per habit",
+    "monthlyProgress": "monthly progress",
+    "sevenDayAvg": "7-day avg",
+    "momentumPerDay_one": "{{count}}/d",
+    "momentumPerDay_other": "{{count}}/d"
+  },
+  "daysOfWeek": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+}

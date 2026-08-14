@@ -1,0 +1,63 @@
+{
+  "greeting": {
+    "morning": "Bom dia",
+    "afternoon": "Boa tarde",
+    "evening": "Boa noite"
+  },
+  "empty": {
+    "title": "Bem-vindo ao LifeOS",
+    "noPillarDescription": "Comece por criar o seu primeiro pilar — os hábitos precisam de um pilar onde viver.",
+    "description": "Comece por criar o seu primeiro hábito.",
+    "setup": "Configurar o LifeOS",
+    "createPillar": "Criar pilar",
+    "createHabit": "Criar hábito"
+  },
+  "pageTitles": {
+    "goal": "Objetivo",
+    "project": "Projeto",
+    "habit": "Hábito"
+  },
+  "skipToContent": "Saltar para o conteúdo",
+  "verifyEmailBanner": "Por favor, verifique o seu email para ativar totalmente a sua conta.",
+  "verifyNow": "Verificar agora",
+  "logoAlt": "Logótipo da LifeOS",
+  "openProfileMenu": "Abrir menu de perfil",
+  "habitGrid": {
+    "habit": "Hábito",
+    "goal": "Objetivo",
+    "total": "Total",
+    "markOn": "Marcar {{habit}} em {{date}}",
+    "unmarkOn": "Desmarcar {{habit}} em {{date}}"
+  },
+  "mobileHabitList": {
+    "today": "Hoje",
+    "monthProgress": "{{completed}}/{{goal}} este mês · {{pct}}%",
+    "markToday": "Marcar {{habit}} para hoje",
+    "unmarkToday": "Desmarcar {{habit}} para hoje"
+  },
+  "monthNav": {
+    "today": "Hoje",
+    "previousMonth": "Mês anterior",
+    "nextMonth": "Mês seguinte"
+  },
+  "insights": {
+    "dailyCompletions": "Conclusões diárias",
+    "onTrack": "Dentro do previsto",
+    "partial": "Parcial",
+    "lowMonth": "Mês fraco",
+    "perHabit": "Por hábito",
+    "monthlyProgress": "progresso mensal",
+    "sevenDayAvg": "média de 7 dias",
+    "momentumPerDay_one": "{{count}}/d",
+    "momentumPerDay_other": "{{count}}/d"
+  },
+  "daysOfWeek": {
+    "mon": "Seg",
+    "tue": "Ter",
+    "wed": "Qua",
+    "thu": "Qui",
+    "fri": "Sex",
+    "sat": "Sáb",
+    "sun": "Dom"
+  }
+}

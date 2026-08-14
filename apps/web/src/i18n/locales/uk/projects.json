@@ -1,0 +1,95 @@
+{
+  "title": "Проєкти",
+  "emptyState": {
+    "title": "Ще немає проєктів",
+    "description": "Організуйте структуровану роботу — визначте завдання та спостерігайте, як прогрес проєкту оновлюється, коли ви їх виконуєте."
+  },
+  "other": "Інші",
+  "toast": {
+    "deleted": "Проєкт видалено",
+    "deleteFailed": "Не вдалося видалити проєкт",
+    "createFailed": "Не вдалося створити проєкт",
+    "updated": "Проєкт оновлено",
+    "updateFailed": "Не вдалося оновити проєкт",
+    "createTaskFailed": "Не вдалося створити завдання",
+    "updateStatusFailed": "Не вдалося оновити статус",
+    "updateTaskFailed": "Не вдалося оновити завдання",
+    "deleteTaskFailed": "Не вдалося видалити завдання",
+    "reorderTasksFailed": "Не вдалося змінити порядок завдань"
+  },
+  "status": {
+    "planning": "Планування",
+    "inProgress": "В процесі",
+    "completed": "Завершено",
+    "paused": "Призупинено"
+  },
+  "projectCard": {
+    "deleteLabel": "Видалити {{name}}",
+    "deleteTitle": "Видалити проєкт?",
+    "deleteDescription": "Це назавжди видалить <strong>{{name}}</strong> та всі його завдання.",
+    "taskCount_one": "{{count}} завдання",
+    "taskCount_few": "{{count}} завдання",
+    "taskCount_many": "{{count}} завдань",
+    "taskCount_other": "{{count}} завдання",
+    "deadline": "· дедлайн {{date}}"
+  },
+  "newProject": {
+    "trigger": "Новий проєкт",
+    "title": "Створити новий проєкт",
+    "description": "Визначте структуровану роботу для досягнення результату, а потім додайте завдання.",
+    "titleLabel": "Назва",
+    "titlePlaceholder": "напр., створити цільову сторінку",
+    "titleRequired": "Назва обов'язкова",
+    "descriptionLabel": "Опис (необов'язково)",
+    "descriptionPlaceholder": "Про що ця робота?",
+    "pillarLabel": "Стовп",
+    "pillarPlaceholder": "Вибрати стовп",
+    "deadlineLabel": "Дедлайн (необов'язково)",
+    "deadlinePlaceholder": "Вибрати дату",
+    "saving": "Збереження...",
+    "create": "Створити проєкт"
+  },
+  "editProject": {
+    "editLabel": "Редагувати {{name}}",
+    "title": "Редагувати проєкт",
+    "description": "Оновіть роботу, її стовп, дедлайн або статус.",
+    "titleLabel": "Назва",
+    "titlePlaceholder": "напр., створити цільову сторінку",
+    "titleRequired": "Назва обов'язкова",
+    "descriptionLabel": "Опис (необов'язково)",
+    "pillarLabel": "Стовп",
+    "deadlineLabel": "Дедлайн (необов'язково)",
+    "deadlinePlaceholder": "Вибрати дату",
+    "statusLabel": "Статус",
+    "saving": "Збереження..."
+  },
+  "projectDetail": {
+    "backToProjects": "Назад до проєктів",
+    "progress": "Прогрес",
+    "tasksDone": "{{done}} з {{total}} завдань виконано",
+    "description": "Опис",
+    "tasks": "Завдання",
+    "noTasks": "Ще немає завдань. Додайте завдання, щоб почати.",
+    "taskRow": {
+      "markNotDone": "Позначити \"{{title}}\" як невиконане",
+      "markDone": "Позначити \"{{title}}\" як виконане",
+      "editTask": "Редагувати завдання {{title}}",
+      "moveUp": "Перемістити \"{{title}}\" вгору",
+      "moveDown": "Перемістити \"{{title}}\" вниз",
+      "saveTitle": "Зберегти назву завдання",
+      "cancelEditing": "Скасувати редагування",
+      "edit": "Редагувати \"{{title}}\"",
+      "delete": "Видалити \"{{title}}\""
+    }
+  },
+  "newTask": {
+    "trigger": "Нове завдання",
+    "title": "Створити нове завдання",
+    "description": "Додайте завдання до цього проєкту.",
+    "taskTitleLabel": "Назва завдання",
+    "placeholder": "напр., розробити цільову сторінку",
+    "titleRequired": "Назва обов'язкова",
+    "saving": "Збереження...",
+    "create": "Створити завдання"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "greeting": {
+    "morning": "Доброго ранку",
+    "afternoon": "Добрий день",
+    "evening": "Добрий вечір"
+  },
+  "empty": {
+    "title": "Ласкаво просимо до LifeOS",
+    "noPillarDescription": "Почніть зі створення свого першого стовпа — звички потребують стовпа, у якому житимуть.",
+    "description": "Почніть зі створення своєї першої звички.",
+    "setup": "Налаштувати LifeOS",
+    "createPillar": "Створити стовп",
+    "createHabit": "Створити звичку"
+  },
+  "pageTitles": {
+    "goal": "Ціль",
+    "project": "Проєкт",
+    "habit": "Звичка"
+  },
+  "skipToContent": "Перейти до вмісту",
+  "verifyEmailBanner": "Будь ласка, підтвердіть свою електронну пошту, щоб повністю активувати обліковий запис.",
+  "verifyNow": "Підтвердити зараз",
+  "logoAlt": "Логотип LifeOS",
+  "openProfileMenu": "Відкрити меню профілю",
+  "habitGrid": {
+    "habit": "Звичка",
+    "goal": "Ціль",
+    "total": "Усього",
+    "markOn": "Позначити {{habit}} на {{date}}",
+    "unmarkOn": "Зняти позначку {{habit}} на {{date}}"
+  },
+  "mobileHabitList": {
+    "today": "Сьогодні",
+    "monthProgress": "{{completed}}/{{goal}} цього місяця · {{pct}}%",
+    "markToday": "Позначити {{habit}} на сьогодні",
+    "unmarkToday": "Зняти позначку {{habit}} на сьогодні"
+  },
+  "monthNav": {
+    "today": "Сьогодні",
+    "previousMonth": "Попередній місяць",
+    "nextMonth": "Наступний місяць"
+  },
+  "insights": {
+    "dailyCompletions": "Щоденні виконання",
+    "onTrack": "За графіком",
+    "partial": "Частково",
+    "lowMonth": "Низький місяць",
+    "perHabit": "На звичку",
+    "monthlyProgress": "щомісячний прогрес",
+    "sevenDayAvg": "середнє за 7 днів",
+    "momentumPerDay_one": "{{count}}/д",
+    "momentumPerDay_few": "{{count}}/д",
+    "momentumPerDay_many": "{{count}}/д",
+    "momentumPerDay_other": "{{count}}/д"
+  },
+  "daysOfWeek": {
+    "mon": "Пн",
+    "tue": "Вт",
+    "wed": "Ср",
+    "thu": "Чт",
+    "fri": "Пт",
+    "sat": "Сб",
+    "sun": "Нд"
+  }
+}
