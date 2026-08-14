@@ -51,6 +51,27 @@ export const loginBodySchema = z.object({
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
+export const verifyEmailBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
+export type VerifyEmailBody = z.infer<typeof verifyEmailBodySchema>;
+
+export const resendVerificationBodySchema = z.object({
+  email: z.email().min(1),
+  // Internal path to return to after verification (optional). Must be a
+  // same-origin path to avoid open-redirect abuse.
+  redirect: z
+    .string()
+    .max(500)
+    .refine((v) => v.startsWith("/") && !v.startsWith("//"), {
+      message: "Redirect must be an internal path",
+    })
+    .optional(),
+});
+
+export type ResendVerificationBody = z.infer<typeof resendVerificationBodySchema>;
+
 export const updateMeBodySchema = z.object({
   name: z.string().min(1).max(100).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),
@@ -71,6 +92,7 @@ export interface UserResponse {
   theme: string;
   onboarded: boolean;
   gamification: boolean;
+  emailVerified: boolean;
   isDemo: boolean;
   createdAt: Date;
 }

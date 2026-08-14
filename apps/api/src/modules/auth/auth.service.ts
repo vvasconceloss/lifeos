@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../db/client";
+import { generateToken, hashToken, TOKEN_TTLS } from "../../lib/tokens";
 import type { RegisterBody, UpdateMeBody, UserResponse } from "./auth.schemas";
 
 const SALT_ROUNDS = 10;
@@ -29,6 +30,7 @@ export function toUserResponse(user: {
   theme: string;
   onboarded: boolean;
   gamification: boolean;
+  emailVerified: boolean;
   createdAt: Date;
 }): UserResponse {
   return {
@@ -40,6 +42,7 @@ export function toUserResponse(user: {
     theme: user.theme,
     onboarded: user.onboarded,
     gamification: user.gamification,
+    emailVerified: user.emailVerified,
     isDemo: isDemoEmail(user.email),
     createdAt: user.createdAt,
   };
@@ -119,6 +122,79 @@ export async function updateUser(
   });
 
   return toUserResponse(user);
+}
+
+/**
+ * Creates a single-use email-verification token for the user, invalidating any
+ * previous one. Returns the plaintext token (never persisted) for the email.
+ */
+export async function createVerificationToken(userId: string): Promise<string> {
+  const token = generateToken();
+  await prisma.$transaction([
+    prisma.emailVerificationToken.deleteMany({ where: { userId } }),
+    prisma.emailVerificationToken.create({
+      data: {
+        userId,
+        tokenHash: hashToken(token),
+        expiresAt: new Date(Date.now() + TOKEN_TTLS.EMAIL_VERIFICATION),
+      },
+    }),
+  ]);
+  return token;
+}
+
+export type VerifyEmailResult =
+  | { status: "verified" }
+  | { status: "expired" }
+  | { status: "already-verified" }
+  | { status: "invalid" };
+
+/**
+ * Verifies a token. Single-use: on success the token is deleted. Idempotent for
+ * already-verified emails. An expired token is removed so a stale link can't linger.
+ */
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
+  const record = await prisma.emailVerificationToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+
+  if (!record) return { status: "invalid" };
+
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  if (!user) return { status: "invalid" };
+
+  if (user.emailVerified) {
+    await prisma.emailVerificationToken.delete({ where: { id: record.id } });
+    return { status: "already-verified" };
+  }
+
+  if (record.expiresAt < new Date()) {
+    await prisma.emailVerificationToken.delete({ where: { id: record.id } });
+    return { status: "expired" };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: user.id }, data: { emailVerified: true } }),
+    prisma.emailVerificationToken.delete({ where: { id: record.id } }),
+  ]);
+
+  return { status: "verified" };
+}
+
+/**
+ * Resends a verification email for the given address. Returns nothing — callers
+ * always respond with the same generic message so the endpoint never reveals
+ * whether an email is registered (anti-enumeration).
+ */
+export async function resendVerification(
+  email: string,
+  sendEmail: (token: string, email: string) => Promise<void>,
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || user.emailVerified) return;
+
+  const token = await createVerificationToken(user.id);
+  await sendEmail(token, user.email);
 }
 
 export const AUTH_ERRORS = {

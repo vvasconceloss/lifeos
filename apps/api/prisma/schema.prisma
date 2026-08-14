@@ -17,14 +17,28 @@ model User {
   theme        String   @default("system")
   onboarded    Boolean  @default(false)
   gamification Boolean  @default(false)
+  emailVerified Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  pillars   Pillar[]
-  habits    Habit[]
-  goals     Goal[]
-  projects  Project[]
-  dailyLogs DailyLog[]
+  pillars       Pillar[]
+  habits        Habit[]
+  goals         Goal[]
+  projects      Project[]
+  dailyLogs     DailyLog[]
+  emailVerificationTokens EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Pillar {
