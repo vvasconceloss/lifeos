@@ -11,6 +11,9 @@ export {
   changeEmailRequestBodySchema,
   changeEmailConfirmBodySchema,
   changeEmailCancelBodySchema,
+  deleteAccountBodySchema,
+  recoverAccountBodySchema,
+  cancelDeletionBodySchema,
 } from "@lifeos/shared";
 
 export type {
@@ -27,7 +30,11 @@ export type {
   ChangeEmailRequestBody,
   ChangeEmailConfirmBody,
   ChangeEmailCancelBody,
+  DeleteAccountBody,
+  RecoverAccountBody,
+  CancelDeletionBody,
   UserResponse,
+  UserStatus,
   AuthResponse,
   MeResponse,
 } from "@lifeos/shared";

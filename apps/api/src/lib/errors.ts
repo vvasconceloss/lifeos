@@ -31,6 +31,10 @@ const MESSAGE_TO_CODE: Record<string, string> = {
   "New email must be different from the current one": "NEW_EMAIL_SAME",
   "Confirmation link has expired": "EMAIL_CHANGE_EXPIRED",
   "Invalid or used confirmation link": "INVALID_EMAIL_CHANGE_TOKEN",
+  "Account deletion has already been requested": "ALREADY_PENDING_DELETION",
+  "This account is scheduled for deletion. Please recover it first.": "ACCOUNT_PENDING_DELETION",
+  "Recovery link has expired": "RECOVERY_EXPIRED",
+  "Invalid or used recovery link": "INVALID_RECOVERY_TOKEN",
 };
 
 /**

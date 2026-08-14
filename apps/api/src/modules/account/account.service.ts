@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { prisma } from "../../db/client";
 import { generateToken, hashToken, TOKEN_TTLS } from "../../lib/tokens";
 import { comparePassword, hashPassword } from "../auth/auth.service";
@@ -6,7 +7,10 @@ export const ACCOUNT_ERRORS = {
   INCORRECT_PASSWORD: "Current password is incorrect",
   SAME_PASSWORD: "New password must be different from the current one",
   NEW_EMAIL_SAME: "New email must be different from the current one",
+  ALREADY_PENDING_DELETION: "Account deletion has already been requested",
 } as const;
+
+export const DELETION_GRACE_PERIOD_MS = 15 * 24 * 60 * 60 * 1000; // 15 days
 
 /**
  * Changes the authenticated user's password. Requires the current password as
@@ -147,4 +151,158 @@ export async function cancelEmailChangeByToken(
 
   await prisma.emailChangeToken.delete({ where: { id: record.id } });
   return "cancelled";
+}
+
+export interface DeletionRequestResult {
+  recoveryToken: string;
+  scheduledDeletionAt: Date;
+}
+
+/**
+ * Requests account deletion: sets status = PENDING_DELETION, records the request
+ * and the scheduled deletion (+15 days), issues a single-use recovery token and
+ * bumps passwordChangedAt to invalidate all active sessions. Requires the current
+ * password as confirmation.
+ */
+export async function requestAccountDeletion(
+  userId: string,
+  currentPassword: string,
+): Promise<DeletionRequestResult> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error(ACCOUNT_ERRORS.INCORRECT_PASSWORD);
+
+  if (!comparePassword(currentPassword, user.passwordHash)) {
+    throw new Error(ACCOUNT_ERRORS.INCORRECT_PASSWORD);
+  }
+
+  if (user.status === "PENDING_DELETION") {
+    throw new Error(ACCOUNT_ERRORS.ALREADY_PENDING_DELETION);
+  }
+
+  const now = new Date();
+  const scheduledDeletionAt = new Date(now.getTime() + DELETION_GRACE_PERIOD_MS);
+  const recoveryToken = generateToken();
+
+  await prisma.$transaction([
+    prisma.accountDeletionToken.deleteMany({ where: { userId } }),
+    prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: "PENDING_DELETION",
+        deletionRequestedAt: now,
+        scheduledDeletionAt,
+        passwordChangedAt: now,
+      },
+    }),
+    prisma.accountDeletionToken.create({
+      data: {
+        userId,
+        tokenHash: hashToken(recoveryToken),
+        expiresAt: scheduledDeletionAt,
+      },
+    }),
+  ]);
+
+  return { recoveryToken, scheduledDeletionAt };
+}
+
+export type RecoverAccountResult =
+  | { status: "recovered" }
+  | { status: "expired" }
+  | { status: "invalid" };
+
+/**
+ * Reverts a PENDING_DELETION account back to ACTIVE using the single-use recovery
+ * token from the email (no login required). A nonexistent token is reported as
+ * invalid (generic error). Idempotency for the already-active case is handled by
+ * the authenticated Path B (`cancelAccountDeletion`).
+ */
+export async function recoverAccount(token: string): Promise<RecoverAccountResult> {
+  const record = await prisma.accountDeletionToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+
+  if (!record) return { status: "invalid" };
+
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  if (!user) return { status: "invalid" };
+
+  if (record.expiresAt < new Date()) {
+    await prisma.accountDeletionToken.delete({ where: { id: record.id } });
+    return { status: "expired" };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: {
+        status: "ACTIVE",
+        deletionRequestedAt: null,
+        scheduledDeletionAt: null,
+      },
+    }),
+    prisma.accountDeletionToken.delete({ where: { id: record.id } }),
+  ]);
+
+  return { status: "recovered" };
+}
+
+/**
+ * Cancels a pending deletion for an authenticated user (Path B recovery).
+ * Idempotent: recovering an already-active account produces no error.
+ */
+export async function cancelAccountDeletion(userId: string): Promise<void> {
+  await prisma.$transaction([
+    prisma.user.updateMany({
+      where: { id: userId, status: "PENDING_DELETION" },
+      data: {
+        status: "ACTIVE",
+        deletionRequestedAt: null,
+        scheduledDeletionAt: null,
+      },
+    }),
+    prisma.accountDeletionToken.deleteMany({ where: { userId } }),
+  ]);
+}
+
+export interface DeletedAccount {
+  userIdHash: string;
+  email: string;
+}
+
+export interface ProcessDeletionsResult {
+  deleted: DeletedAccount[];
+}
+
+/**
+ * Processes all accounts whose scheduled deletion date has passed. For each one,
+ * the final email is sent first, then the user is hard-deleted (cascading to all
+ * related data) and an anonymized audit event is logged. Idempotent: running it
+ * twice never errors or deletes twice.
+ */
+export async function processAccountDeletions(
+  sendEmail: (to: string) => Promise<void>,
+): Promise<ProcessDeletionsResult> {
+  const due = await prisma.user.findMany({
+    where: {
+      status: "PENDING_DELETION",
+      scheduledDeletionAt: { lte: new Date() },
+    },
+    select: { id: true, email: true },
+  });
+
+  const deleted: DeletedAccount[] = [];
+
+  for (const user of due) {
+    // Final email must be sent before deletion — the address won't exist after.
+    await sendEmail(user.email);
+
+    await prisma.user.delete({ where: { id: user.id } });
+
+    const userIdHash = createHash("sha256").update(user.id).digest("hex");
+    deleted.push({ userIdHash, email: user.email });
+    console.log(`[account-deletion] deleted account ${userIdHash} at ${new Date().toISOString()}`);
+  }
+
+  return { deleted };
 }

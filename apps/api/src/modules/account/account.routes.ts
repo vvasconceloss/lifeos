@@ -2,8 +2,8 @@ import { toErrorBody } from '../../lib/errors';
 import { requireAuth, requireVerified } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
-import { changePasswordBodySchema, changeEmailRequestBodySchema, changeEmailConfirmBodySchema, changeEmailCancelBodySchema } from './account.schemas';
-import { changePassword, requestEmailChange, confirmEmailChange, cancelEmailChange, cancelEmailChangeByToken, ACCOUNT_ERRORS } from './account.service';
+import { changePasswordBodySchema, changeEmailRequestBodySchema, changeEmailConfirmBodySchema, changeEmailCancelBodySchema, deleteAccountBodySchema, recoverAccountBodySchema } from './account.schemas';
+import { changePassword, requestEmailChange, confirmEmailChange, cancelEmailChange, cancelEmailChangeByToken, requestAccountDeletion, recoverAccount, cancelAccountDeletion, ACCOUNT_ERRORS } from './account.service';
 
 const SESSION_TTL_DAYS = 30;
 const SESSION_TTL_SECONDS = SESSION_TTL_DAYS * 24 * 60 * 60;
@@ -151,6 +151,74 @@ export async function accountRoutes(fastify: FastifyInstance) {
     await cancelEmailChangeByToken(data.token);
     return { message: 'Pending email change cancelled.' };
   });
+
+  fastify.post(
+    '/delete',
+    { preHandler: requireVerified },
+    async (request, reply) => {
+      const data = validateInput(deleteAccountBodySchema, request.body, reply);
+      if (!data) return;
+
+      let result;
+      try {
+        result = await requestAccountDeletion(request.user.sub, data.currentPassword);
+      } catch (error) {
+        if (error instanceof Error && error.message === ACCOUNT_ERRORS.INCORRECT_PASSWORD) {
+          return reply.status(400).send({ error: toErrorBody(error.message, undefined, 'INCORRECT_PASSWORD') });
+        }
+        if (error instanceof Error && error.message === ACCOUNT_ERRORS.ALREADY_PENDING_DELETION) {
+          return reply.status(409).send({ error: toErrorBody(error.message, undefined, 'ALREADY_PENDING_DELETION') });
+        }
+        throw error;
+      }
+
+      // Confirmation email with a single-use recovery link.
+      await fastify.emailService.send({
+        to: request.user.email,
+        template: 'account-deletion-requested',
+        data: {
+          recoveryUrl: accountRecoveryUrl(result.recoveryToken),
+          deletionDate: result.scheduledDeletionAt.toISOString().slice(0, 10),
+        },
+      });
+
+      // All active sessions are invalidated — force a fresh login for any action.
+      reply.clearCookie('token', { path: '/' });
+
+      return { message: 'Account deletion scheduled. You can recover it within 15 days.' };
+    },
+  );
+
+  // Path A — recovery via the email link (no login required).
+  fastify.post('/recover', async (request, reply) => {
+    const data = validateInput(recoverAccountBodySchema, request.body, reply);
+    if (!data) return;
+
+    const result = await recoverAccount(data.token);
+
+    switch (result.status) {
+      case 'recovered':
+        return { message: 'Account recovered.' };
+      case 'expired':
+        return reply.status(400).send({
+          error: toErrorBody('Recovery link has expired', undefined, 'RECOVERY_EXPIRED'),
+        });
+      default:
+        return reply.status(400).send({
+          error: toErrorBody('Invalid or used recovery link', undefined, 'INVALID_RECOVERY_TOKEN'),
+        });
+    }
+  });
+
+  // Path B — recovery while authenticated (from the post-login recovery screen).
+  fastify.post('/cancel-deletion', { preHandler: requireAuth }, async (request) => {
+    await cancelAccountDeletion(request.user.sub);
+    return { message: 'Account deletion cancelled.' };
+  });
+}
+
+function accountRecoveryUrl(token: string): string {
+  return `${WEB_URL}/account/recover?token=${encodeURIComponent(token)}`;
 }
 
 async function issueSessionCookie(
