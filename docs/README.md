@@ -44,7 +44,8 @@ The roadmaps below are ordered chronologically — from the first release plan t
 
 | Document | What it is |
 |---|---|
-| [`SECURITY.md`](SECURITY.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
+| [`../SECURITY.md`](../SECURITY.md) | The security policy: how to report a vulnerability and the disclosure process. |
+| [`SECURITY_AUDIT.md`](SECURITY_AUDIT.md) | The security audit and data-isolation checklist (auth, session expiry, IDOR, CSRF, XSS, SQLi, CORS, rate limits, secrets, error handling). |
 | [`email/EMAIL.md`](email/EMAIL.md) | The transactional email infrastructure: Gmail SMTP provider, env vars, the `EmailService` abstraction, supported templates and expected data. |
 | [`legal/data-deletion-policy.md`](legal/data-deletion-policy.md) | The account soft-delete policy: the 15-day recovery window, what gets deleted, and the anonymized audit trail. |
 

@@ -48,4 +48,4 @@ Permanently removed (cascade via Prisma `onDelete: Cascade`):
 
 ---
 
-_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/v1.6_ACCOUNT_SECURITY.md) · [Security](../SECURITY.md)_
+_More docs: [Documentation index](../README.md) · [1.6 roadmap](../roadmap/v1.6_ACCOUNT_SECURITY.md) · [Security policy](../../SECURITY.md) · [Security audit](../SECURITY_AUDIT.md)_

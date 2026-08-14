@@ -49,7 +49,7 @@ in [`docs/roadmap/v1.6_ACCOUNT_SECURITY.md`](docs/roadmap/v1.6_ACCOUNT_SECURITY.
 
 - Roadmaps renamed with release-version prefixes (`v1.0_MVP`, `v1.5_PUBLIC_BETA`,
   `v1.5.1_IMPROVE`, `v1.6_ACCOUNT_SECURITY`) to show the chronological path.
-- New `docs/features/INTERNATIONALIZATION.md`; `docs/SECURITY.md` updated with the per-endpoint
+- New `docs/features/INTERNATIONALIZATION.md`; `docs/SECURITY_AUDIT.md` updated with the per-endpoint
   rate limits and logger redaction guarantees; `docs/email/EMAIL.md` documents localized emails.
 
 ## v1.5.2 — UX & Feedback (2026-08)
@@ -84,7 +84,7 @@ features. Full roadmap and results in [`docs/roadmap/v1.5.1_IMPROVE.md`](docs/ro
 - 30-day session expiry (JWT `exp` + cookie `Max-Age`); expired tokens rejected with `401`.
 - Data-isolation (IDOR) tests for every entity; cross-user access returns `404`.
 - CSRF, CORS allow-list, rate limiting (login/register), password policy and cookie hardening
-  audited and documented (`docs/SECURITY.md`).
+  audited and documented (`docs/SECURITY_AUDIT.md`).
 - Dependency audit kept clean (`pnpm audit --prod` → 0 vulnerabilities).
 
 ### Quality & architecture
