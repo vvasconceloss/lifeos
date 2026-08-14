@@ -30,6 +30,9 @@ export function toUserResponse(user: {
   onboarded: boolean;
   gamification: boolean;
   emailVerified: boolean;
+  status: string;
+  deletionRequestedAt: Date | null;
+  scheduledDeletionAt: Date | null;
   createdAt: Date;
 }): UserResponse {
   return {
@@ -42,6 +45,9 @@ export function toUserResponse(user: {
     onboarded: user.onboarded,
     gamification: user.gamification,
     emailVerified: user.emailVerified,
+    status: user.status as UserResponse["status"],
+    deletionRequestedAt: user.deletionRequestedAt,
+    scheduledDeletionAt: user.scheduledDeletionAt,
     isDemo: isDemoEmail(user.email),
     createdAt: user.createdAt,
   };

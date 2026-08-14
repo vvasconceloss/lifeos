@@ -111,6 +111,22 @@ export const changeEmailCancelBodySchema = z.object({
 
 export type ChangeEmailCancelBody = z.infer<typeof changeEmailCancelBodySchema>;
 
+export const deleteAccountBodySchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+});
+
+export type DeleteAccountBody = z.infer<typeof deleteAccountBodySchema>;
+
+export const recoverAccountBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
+export type RecoverAccountBody = z.infer<typeof recoverAccountBodySchema>;
+
+export const cancelDeletionBodySchema = z.object({});
+
+export type CancelDeletionBody = z.infer<typeof cancelDeletionBodySchema>;
+
 export const updateMeBodySchema = z.object({
   name: z.string().min(1).max(100).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),
@@ -122,6 +138,8 @@ export const updateMeBodySchema = z.object({
 
 export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;
 
+export type UserStatus = "ACTIVE" | "PENDING_DELETION";
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -132,6 +150,9 @@ export interface UserResponse {
   onboarded: boolean;
   gamification: boolean;
   emailVerified: boolean;
+  status: UserStatus;
+  deletionRequestedAt: Date | null;
+  scheduledDeletionAt: Date | null;
   isDemo: boolean;
   createdAt: Date;
 }
