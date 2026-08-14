@@ -11,7 +11,8 @@ export type EmailTemplate =
   | "email-changed"
   | "account-deletion-requested"
   | "account-deletion-reminder"
-  | "account-deleted";
+  | "account-deleted"
+  | "account-recovered";
 
 export interface SendEmailInput {
   to: string;

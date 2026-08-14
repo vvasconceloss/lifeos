@@ -261,6 +261,15 @@ const TEMPLATES: Record<EmailTemplate, TemplateDef> = {
     text: () =>
       "Your LifeOS account and all of your data have been permanently deleted. We're sorry to see you go.",
   },
+  "account-recovered": {
+    subject: "Your account was recovered",
+    html: () =>
+      paragraph(
+        "Your LifeOS account is back and active. All of your data is intact — welcome back!",
+      ),
+    text: () =>
+      "Your LifeOS account is back and active. All of your data is intact — welcome back!",
+  },
 };
 
 /**
