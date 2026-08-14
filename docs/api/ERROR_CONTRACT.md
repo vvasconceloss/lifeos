@@ -76,6 +76,17 @@ from the message via a central map (default `APP_ERROR`).
 
 - **Validation** is centralized in `validateInput` (`apps/api/src/lib/validation.ts`): a failed Zod
   parse returns `400` with `VALIDATION_ERROR` and the Zod issues in `details`.
+- **Password validation** (registration, and any future reset/change endpoint) follows the strong
+  policy defined in `packages/shared/src/schemas/password.ts`. Each violation is reported as an
+  individual Zod issue under `details[].message`:
+  - `Password must be at least 8 characters`
+  - `Password must be at most 72 bytes`
+  - `Password must include at least one lowercase letter`
+  - `Password must include at least one uppercase letter`
+  - `Password must include at least one number`
+  - `Password must include at least one special character`
+  - `Password is too common. Choose a more unique password.`
+  - `Password must not be the same as your email`
 - **Not-found vs. forbidden:** cross-user access to another user's resource returns `404` (with the
   entity's `*_NOT_FOUND` code) — it is deliberately indistinguishable from "does not exist".
 - **5xx** never leak stack traces, SQL or internal state — the global handler returns a generic

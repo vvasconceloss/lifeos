@@ -50,7 +50,12 @@ User (1) ──── (N) DailyLog
 
 1. **Email uniqueness** — No two users can share the same email. Enforced at the database level (`@unique`).
 2. **Password storage** — Password is never stored in plaintext. Must be hashed using bcrypt before persistence. Only the hash is stored.
-3. **Password strength** — Between 8 and 72 characters (bcrypt limit) and must include at least one letter and one number (Zod).
+3. **Password strength** — Strong policy enforced by a single shared Zod schema
+   (`packages/shared/src/schemas/password.ts`) at every point a password is set or changed:
+   8–72 **bytes** (bcrypt limit — 72 bytes is validated explicitly because bcrypt silently
+   truncates beyond it), at least one lowercase letter, one uppercase letter, one number, one
+   special character (`!@#$%^&*()-_=+[]{};:,.<>?/`), must **not** be among the 1000 most common
+   passwords (bundled locally), and must **not** equal the user's email.
 4. **Name is optional** — A user can register without providing a display name.
 5. **Self-data only** — A user can only access their own resources. All queries MUST filter by `userId` derived from the authenticated session.
 6. **Preferences** — Theme, timezone and week-start are personalization preferences (Phase 8); gamification is an opt-in feature (Phase 9).
@@ -240,7 +245,7 @@ Rules: a task belongs to exactly one project; tasks are ordered by `position` (r
 | Entity           | Field        | Rule                                      |
 |------------------|-------------|-------------------------------------------|
 | User             | email        | 5–254 chars, valid email format           |
-| User             | password     | 8–72 chars (bcrypt limit), ≥1 letter, ≥1 number |
+| User             | password     | 8–72 bytes, ≥1 lowercase, ≥1 uppercase, ≥1 number, ≥1 special char, not common, ≠ email |
 | User             | name         | Optional; if provided, 1–100 chars        |
 | Pillar           | name         | 1–100 chars, required                     |
 | Pillar           | color        | Optional; valid hex color (`#rrggbb`)     |

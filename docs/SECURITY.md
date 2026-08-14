@@ -16,7 +16,7 @@
 | SQL injection | ✅ | Prisma parameterized queries only; no raw user-input SQL (`$queryRaw` used solely for a constant `SELECT 1` health check) |
 | CORS | ✅ | Explicit origin allow-list (`ALLOWED_ORIGINS`), wildcard rejected, credentials allowed |
 | Rate limiting | ✅ | Global (300/min) + login (5/min) + register (10/min) |
-| Password policy | ✅ | Min 8 chars + at least one letter and one number (shared Zod schema) |
+| Password policy | ✅ | **Strong policy** (shared Zod schema): 8–72 bytes, ≥1 lowercase, ≥1 uppercase, ≥1 number, ≥1 special char, not among the 1000 most common passwords, not equal to the email |
 | Cookie configuration | ✅ | `HttpOnly`, `SameSite=Strict`, `Secure` in production, `Max-Age` 30 days |
 | Session / JWT expiry | ✅ | Tokens signed with a 30-day `exp`; expired tokens rejected with `401` (tested) |
 | Secrets | ✅ | `.env` git-ignored; secrets never in code. Exception: the **public demo account** (`demo@lifeos.com`) credentials are intentionally committed — they are not real secrets |
