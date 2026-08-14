@@ -43,12 +43,17 @@ User (1) ──── (N) DailyLog
 | theme       | String   | Default `"system"`; `light`/`dark`/`system` |
 | onboarded   | Boolean  | Default `false`; set `true` after onboarding |
 | gamification| Boolean  | Default `false`; opt-in XP/levels   |
+| emailVerified | Boolean | Default `false`; `true` after the user confirms their email |
 | createdAt   | DateTime | Auto-generated                      |
 | updatedAt   | DateTime | Auto-updated                        |
 
 ### Rules
 
 1. **Email uniqueness** — No two users can share the same email. Enforced at the database level (`@unique`).
+2. **Email verification** — New accounts start with `emailVerified=false`. A single-use token
+   (24 h TTL, only its SHA-256 hash stored) confirms the address via `POST /auth/verify-email`.
+   Resend (`/auth/resend-verification`) is anti-enumeration (always the same generic response) and
+   rate-limited. Sensitive account actions require a verified email (`requireVerified`).
 2. **Password storage** — Password is never stored in plaintext. Must be hashed using bcrypt before persistence. Only the hash is stored.
 3. **Password strength** — Strong policy enforced by a single shared Zod schema
    (`packages/shared/src/schemas/password.ts`) at every point a password is set or changed:

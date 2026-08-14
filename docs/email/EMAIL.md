@@ -33,6 +33,7 @@ All defined in `apps/api/.env.example` and set in `render.yaml` (secrets via `sy
 | `EMAIL_FROM_NAME` | Display name in the From header (default `LifeOS`) |
 | `EMAIL_FROM_ADDRESS` | From address (defaults to `EMAIL_USER`) |
 | `EMAIL_REPLY_TO` | Reply-To header (defaults to `EMAIL_USER`) |
+| `WEB_URL` | Public web origin used to build email links (e.g. `https://lifeos.app`) |
 
 > **Safety:** `EMAIL_ENABLED=false` is the default. Development and CI never contact an SMTP
 > server; the service logs `[email][dry-run] ...` instead. Only flip it to `true` with real
@@ -48,6 +49,10 @@ The code lives in `apps/api/src/lib/email/`:
 | `email.config.ts` | Reads the `EMAIL_*` env vars into a typed `EmailConfig` |
 | `email.templates.ts` | Base HTML layout + plain-text fallback + a renderer per template |
 | `email.service.ts` | `createEmailService()` — nodemailer SMTP adapter, retry, failure logging, dry-run mode |
+
+The service is exposed on the Fastify instance as `fastify.emailService` (decorated by
+`apps/api/src/plugins/email.ts`), so any route can send mail. `buildApp({ emailService })` accepts
+an injected service for tests (tests always force `EMAIL_ENABLED=false` via `vitest.setup.ts`).
 
 The `EmailService` interface is **provider-independent**:
 
@@ -67,6 +72,37 @@ code changes.
   recipient only — **never** the payload (links/tokens are not written to logs).
 - **Dry-run:** when `EMAIL_ENABLED=false`, `send` renders and logs the email but never contacts
   the SMTP server.
+
+### Email template design
+
+The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
+
+- **Header:** the LifeOS brand name as text (bold) — no image, so it renders reliably in every
+  email client (Gmail blocks external images by default).
+- **Colours:** brand indigo (`#6366f1`) CTA with white text and `border-radius: 6px`; zinc
+  foreground (`#18181b`), muted footer text, neutral page background `#f8f9fa`.
+- **Layout:** the white card is centered, all content left-aligned, generous padding, a subtle
+  divider above the footer, and clean footer links (Privacy Policy / Support).
+- **Long links** in the HTML are wrapped with `word-break: break-all`; the fallback link shows only
+  the host to avoid breaking the card width.
+
+## Email verification (Phase 3)
+
+- Registration creates an **unverified** user (`emailVerified=false`) and does **not** send any
+  email. No token is created at registration.
+- The verification email is sent **only when the user requests it** via the `/verify-email` page
+  (which calls `POST /v1/auth/resend-verification`). This issues a single-use
+  `EmailVerificationToken` (SHA-256 hash stored, 24 h TTL) and sends the `verify-email` template.
+- `POST /v1/auth/verify-email` marks the email verified exactly once (token deleted on success).
+- `POST /v1/auth/resend-verification` always returns the same generic message (no account
+  enumeration) and is rate-limited (default 3/hour).
+- **Access policy (Option B):** unverified users can log in and see a persistent "Verify your
+  email" banner. They are restricted to **pillars and habits** (setup). Goals, projects, daily
+  logs, statistics, insights and progression are blocked (`403 EMAIL_NOT_VERIFIED` via the
+  `requireVerified` guard) until the email is confirmed — the sidebar hides those routes too.
+- After verification the user is automatically redirected to the dashboard; `/verify-email` is no
+  longer accessible for a verified account.
+- Links are built from `WEB_URL` (default `https://lifeos.app`).
 
 ## Supported templates & expected data
 

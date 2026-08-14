@@ -38,9 +38,12 @@ from the message via a central map (default `APP_ERROR`).
 | HTTP status | Meaning | Code |
 |---|---|---|
 | 400 | Validation error | `VALIDATION_ERROR` |
+| 400 | Invalid or expired verification link | `INVALID_VERIFICATION_TOKEN` |
+| 400 | Expired verification link | `VERIFICATION_EXPIRED` |
 | 400 | Domain rule violation (future date, pillar mismatch, invalid onboarding pillar) | `FUTURE_DATE` · `HABIT_PILLAR_MISMATCH` · `INVALID_PILLAR_INDEX` |
 | 401 | Unauthenticated / expired session | `UNAUTHORIZED` |
 | 401 | Invalid credentials | `INVALID_CREDENTIALS` |
+| 403 | Action requires a verified email | `EMAIL_NOT_VERIFIED` |
 | 404 | Resource not found (incl. cross-user access, which is indistinguishable) | `*_NOT_FOUND` |
 | 409 | Conflict (duplicate email, already onboarded, pillar with habits) | `EMAIL_ALREADY_EXISTS` · `ALREADY_ONBOARDED` · `PILLAR_HAS_HABITS` |
 | 429 | Rate limited | `RATE_LIMIT_EXCEEDED` |
@@ -69,6 +72,9 @@ from the message via a central map (default `APP_ERROR`).
 | `PROJECT_NOT_FOUND` | Project not found |
 | `TASK_NOT_FOUND` | Task not found |
 | `DAILY_LOG_NOT_FOUND` | Daily log not found |
+| `EMAIL_NOT_VERIFIED` | Please verify your email to continue |
+| `VERIFICATION_EXPIRED` | Verification link has expired |
+| `INVALID_VERIFICATION_TOKEN` | Invalid or expired verification link |
 | `RATE_LIMIT_EXCEEDED` | Rate limit exceeded, retry in … |
 | `APP_ERROR` | Fallback for any unlisted message |
 

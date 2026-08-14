@@ -53,6 +53,9 @@ services:
         sync: false
       - key: EMAIL_REPLY_TO
         sync: false
+      # Web origin used to build verification/reset links in emails.
+      - key: WEB_URL
+        sync: false
       # Set these in the Render dashboard (never commit secrets):
       # - DATABASE_URL  -> Neon PostgreSQL connection string (include ?sslmode=require)
       # - JWT_SECRET    -> long random value (openssl rand -hex 32)

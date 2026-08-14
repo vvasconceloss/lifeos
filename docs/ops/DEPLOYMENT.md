@@ -55,6 +55,8 @@ Set these in the Render dashboard (or they come from `render.yaml`):
 | `EMAIL_PASS` | Gmail app password (secret) |
 | `EMAIL_FROM_NAME` / `EMAIL_FROM_ADDRESS` | `LifeOS` / `noreplylifeos.focus@gmail.com` |
 | `EMAIL_REPLY_TO` | `noreplylifeos.focus+support@gmail.com` |
+| `WEB_URL` | web origin used to build verification/reset links, e.g. `https://your-app.vercel.app` |
+| `RESEND_VERIFICATION_RATE_LIMIT_MAX` / `_WINDOW` | `3` / `1 hour` |
 
 ### Vercel (web)
 

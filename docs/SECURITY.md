@@ -9,6 +9,7 @@
 | Area | Status | How it's guaranteed |
 |---|---|---|
 | Authentication | ✅ | Email + bcrypt password; JWT in `HttpOnly` cookie; **session expiry enforced (30 days)** |
+| Email verification | ✅ | New accounts start unverified; single-use 24 h token (SHA-256 hash stored); resend is anti-enumeration + rate-limited; sensitive actions gated by `requireVerified` |
 | Authorization | ✅ | `requireAuth` (`jwtVerify`) on every protected route; all queries scoped by `userId` |
 | IDOR / data isolation | ✅ | Cross-user access to every entity returns `404` — verified by per-entity tests (below) |
 | CSRF | ✅ | `@fastify/csrf-protection` on all state-changing requests (`csrf-token` header + signed cookie) |
