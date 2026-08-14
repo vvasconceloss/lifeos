@@ -17,7 +17,7 @@ describe('E2E: main flow', () => {
     const registerRes = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
     expect(registerRes.statusCode).toBe(201);
     const tokenCookie = registerRes.cookies.find((c) => c.name === 'token');
@@ -144,7 +144,7 @@ async function registerAndCookie(
   const res = await app.inject({
     method: 'POST',
     url: '/v1/auth/register',
-    payload: { email, password: 'test1234' },
+    payload: { email, password: 'Test1234!' },
   });
   const tokenCookie = res.cookies.find((c) => c.name === 'token');
   return `token=${tokenCookie!.value}`;

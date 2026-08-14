@@ -68,13 +68,13 @@ describe('Infrastructure failure scenarios', () => {
     await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     const res = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email, password: 'test1234' },
+      payload: { email, password: 'Test1234!' },
     });
 
     expect(res.statusCode).toBe(409);
