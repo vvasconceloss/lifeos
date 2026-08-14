@@ -1,69 +1,24 @@
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff, Info } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthLayout } from "@/components/auth-layout";
-import { cn } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/errors";
 import { registerBodySchema } from "@lifeos/shared";
 import { validateForm } from "@/lib/validation";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  PasswordStrengthMeter,
+  PasswordRequirementsList,
+} from "@/components/password-requirements";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 interface FieldErrors {
   email?: string;
   password?: string;
   name?: string;
-}
-
-const PASSWORD_REQUIREMENTS = [
-  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { id: "number", label: "Includes a number", test: (p: string) => /\d/.test(p) },
-  { id: "letter", label: "Includes a letter", test: (p: string) => /[a-zA-Z]/.test(p) },
-];
-
-function PasswordRequirements({ password }: { password: string }) {
-  const hasValue = password.length > 0;
-
-  return (
-    <div className="mt-2">
-      <div className="flex gap-1.5" aria-hidden>
-        {PASSWORD_REQUIREMENTS.map((req) => {
-          const met = req.test(password);
-          return (
-            <span
-              key={req.id}
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors duration-200",
-                !hasValue ? "bg-border" : met ? "bg-green-500" : "bg-destructive/70",
-              )}
-            />
-          );
-        })}
-      </div>
-      <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5" aria-live="polite">
-        {PASSWORD_REQUIREMENTS.map((req) => {
-          const met = req.test(password);
-          return (
-            <li
-              key={req.id}
-              className={cn(
-                "text-xs transition-colors duration-200",
-                !hasValue
-                  ? "text-foreground/60"
-                  : met
-                    ? "text-green-600 dark:text-green-500"
-                    : "text-destructive",
-              )}
-            >
-              {req.label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
 }
 
 export default function RegisterPage() {
@@ -222,9 +177,27 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor={passwordInputId} className="block text-sm font-medium text-foreground">
-              Password
-            </label>
+            <div className="flex items-center gap-x-1">
+              <label htmlFor={passwordInputId} className="block text-sm font-medium text-foreground">
+                Password
+              </label>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="inline-flex size-5 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-accent hover:text-foreground"
+                      aria-label="Password requirements"
+                    >
+                      <Info className="size-4" />
+                    </button>
+                  }
+                />
+                <TooltipContent side="left" align="center" className="w-64">
+                  <PasswordRequirementsList password={password} email={email} />
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="relative">
               <input
                 id={passwordInputId}
@@ -256,7 +229,7 @@ export default function RegisterPage() {
                 />
               )}
             </div>
-            <PasswordRequirements password={password} />
+            <PasswordStrengthMeter password={password} email={email} />
             {hasSubmitted && errors.password && (
               <p className="mt-1 text-xs text-destructive" id={errorId("password")} role="alert">
                 {errors.password}
