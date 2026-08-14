@@ -72,6 +72,19 @@ export const resendVerificationBodySchema = z.object({
 
 export type ResendVerificationBody = z.infer<typeof resendVerificationBodySchema>;
 
+export const forgotPasswordBodySchema = z.object({
+  email: z.email().min(1),
+});
+
+export type ForgotPasswordBody = z.infer<typeof forgotPasswordBodySchema>;
+
+export const resetPasswordBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: passwordSchema,
+});
+
+export type ResetPasswordBody = z.infer<typeof resetPasswordBodySchema>;
+
 export const updateMeBodySchema = z.object({
   name: z.string().min(1).max(100).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),
