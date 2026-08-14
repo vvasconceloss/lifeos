@@ -18,6 +18,7 @@
     "audit": "pnpm audit --prod",
     "lint": "eslint .",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
+    "jobs:process-account-deletions": "tsx src/scripts/process-account-deletions.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:dev": "prisma migrate dev"
   },
