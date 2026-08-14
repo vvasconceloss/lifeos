@@ -1,5 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { toErrorBody } from "../lib/errors";
+import { prisma } from "../db/client";
 
 export async function requireAuth(
   request: FastifyRequest,
@@ -9,5 +10,28 @@ export async function requireAuth(
     await request.jwtVerify();
   } catch {
     reply.status(401).send({ error: toErrorBody("Unauthorized", undefined, "UNAUTHORIZED") });
+  }
+}
+
+/**
+ * Blocks sensitive account actions (change email, delete account) for users who
+ * have not verified their email yet (Option B access policy). Returns 403.
+ */
+export async function requireVerified(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  await requireAuth(request, reply);
+  if (reply.sent) return;
+
+  const user = await prisma.user.findUnique({
+    where: { id: request.user.sub },
+    select: { emailVerified: true },
+  });
+
+  if (!user?.emailVerified) {
+    reply
+      .status(403)
+      .send({ error: toErrorBody("Please verify your email to continue", undefined, "EMAIL_NOT_VERIFIED") });
   }
 }

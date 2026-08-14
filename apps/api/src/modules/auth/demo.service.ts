@@ -37,6 +37,7 @@ export async function seedDemoUser(): Promise<{ id: string; email: string }> {
         theme: "system",
         onboarded: true,
         gamification: true,
+        emailVerified: true,
         passwordHash: hashPassword(DEMO_PASSWORD),
       },
     });
@@ -52,6 +53,7 @@ export async function seedDemoUser(): Promise<{ id: string; email: string }> {
         theme: "system",
         onboarded: true,
         gamification: true,
+        emailVerified: true,
       },
     });
     userId = user.id;

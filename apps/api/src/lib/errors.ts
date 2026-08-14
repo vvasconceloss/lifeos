@@ -21,6 +21,9 @@ const MESSAGE_TO_CODE: Record<string, string> = {
   "Project not found": "PROJECT_NOT_FOUND",
   "Task not found": "TASK_NOT_FOUND",
   "Daily log not found": "DAILY_LOG_NOT_FOUND",
+  "Please verify your email to continue": "EMAIL_NOT_VERIFIED",
+  "Verification link has expired": "VERIFICATION_EXPIRED",
+  "Invalid or expired verification link": "INVALID_VERIFICATION_TOKEN",
 };
 
 /**
