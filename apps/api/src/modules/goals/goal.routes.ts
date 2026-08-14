@@ -1,7 +1,7 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth } from '../../plugins/auth';
+import { requireVerified } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { createGoalBodySchema, updateGoalBodySchema, idParamSchema } from './goal.schemas';
 import {
@@ -22,7 +22,7 @@ const goalHabitParamsSchema = z.object({
 export async function goalRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request) => {
       const goals = await listGoals(request.user.sub);
       return { goals };
@@ -31,7 +31,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const data = validateInput(createGoalBodySchema, request.body, reply);
       if (!data) return;
@@ -48,7 +48,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -65,7 +65,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -85,7 +85,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -102,7 +102,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.put(
     '/:id/habits/:habitId',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(
         goalHabitParamsSchema,
@@ -123,7 +123,7 @@ export async function goalRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id/habits/:habitId',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(
         goalHabitParamsSchema,

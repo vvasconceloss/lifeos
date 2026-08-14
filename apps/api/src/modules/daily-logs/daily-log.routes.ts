@@ -1,6 +1,6 @@
 import { toErrorBody } from '../../lib/errors';
 import type { FastifyInstance } from 'fastify';
-import { requireAuth } from '../../plugins/auth';
+import { requireVerified } from '../../plugins/auth';
 import { validateInput } from '../../lib/validation';
 import { createDailyLogBodySchema, dailyLogDateParamSchema, idParamSchema, updateDailyLogBodySchema } from './daily-log.schemas';
 import { listCompletionsQuerySchema } from '../completions/completion.schemas';
@@ -16,7 +16,7 @@ import {
 export async function dailyLogRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const query = validateInput(listCompletionsQuerySchema, request.query, reply);
       if (!query) return;
@@ -29,7 +29,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const data = validateInput(createDailyLogBodySchema, request.body, reply);
       if (!data) return;
@@ -46,7 +46,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/correlations',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const query = validateInput(listCompletionsQuerySchema, request.query, reply);
       if (!query) return;
@@ -59,7 +59,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/:date',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(dailyLogDateParamSchema, request.params, reply);
       if (!params) return;
@@ -76,7 +76,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;
@@ -96,7 +96,7 @@ export async function dailyLogRoutes(fastify: FastifyInstance) {
 
   fastify.delete(
     '/:id',
-    { preHandler: requireAuth },
+    { preHandler: requireVerified },
     async (request, reply) => {
       const params = validateInput(idParamSchema, request.params, reply);
       if (!params) return;

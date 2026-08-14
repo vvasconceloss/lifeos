@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookie, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, createHabit, createPillar, markCompletion, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
 import { describe, expect, it, afterAll } from 'vitest';
 
 afterAll(cleanupTestUsers);
@@ -24,7 +24,7 @@ describe('GET /v1/stats/analytics', () => {
 
   it('returns empty analytics for a user without habits', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',
@@ -48,7 +48,7 @@ describe('GET /v1/stats/analytics', () => {
 
   it('reflects recent completions in the weekly rate', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -83,7 +83,7 @@ describe('GET /v1/stats/analytics', () => {
 
   it('reflects elapsed performance in the current-month rate', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
     const pillarId = await createPillar(app, cookie, 'Health');
     const habitId = await createHabit(app, cookie, 'Run', pillarId);
 
@@ -116,7 +116,7 @@ describe('GET /v1/stats/analytics', () => {
 
   it('honours the weeks query parameter', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',
@@ -133,7 +133,7 @@ describe('GET /v1/stats/analytics', () => {
 
   it('rejects an invalid weeks value', async () => {
     const app = await buildApp({ csrf: false });
-    const cookie = await registerAndGetCookie(app, uniqueEmail());
+    const cookie = await registerAndGetCookieVerified(app, uniqueEmail());
 
     const response = await app.inject({
       method: 'GET',

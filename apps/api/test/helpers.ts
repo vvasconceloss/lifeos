@@ -31,6 +31,25 @@ export async function registerAndGetCookie(
   return `token=${tokenCookie!.value}`;
 }
 
+/**
+ * Registers a user and marks their email as verified — required by modules that
+ * gate on `requireVerified` (goals, projects, daily logs, stats, progression).
+ */
+export async function registerAndGetCookieVerified(
+  app: FastifyInstance,
+  email: string,
+): Promise<string> {
+  const cookie = await registerAndGetCookie(app, email);
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true },
+    });
+  }
+  return cookie;
+}
+
 export async function createPillar(
   app: FastifyInstance,
   cookie: string,
