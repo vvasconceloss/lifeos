@@ -1,3 +1,4 @@
+import { BadgeCheck } from "lucide-react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -247,7 +248,15 @@ export default function ProfilePage() {
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">
                 {user?.name || "Your profile"}
               </h2>
-              <p className="truncate text-sm text-foreground/60">{user?.email}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm text-foreground/60">{user?.email}</p>
+                {user?.emailVerified && !user.isDemo ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-500">
+                    <BadgeCheck className="size-3.5" aria-hidden />
+                    Verified
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
           <div className="min-h-0 flex-1">

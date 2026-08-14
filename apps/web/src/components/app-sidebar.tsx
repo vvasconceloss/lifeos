@@ -40,13 +40,21 @@ const NAV_ITEMS = [
   { to: "/settings/habits", label: "Habits", icon: ListChecks },
 ];
 
+// Unverified users are restricted to pillars and habits (setup). The rest of the
+// app unlocks once the email is confirmed.
+const PREMIUM_ROUTES = new Set(["/insights", "/statistics", "/goals", "/projects", "/progression", "/journal"]);
+
 export function AppSidebar() {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
   const { pathname } = useLocation();
 
+  const verified = user?.emailVerified || user?.isDemo;
+
   const navItems = NAV_ITEMS.filter(
-    (item) => item.to !== "/progression" || user?.gamification,
+    (item) =>
+      (item.to !== "/progression" || user?.gamification) &&
+      (verified || !PREMIUM_ROUTES.has(item.to)),
   );
 
   return (

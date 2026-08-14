@@ -6,6 +6,7 @@ const AppPage = lazy(() => import("./pages/app"));
 const LandingPage = lazy(() => import("./pages/landing"));
 const LoginPage = lazy(() => import("./pages/login"));
 const RegisterPage = lazy(() => import("./pages/register"));
+const VerifyEmailPage = lazy(() => import("./pages/verify-email"));
 const InsightsPage = lazy(() => import("./pages/insights"));
 const StatisticsPage = lazy(() => import("./pages/statistics"));
 const HabitDetailPage = lazy(() => import("./pages/habit-detail"));
@@ -41,6 +42,17 @@ const loginRoute = createRoute({
   path: "/login",
   component: LoginPage,
   pendingComponent: RoutePending,
+});
+
+const verifyEmailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/verify-email",
+  component: VerifyEmailPage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
 });
 
 const appRoute = createRoute({
@@ -141,7 +153,7 @@ const onboardingRoute = createRoute({
   pendingComponent: RoutePending,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, verifyEmailRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

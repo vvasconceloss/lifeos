@@ -1,9 +1,11 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { FeedbackMenu } from "@/components/feedback-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 import {
   SidebarProvider,
   SidebarInset,
@@ -22,6 +24,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings/pillars": "Pillars",
   "/settings/habits": "Habits",
 };
+
+// Routes that require a verified email (everything except pillars/habits setup).
+const PREMIUM_PREFIXES = ["/insights", "/statistics", "/goals", "/projects", "/progression", "/journal"];
+
+function isPremiumPath(pathname: string): boolean {
+  return PREMIUM_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 function getPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
@@ -43,6 +52,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, pathname, navigate]);
 
+  // Unverified users are restricted to pillars/habits until they confirm the email.
+  useEffect(() => {
+    if (!loading && user && !user.emailVerified && !user.isDemo && isPremiumPath(pathname)) {
+      navigate({ to: "/app", replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
+
   return (
     <SidebarProvider defaultOpen={false} className="h-svh max-h-svh overflow-hidden">
       <a
@@ -53,6 +69,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </a>
       <AppSidebar />
       <SidebarInset id="main-content" className="flex h-full max-h-full flex-1 flex-col overflow-hidden">
+        {user && !user.emailVerified && !user.isDemo ? (
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-500/10 px-6 py-2.5">
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              Please verify your email to fully activate your account.
+            </p>
+            <Link
+              to="/verify-email"
+              search={{ token: undefined, redirect: pathname }}
+              className={cn(
+                "shrink-0 rounded-md px-2.5 py-1 text-xs font-medium underline underline-offset-4",
+                "text-amber-700 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300",
+              )}
+            >
+              Verify now
+            </Link>
+          </div>
+        ) : null}
         <header className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
