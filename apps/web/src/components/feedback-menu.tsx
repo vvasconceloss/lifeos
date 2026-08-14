@@ -1,6 +1,7 @@
 import { Bug, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTranslation } from "react-i18next";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -16,6 +17,8 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 export function FeedbackMenu() {
+  const { t } = useTranslation("settings");
+
   return (
     <Popover>
       <PopoverTrigger
@@ -24,7 +27,7 @@ export function FeedbackMenu() {
             variant="ghost"
             size="icon"
             className="cursor-pointer"
-            aria-label="Open GitHub feedback menu"
+            aria-label={t("openGitHubFeedbackMenu")}
           >
             <GitHubIcon className="size-[18px]" />
           </Button>
@@ -38,7 +41,7 @@ export function FeedbackMenu() {
           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
         >
           <Bug className="size-4" />
-          Report a bug
+          {t("reportBug")}
         </a>
         <a
           href="https://github.com/vvasconceloss/lifeos/issues/new?template=feature.yml"
@@ -47,7 +50,7 @@ export function FeedbackMenu() {
           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
         >
           <Lightbulb className="size-4" />
-          Suggest a feature
+          {t("suggestFeature")}
         </a>
       </PopoverContent>
     </Popover>

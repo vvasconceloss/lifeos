@@ -1,7 +1,9 @@
+import { BadgeCheck } from "lucide-react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Spinner } from "@/components/ui/spinner";
@@ -87,7 +89,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
       await api.patch("/auth/me", payload);
       setTheme(themePref);
       await onSaved();
-      toast.success("Profile updated");
+      toast.success(t("profileUpdated"));
       setSaved(true);
       successTimer.current = window.setTimeout(() => setSaved(false), 2000);
     } catch {
@@ -111,7 +113,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               id="p-name"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Your name"
+              placeholder={t("namePlaceholder")}
               disabled={saving}
               aria-invalid={nameError ? "true" : undefined}
               aria-describedby={nameError ? "p-name-error" : undefined}
@@ -120,7 +122,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
           </div>
           {nameError && (
             <p id="p-name-error" role="alert" className="text-xs text-destructive">
-              Name is required
+              {t("nameRequired")}
             </p>
           )}
         </div>
@@ -235,7 +237,7 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
             )}
           >
             {saving ? <Spinner className="size-4" /> : null}
-            {saving ? "Saving..." : saved ? <Check className="size-4" /> : "Save changes"}
+            {saving ? t("saving") : saved ? <Check className="size-4" /> : t("common:saveChanges")}
           </button>
         </div>
       </div>
