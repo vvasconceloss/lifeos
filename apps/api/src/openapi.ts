@@ -185,6 +185,53 @@ const openapi = {
         },
       },
     },
+    "/account/delete": {
+      post: {
+        tags: ["Account"],
+        summary: "Schedule account deletion (15-day recovery window)",
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/DeleteAccountBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/account/recover": {
+      post: {
+        tags: ["Account"],
+        summary: "Recover an account via the email link (no login required)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/RecoverAccountBody" } },
+          },
+        },
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/account/cancel-deletion": {
+      post: {
+        tags: ["Account"],
+        summary: "Cancel a pending deletion (authenticated recovery)",
+        security: [{ cookieAuth: [] }],
+        responses: {
+          "200": { $ref: "#/components/responses/Ok" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
     "/auth/demo": {
       post: {
         tags: ["Auth"],
@@ -734,7 +781,7 @@ const openapi = {
       },
       User: {
         type: "object",
-        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "emailVerified", "createdAt"],
+        required: ["id", "email", "weekStart", "theme", "onboarded", "gamification", "emailVerified", "status", "createdAt"],
         properties: {
           id: { type: "string", format: "uuid" },
           email: { type: "string", format: "email" },
@@ -745,6 +792,9 @@ const openapi = {
           onboarded: { type: "boolean" },
           gamification: { type: "boolean" },
           emailVerified: { type: "boolean", description: "Whether the user confirmed their email address" },
+          status: { type: "string", enum: ["ACTIVE", "PENDING_DELETION"] },
+          deletionRequestedAt: { type: "string", format: "date-time", nullable: true },
+          scheduledDeletionAt: { type: "string", format: "date-time", nullable: true },
           createdAt: { type: "string", format: "date-time" },
         },
       },
@@ -827,6 +877,16 @@ const openapi = {
         type: "object",
         required: ["token"],
         properties: { token: { type: "string", description: "The cancel token from the old-address link" } },
+      },
+      DeleteAccountBody: {
+        type: "object",
+        required: ["currentPassword"],
+        properties: { currentPassword: { type: "string", description: "The user's current password (confirmation)" } },
+      },
+      RecoverAccountBody: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string", description: "The recovery token from the confirmation email" } },
       },
       UpdateMeBody: {
         type: "object",
