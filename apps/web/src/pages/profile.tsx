@@ -1,6 +1,7 @@
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Spinner } from "@/components/ui/spinner";
@@ -33,7 +34,10 @@ const WEEK_START_OPTIONS = [
 ];
 
 const inputClass =
-  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
+  "rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 transition-colors hover:border-foreground/40 focus:border-foreground/70 focus:outline-none focus:ring-2 focus:ring-foreground/10 disabled:cursor-not-allowed disabled:opacity-50";
+
+const errorInputClass =
+  "border-destructive hover:border-destructive/70 focus:border-destructive focus:ring-destructive/30";
 
 function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<void> }) {
   const { setTheme } = useTheme();
@@ -45,12 +49,32 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
   const [weekStart, setWeekStart] = useState(user.weekStart ?? 1);
   const [gamification, setGamification] = useState(user.gamification);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const successTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (successTimer.current) window.clearTimeout(successTimer.current);
+    };
+  }, []);
+
+  function handleNameChange(value: string) {
+    setName(value);
+    if (nameError && value.trim()) setNameError(false);
+  }
 
   async function handleSave() {
+    if (!name.trim()) {
+      setNameError(true);
+      return;
+    }
+
     setSaving(true);
+    setSaved(false);
     try {
       const payload: Record<string, unknown> = {
-        name: name.trim() || null,
+        name: name.trim(),
         theme: themePref,
         weekStart,
         gamification,
@@ -61,6 +85,8 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
       setTheme(themePref);
       await onSaved();
       toast.success("Profile updated");
+      setSaved(true);
+      successTimer.current = window.setTimeout(() => setSaved(false), 2000);
     } catch {
       toast.error("Failed to update profile");
     } finally {
@@ -77,13 +103,23 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
           <label htmlFor="p-name" className="text-xs font-medium text-foreground/60">
             Name
           </label>
-          <input
-            id="p-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            className={inputClass}
-          />
+          <div className="relative">
+            <input
+              id="p-name"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="Your name"
+              disabled={saving}
+              aria-invalid={nameError ? "true" : undefined}
+              aria-describedby={nameError ? "p-name-error" : undefined}
+              className={cn(inputClass, nameError && errorInputClass, "w-full rounded-lg")}
+            />
+          </div>
+          {nameError && (
+            <p id="p-name-error" role="alert" className="text-xs text-destructive">
+              Name is required
+            </p>
+          )}
         </div>
       </div>
 
@@ -99,7 +135,8 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               id="p-theme"
               value={themePref}
               onChange={(e) => setThemePref(e.target.value as typeof themePref)}
-              className={inputClass}
+              disabled={saving}
+              className={cn(inputClass)}
             >
               <option value="system">System</option>
               <option value="light">Light</option>
@@ -115,7 +152,8 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               id="p-tz"
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className={inputClass}
+              disabled={saving}
+              className={cn(inputClass)}
             >
               <option value="">Not set</option>
               {TIMEZONES.map((tz) => (
@@ -134,7 +172,8 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               id="p-week"
               value={weekStart}
               onChange={(e) => setWeekStart(Number(e.target.value))}
-              className={inputClass}
+              disabled={saving}
+              className={cn(inputClass)}
             >
               {WEEK_START_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -157,8 +196,9 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
               aria-checked={gamification}
               aria-label="Toggle gamification"
               onClick={() => setGamification((v) => !v)}
+              disabled={saving}
               className={cn(
-                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                 gamification ? "bg-primary" : "bg-border",
               )}
             >
@@ -174,14 +214,21 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
       </div>
 
       <div className="lg:col-span-2">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 sm:w-auto"
-        >
-          {saving ? <Spinner className="size-4" /> : null}
-          {saving ? "Saving..." : "Save changes"}
-        </button>
+        <div className="sticky bottom-0 z-10 -mx-6 flex justify-end border-t border-border/40 bg-background/95 px-6 py-3 backdrop-blur-sm">
+          <button
+            onClick={handleSave}
+            disabled={saving || saved}
+            className={cn(
+              "inline-flex min-w-44 h-9 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto",
+              saved
+                ? "bg-emerald-500 text-white"
+                : "bg-primary text-primary-foreground hover:bg-primary/90",
+            )}
+          >
+            {saving ? <Spinner className="size-4" /> : null}
+            {saving ? "Saving..." : saved ? <Check className="size-4" /> : "Save changes"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -205,31 +252,6 @@ export default function ProfilePage() {
           </div>
           <div className="min-h-0 flex-1">
             {user ? <ProfileForm key={user.id} user={user} onSaved={refreshUser} /> : null}
-          </div>
-
-          <div className="mt-6 rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground">Feedback</h3>
-            <p className="mt-1 text-xs text-foreground/60">
-              Found a bug or have an idea? Open a GitHub issue and help improve LifeOS.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <a
-                href="https://github.com/vvasconceloss/lifeos/issues/new?template=bug.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-accent/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent/60"
-              >
-                Report a bug
-              </a>
-              <a
-                href="https://github.com/vvasconceloss/lifeos/issues/new?template=feature.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-accent/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent/60"
-              >
-                Suggest a feature
-              </a>
-            </div>
           </div>
         </main>
       </AppLayout>

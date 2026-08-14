@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { FeedbackMenu } from "@/components/feedback-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -57,7 +58,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger />
             <h1 className="text-sm font-semibold text-foreground uppercase">{pageTitle}</h1>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <FeedbackMenu />
+            <ThemeToggle />
+          </div>
         </header>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scroll-subtle">
           {children}
