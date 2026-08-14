@@ -30,6 +30,9 @@ export async function buildApp(opts?: { csrf?: boolean }): Promise<FastifyInstan
         paths: [
           'req.headers.cookie',
           'req.headers.authorization',
+          'req.body.password',
+          'req.body.currentPassword',
+          'req.body.newPassword',
           'res.headers["set-cookie"]',
         ],
         censor: '[redacted]',
