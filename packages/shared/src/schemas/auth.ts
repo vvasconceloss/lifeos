@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordNotEqualToEmail, passwordSchema } from "./password";
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color");
 
@@ -33,16 +34,13 @@ export interface OnboardingResponse {
   habitsCreated: number;
 }
 
-export const registerBodySchema = z.object({
-  email: z.email().min(5).max(254),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(72, "Password must be at most 72 characters")
-    .regex(/[a-zA-Z]/, "Password must include at least one letter")
-    .regex(/\d/, "Password must include at least one number"),
-  name: z.string().min(1).max(100).optional(),
-});
+export const registerBodySchema = passwordNotEqualToEmail(
+  z.object({
+    email: z.email().min(5).max(254),
+    password: passwordSchema,
+    name: z.string().min(1).max(100).optional(),
+  }),
+);
 
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 
