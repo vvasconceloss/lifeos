@@ -1,5 +1,5 @@
 import { buildApp } from '../../app';
-import { cleanupTestUsers, registerAndGetCookieVerified, uniqueEmail } from '../../../test/helpers';
+import { cleanupTestUsers, registerAndGetCookieVerified, loginAndGetCookie, uniqueEmail } from '../../../test/helpers';
 import { prisma } from '../../db/client';
 import { hashToken } from '../../lib/tokens';
 import type { EmailService } from '../../lib/email';
@@ -164,6 +164,11 @@ describe('recovery', () => {
     const tokens = await prisma.accountDeletionToken.findMany({ where: { userId: user!.id } });
     expect(tokens).toHaveLength(0);
 
+    // Security notification is sent after recovery.
+    const recovered = sends.find((s) => s.template === 'account-recovered');
+    expect(recovered).toBeDefined();
+    expect(recovered!.to).toBe(email);
+
     await app.close();
   });
 
@@ -173,16 +178,23 @@ describe('recovery', () => {
     const cookie = await registerVerified(app, email);
     await requestDeletion(app, sends, cookie);
 
+    // The deletion request invalidated all sessions; a real user logs in again.
+    const freshCookie = await loginAndGetCookie(app, email);
     const res = await app.inject({
       method: 'POST',
       url: '/v1/account/cancel-deletion',
-      headers: { cookie },
+      headers: { cookie: freshCookie },
     });
 
     expect(res.statusCode).toBe(200);
 
     const user = await prisma.user.findUnique({ where: { email } });
     expect(user!.status).toBe('ACTIVE');
+
+    // Security notification is sent after recovery.
+    const recovered = sends.find((s) => s.template === 'account-recovered');
+    expect(recovered).toBeDefined();
+    expect(recovered!.to).toBe(email);
 
     await app.close();
   });
@@ -193,14 +205,15 @@ describe('recovery', () => {
     const cookie = await registerVerified(app, email);
     await requestDeletion(app, sends, cookie);
 
-    // Recover via Path B.
-    await app.inject({ method: 'POST', url: '/v1/account/cancel-deletion', headers: { cookie } });
+    // Recover via Path B with a fresh session.
+    const freshCookie = await loginAndGetCookie(app, email);
+    await app.inject({ method: 'POST', url: '/v1/account/cancel-deletion', headers: { cookie: freshCookie } });
 
     // Cancelling again is a no-op, no error.
     const again = await app.inject({
       method: 'POST',
       url: '/v1/account/cancel-deletion',
-      headers: { cookie },
+      headers: { cookie: freshCookie },
     });
     expect(again.statusCode).toBe(200);
 
@@ -252,13 +265,16 @@ describe('access during PENDING_DELETION', () => {
     const cookie = await registerVerified(app, email);
     await requestDeletion(app, sends, cookie);
 
+    // The deletion invalidated the session; log in again to confirm access rules.
+    const freshCookie = await loginAndGetCookie(app, email);
+
     // Pillars (normally open) are now blocked.
-    const pillars = await app.inject({ method: 'GET', url: '/v1/pillars', headers: { cookie } });
+    const pillars = await app.inject({ method: 'GET', url: '/v1/pillars', headers: { cookie: freshCookie } });
     expect(pillars.statusCode).toBe(403);
     expect(pillars.json().error.code).toBe('ACCOUNT_PENDING_DELETION');
 
     // auth/me still works (frontend reads the status to show the recovery screen).
-    const me = await app.inject({ method: 'GET', url: '/v1/auth/me', headers: { cookie } });
+    const me = await app.inject({ method: 'GET', url: '/v1/auth/me', headers: { cookie: freshCookie } });
     expect(me.statusCode).toBe(200);
     expect(me.json().user.status).toBe('PENDING_DELETION');
 
@@ -273,11 +289,15 @@ describe('deletion job', () => {
     const cookie = await registerVerified(app, email);
     await requestDeletion(app, sends, cookie);
 
+    // The deletion invalidated the session; a fresh login still hits the
+    // PENDING_DELETION block (proves the middleware, not a stale cookie, returns 403).
+    const freshCookie = await loginAndGetCookie(app, email);
+
     // Create some data that must cascade away.
     const pillarRes = await app.inject({
       method: 'POST',
       url: '/v1/pillars',
-      headers: { cookie },
+      headers: { cookie: freshCookie },
       payload: { name: 'Health' },
     });
     // Pillars are blocked while pending — force the data directly instead.
@@ -354,5 +374,79 @@ describe('deletion job', () => {
     expect(second.deleted).toHaveLength(0);
 
     await app.close();
+  });
+});
+
+describe('account security — rate limiting', () => {
+  it('returns 429 after exceeding the change-password rate limit', async () => {
+    const previousMax = process.env.CHANGE_PASSWORD_RATE_LIMIT_MAX;
+    process.env.CHANGE_PASSWORD_RATE_LIMIT_MAX = '2';
+
+    const { app, sends } = await buildWithEmail();
+    const email = uniqueEmail();
+    const cookie = await registerVerified(app, email);
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/account/change-password',
+        headers: { cookie },
+        payload: { currentPassword: 'Test1234!', newPassword: 'NewPass123!' },
+      });
+      statuses.push(res.statusCode);
+    }
+
+    expect(statuses[0]).toBe(200);
+    expect(statuses[2]).toBe(429);
+
+    await app.close();
+    void sends;
+
+    if (previousMax === undefined) {
+      delete process.env.CHANGE_PASSWORD_RATE_LIMIT_MAX;
+    } else {
+      process.env.CHANGE_PASSWORD_RATE_LIMIT_MAX = previousMax;
+    }
+  });
+
+  it('returns 429 after exceeding the recover rate limit', async () => {
+    const previousMax = process.env.RECOVER_ACCOUNT_RATE_LIMIT_MAX;
+    process.env.RECOVER_ACCOUNT_RATE_LIMIT_MAX = '2';
+
+    const { app, sends } = await buildWithEmail();
+    const email = uniqueEmail();
+    const cookie = await registerVerified(app, email);
+    const { token } = await requestDeletion(app, sends, cookie);
+
+    // First call succeeds and consumes the single-use token.
+    const first = await app.inject({
+      method: 'POST',
+      url: '/v1/account/recover',
+      payload: { token },
+    });
+    expect(first.statusCode).toBe(200);
+
+    // Subsequent attempts (even with a stale token) hit the rate limit.
+    const second = await app.inject({
+      method: 'POST',
+      url: '/v1/account/recover',
+      payload: { token: 'stale-token' },
+    });
+    const third = await app.inject({
+      method: 'POST',
+      url: '/v1/account/recover',
+      payload: { token: 'stale-token' },
+    });
+    expect(second.statusCode).toBe(400);
+    expect(third.statusCode).toBe(429);
+
+    await app.close();
+
+    if (previousMax === undefined) {
+      delete process.env.RECOVER_ACCOUNT_RATE_LIMIT_MAX;
+    } else {
+      process.env.RECOVER_ACCOUNT_RATE_LIMIT_MAX = previousMax;
+    }
   });
 });

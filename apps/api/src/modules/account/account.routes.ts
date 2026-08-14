@@ -37,7 +37,15 @@ async function userLocale(request: { user: { sub: string } }): Promise<string> {
 export async function accountRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/change-password',
-    { preHandler: requireAuth },
+    {
+      preHandler: requireAuth,
+      config: {
+        rateLimit: {
+          max: Number(process.env.CHANGE_PASSWORD_RATE_LIMIT_MAX ?? 5),
+          timeWindow: process.env.CHANGE_PASSWORD_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
     async (request, reply) => {
       const data = validateInput(changePasswordBodySchema, request.body, reply);
       if (!data) return;
@@ -72,7 +80,15 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/change-email/request',
-    { preHandler: requireVerified },
+    {
+      preHandler: requireVerified,
+      config: {
+        rateLimit: {
+          max: Number(process.env.CHANGE_EMAIL_REQUEST_RATE_LIMIT_MAX ?? 5),
+          timeWindow: process.env.CHANGE_EMAIL_REQUEST_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
     async (request, reply) => {
       const data = validateInput(changeEmailRequestBodySchema, request.body, reply);
       if (!data) return;
@@ -114,7 +130,17 @@ export async function accountRoutes(fastify: FastifyInstance) {
     },
   );
 
-  fastify.post('/change-email/confirm', async (request, reply) => {
+  fastify.post(
+    '/change-email/confirm',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.CHANGE_EMAIL_CONFIRM_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.CHANGE_EMAIL_CONFIRM_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
     const data = validateInput(changeEmailConfirmBodySchema, request.body, reply);
     if (!data) return;
 
@@ -158,17 +184,36 @@ export async function accountRoutes(fastify: FastifyInstance) {
   });
 
   // Cancellation via the link sent to the old email (no login required).
-  fastify.post('/change-email/cancel', async (request, reply) => {
-    const data = validateInput(changeEmailCancelBodySchema, request.body, reply);
-    if (!data) return;
+  fastify.post(
+    '/change-email/cancel',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.CHANGE_EMAIL_CANCEL_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.CHANGE_EMAIL_CANCEL_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
+      const data = validateInput(changeEmailCancelBodySchema, request.body, reply);
+      if (!data) return;
 
-    await cancelEmailChangeByToken(data.token);
-    return { message: 'Pending email change cancelled.' };
-  });
+      await cancelEmailChangeByToken(data.token);
+      return { message: 'Pending email change cancelled.' };
+    },
+  );
 
   fastify.post(
     '/delete',
-    { preHandler: requireVerified },
+    {
+      preHandler: requireVerified,
+      config: {
+        rateLimit: {
+          max: Number(process.env.DELETE_ACCOUNT_RATE_LIMIT_MAX ?? 5),
+          timeWindow: process.env.DELETE_ACCOUNT_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
     async (request, reply) => {
       const data = validateInput(deleteAccountBodySchema, request.body, reply);
       if (!data) return;
@@ -205,31 +250,68 @@ export async function accountRoutes(fastify: FastifyInstance) {
   );
 
   // Path A — recovery via the email link (no login required).
-  fastify.post('/recover', async (request, reply) => {
-    const data = validateInput(recoverAccountBodySchema, request.body, reply);
-    if (!data) return;
+  fastify.post(
+    '/recover',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.RECOVER_ACCOUNT_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.RECOVER_ACCOUNT_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request, reply) => {
+      const data = validateInput(recoverAccountBodySchema, request.body, reply);
+      if (!data) return;
 
-    const result = await recoverAccount(data.token);
+      const result = await recoverAccount(data.token);
 
-    switch (result.status) {
-      case 'recovered':
-        return { message: 'Account recovered.' };
-      case 'expired':
-        return reply.status(400).send({
-          error: toErrorBody('Recovery link has expired', undefined, 'RECOVERY_EXPIRED'),
-        });
-      default:
-        return reply.status(400).send({
-          error: toErrorBody('Invalid or used recovery link', undefined, 'INVALID_RECOVERY_TOKEN'),
-        });
-    }
-  });
+      switch (result.status) {
+        case 'recovered':
+          // Security notification — the account left the deletion grace period.
+          await fastify.emailService.send({
+            to: result.email,
+            template: 'account-recovered',
+            data: {},
+            locale: result.locale,
+          });
+          return { message: 'Account recovered.' };
+        case 'expired':
+          return reply.status(400).send({
+            error: toErrorBody('Recovery link has expired', undefined, 'RECOVERY_EXPIRED'),
+          });
+        default:
+          return reply.status(400).send({
+            error: toErrorBody('Invalid or used recovery link', undefined, 'INVALID_RECOVERY_TOKEN'),
+          });
+      }
+    },
+  );
 
   // Path B — recovery while authenticated (from the post-login recovery screen).
-  fastify.post('/cancel-deletion', { preHandler: requireAuth }, async (request) => {
-    await cancelAccountDeletion(request.user.sub);
-    return { message: 'Account deletion cancelled.' };
-  });
+  fastify.post(
+    '/cancel-deletion',
+    {
+      preHandler: requireAuth,
+      config: {
+        rateLimit: {
+          max: Number(process.env.CANCEL_DELETION_RATE_LIMIT_MAX ?? 5),
+          timeWindow: process.env.CANCEL_DELETION_RATE_LIMIT_WINDOW ?? '1 minute',
+        },
+      },
+    },
+    async (request) => {
+      const result = await cancelAccountDeletion(request.user.sub);
+      // Security notification — the account left the deletion grace period.
+      await request.server.emailService.send({
+        to: result.email,
+        template: 'account-recovered',
+        data: {},
+        locale: result.locale,
+      });
+      return { message: 'Account deletion cancelled.' };
+    },
+  );
 }
 
 function accountRecoveryUrl(token: string): string {

@@ -32,6 +32,23 @@ export async function registerAndGetCookie(
 }
 
 /**
+ * Logs in an existing user and returns a fresh session cookie. Used after a
+ * sensitive change (e.g. deletion request) that invalidated earlier sessions.
+ */
+export async function loginAndGetCookie(
+  app: FastifyInstance,
+  email: string,
+): Promise<string> {
+  const res = await app.inject({
+    method: "POST",
+    url: "/v1/auth/login",
+    payload: { email, password: "Test1234!" },
+  });
+  const tokenCookie = res.cookies.find((c) => c.name === "token");
+  return `token=${tokenCookie!.value}`;
+}
+
+/**
  * Registers a user and marks their email as verified — required by modules that
  * gate on `requireVerified` (goals, projects, daily logs, stats, progression).
  */

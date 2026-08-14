@@ -208,7 +208,7 @@ export async function requestAccountDeletion(
 }
 
 export type RecoverAccountResult =
-  | { status: "recovered" }
+  | { status: "recovered"; email: string; locale: string }
   | { status: "expired" }
   | { status: "invalid" };
 
@@ -245,14 +245,25 @@ export async function recoverAccount(token: string): Promise<RecoverAccountResul
     prisma.accountDeletionToken.delete({ where: { id: record.id } }),
   ]);
 
-  return { status: "recovered" };
+  return { status: "recovered", email: user.email, locale: user.locale };
+}
+
+export interface CancelledDeletionResult {
+  email: string;
+  locale: string;
 }
 
 /**
  * Cancels a pending deletion for an authenticated user (Path B recovery).
  * Idempotent: recovering an already-active account produces no error.
  */
-export async function cancelAccountDeletion(userId: string): Promise<void> {
+export async function cancelAccountDeletion(userId: string): Promise<CancelledDeletionResult> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, locale: true },
+  });
+  if (!user) throw new Error("User not found");
+
   await prisma.$transaction([
     prisma.user.updateMany({
       where: { id: userId, status: "PENDING_DELETION" },
@@ -264,6 +275,8 @@ export async function cancelAccountDeletion(userId: string): Promise<void> {
     }),
     prisma.accountDeletionToken.deleteMany({ where: { userId } }),
   ]);
+
+  return { email: user.email, locale: user.locale };
 }
 
 export interface DeletedAccount {
