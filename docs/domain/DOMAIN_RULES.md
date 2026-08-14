@@ -44,6 +44,7 @@ User (1) ──── (N) DailyLog
 | onboarded   | Boolean  | Default `false`; set `true` after onboarding |
 | gamification| Boolean  | Default `false`; opt-in XP/levels   |
 | emailVerified | Boolean | Default `false`; `true` after the user confirms their email |
+| passwordChangedAt | DateTime? | Set on password reset/change; sessions issued before it are rejected |
 | createdAt   | DateTime | Auto-generated                      |
 | updatedAt   | DateTime | Auto-updated                        |
 

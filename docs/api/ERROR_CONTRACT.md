@@ -40,6 +40,8 @@ from the message via a central map (default `APP_ERROR`).
 | 400 | Validation error | `VALIDATION_ERROR` |
 | 400 | Invalid or expired verification link | `INVALID_VERIFICATION_TOKEN` |
 | 400 | Expired verification link | `VERIFICATION_EXPIRED` |
+| 400 | Invalid or expired password-reset link | `INVALID_RESET_TOKEN` |
+| 400 | Expired password-reset link | `RESET_EXPIRED` |
 | 400 | Domain rule violation (future date, pillar mismatch, invalid onboarding pillar) | `FUTURE_DATE` · `HABIT_PILLAR_MISMATCH` · `INVALID_PILLAR_INDEX` |
 | 401 | Unauthenticated / expired session | `UNAUTHORIZED` |
 | 401 | Invalid credentials | `INVALID_CREDENTIALS` |
@@ -75,6 +77,8 @@ from the message via a central map (default `APP_ERROR`).
 | `EMAIL_NOT_VERIFIED` | Please verify your email to continue |
 | `VERIFICATION_EXPIRED` | Verification link has expired |
 | `INVALID_VERIFICATION_TOKEN` | Invalid or expired verification link |
+| `INVALID_RESET_TOKEN` | Invalid or expired reset link |
+| `RESET_EXPIRED` | Reset link has expired |
 | `RATE_LIMIT_EXCEEDED` | Rate limit exceeded, retry in … |
 | `APP_ERROR` | Fallback for any unlisted message |
 

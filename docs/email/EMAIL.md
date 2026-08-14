@@ -104,6 +104,18 @@ The shared HTML layout follows the LifeOS brand (see `apps/web/src/index.css`):
   longer accessible for a verified account.
 - Links are built from `WEB_URL` (default `https://lifeos.app`).
 
+## Password recovery (Phase 4)
+
+- `POST /v1/auth/forgot-password` always responds the same way (anti-enumeration) and runs
+  equivalent work so the response time doesn't reveal whether the email is registered.
+- A single-use `PasswordResetToken` (SHA-256 hash stored, **1 h TTL**) is issued; requesting again
+  invalidates any previous one. The demo account never receives reset links.
+- `POST /v1/auth/reset-password` validates the token + new password (Phase 1 policy), bumps
+  `passwordChangedAt`, invalidates **all** old sessions/JWTs, and sends the `password-changed`
+  security notification.
+- `requireAuth` rejects any JWT issued before `passwordChangedAt` — forces a fresh login everywhere.
+- Both endpoints are rate-limited (default 3/h forgot, 10/h reset).
+
 ## Supported templates & expected data
 
 | Template | Data fields |
