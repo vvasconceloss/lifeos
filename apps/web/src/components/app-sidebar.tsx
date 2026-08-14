@@ -11,6 +11,7 @@ import {
   FolderKanban,
   Trophy,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { UserAvatar } from "@/components/user-avatar";
@@ -29,15 +30,15 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV_ITEMS = [
-  { to: "/app", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/insights", label: "Insights", icon: Sparkles },
-  { to: "/statistics", label: "Statistics", icon: BarChart3 },
-  { to: "/goals", label: "Goals", icon: Target },
-  { to: "/projects", label: "Projects", icon: FolderKanban },
-  { to: "/progression", label: "Progression", icon: Trophy },
-  { to: "/journal", label: "Journal", icon: NotebookPen },
-  { to: "/settings/pillars", label: "Pillars", icon: Layers },
-  { to: "/settings/habits", label: "Habits", icon: ListChecks },
+  { to: "/app", labelKey: "common:dashboard", icon: LayoutDashboard },
+  { to: "/insights", labelKey: "common:insights", icon: Sparkles },
+  { to: "/statistics", labelKey: "common:statistics", icon: BarChart3 },
+  { to: "/goals", labelKey: "common:goals", icon: Target },
+  { to: "/projects", labelKey: "common:projects", icon: FolderKanban },
+  { to: "/progression", labelKey: "common:progression", icon: Trophy },
+  { to: "/journal", labelKey: "common:journal", icon: NotebookPen },
+  { to: "/settings/pillars", labelKey: "common:pillars", icon: Layers },
+  { to: "/settings/habits", labelKey: "common:habits", icon: ListChecks },
 ];
 
 // Unverified users are restricted to pillars and habits (setup). The rest of the
@@ -48,6 +49,7 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
   const { pathname } = useLocation();
+  const { t } = useTranslation("dashboard");
 
   const verified = user?.emailVerified || user?.isDemo;
 
@@ -65,7 +67,7 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" render={<Link to="/app" />} className="bg-transparent hover:bg-transparent">
               <img
                 src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
-                alt="LifeOS logo"
+                alt={t("logoAlt")}
                 className="size-8 rounded-lg"
               />
               <div className="flex flex-col leading-tight">
@@ -86,7 +88,7 @@ export function AppSidebar() {
                     render={<Link to={item.to} />}
                   >
                     <item.icon />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -104,7 +106,7 @@ export function AppSidebar() {
                   <button
                     type="button"
                     className="flex h-8 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-                    aria-label="Open profile menu"
+                    aria-label={t("openProfileMenu")}
                   >
                     <UserAvatar email={user?.email ?? ""} className="size-6" />
                     <span className="min-w-0 flex-1 truncate text-sidebar-foreground/80 group-data-[collapsible=icon]:hidden">
@@ -119,7 +121,7 @@ export function AppSidebar() {
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
                 >
                   <User className="size-4" />
-                  Profile
+                  {t("common:profile")}
                 </Link>
                 <button
                   type="button"
@@ -127,7 +129,7 @@ export function AppSidebar() {
                   className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
                 >
                   <LogOut className="size-4" />
-                  Log out
+                  {t("common:logout")}
                 </button>
               </PopoverContent>
             </Popover>

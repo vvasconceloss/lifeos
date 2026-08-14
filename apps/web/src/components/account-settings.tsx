@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { Trash2, Eye, EyeOff, Info, KeyRound, Mail } from "lucide-react";
 import { api } from "@/lib/api";
@@ -44,6 +45,7 @@ function PasswordField({
   requirements?: boolean;
 }) {
   const [show, setShow] = useState(false);
+  const { t } = useTranslation("settings");
 
   return (
     <div>
@@ -58,7 +60,7 @@ function PasswordField({
                 <button
                   type="button"
                   className="inline-flex size-5 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-accent hover:text-foreground"
-                  aria-label="Password requirements"
+                  aria-label={t("passwordRequirements")}
                 >
                   <Info className="size-4" />
                 </button>
@@ -85,7 +87,7 @@ function PasswordField({
           type="button"
           onClick={() => setShow((v) => !v)}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-foreground"
-          aria-label={show ? "Hide password" : "Show password"}
+          aria-label={show ? t("hidePassword") : t("showPassword")}
         >
           {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
@@ -96,6 +98,7 @@ function PasswordField({
 }
 
 function ChangePasswordForm({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation("settings");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -106,20 +109,20 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
     if (submitting) return;
 
     if (newPassword !== confirmPassword) {
-      toast.error("New password and confirmation do not match");
+      toast.error(t("changePassword.mismatch"));
       return;
     }
 
     setSubmitting(true);
     try {
       await api.post("/account/change-password", { currentPassword, newPassword });
-      toast.success("Password updated");
+      toast.success(t("changePassword.updated"));
       onDone();
     } catch (error) {
       const code = getErrorCode(error);
-      if (code === "INCORRECT_PASSWORD") toast.error("Current password is incorrect");
-      else if (code === "SAME_PASSWORD") toast.error("New password must be different from the current one");
-      else toast.error(getApiErrorMessage(error, "Failed to update password"));
+      if (code === "INCORRECT_PASSWORD") toast.error(t("currentPasswordIncorrect"));
+      else if (code === "SAME_PASSWORD") toast.error(t("changePassword.sameAsCurrent"));
+      else toast.error(getApiErrorMessage(error, t("changePassword.failed")));
     } finally {
       setSubmitting(false);
     }
@@ -129,20 +132,20 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-3">
       <PasswordField
         id="cp-current"
-        label="Current password"
+        label={t("currentPassword")}
         value={currentPassword}
         onChange={setCurrentPassword}
       />
       <PasswordField
         id="cp-new"
-        label="New password"
+        label={t("newPassword")}
         value={newPassword}
         onChange={setNewPassword}
         requirements
       />
       <PasswordField
         id="cp-confirm"
-        label="Confirm new password"
+        label={t("confirmNewPassword")}
         value={confirmPassword}
         onChange={setConfirmPassword}
       />
@@ -152,13 +155,14 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? <Spinner className="size-4" /> : <KeyRound className="size-4" />}
-        {submitting ? "Updating…" : "Change password"}
+        {submitting ? t("changePassword.submitting") : t("changePassword.submit")}
       </button>
     </form>
   );
 }
 
 function ChangeEmailForm({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation("settings");
   const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -180,9 +184,9 @@ function ChangeEmailForm({ onDone }: { onDone: () => void }) {
       setNewEmail("");
     } catch (error) {
       const code = getErrorCode(error);
-      if (code === "INCORRECT_PASSWORD") toast.error("Current password is incorrect");
-      else if (code === "NEW_EMAIL_SAME") toast.error("New email must be different from the current one");
-      else toast.error(getApiErrorMessage(error, "Failed to request the email change"));
+      if (code === "INCORRECT_PASSWORD") toast.error(t("currentPasswordIncorrect"));
+      else if (code === "NEW_EMAIL_SAME") toast.error(t("changeEmail.sameAsCurrent"));
+      else toast.error(getApiErrorMessage(error, t("changeEmail.failed")));
     } finally {
       setSubmitting(false);
     }
@@ -192,15 +196,14 @@ function ChangeEmailForm({ onDone }: { onDone: () => void }) {
     return (
       <div className="space-y-3">
         <p className="rounded-lg border border-border/80 bg-card p-4 text-sm text-foreground/70">
-          We sent a confirmation link to the new address and an alert to your current email. If the
-          request is valid, you&apos;ll receive the confirmation email.
+          {t("changeEmail.sent")}
         </p>
         <button
           type="button"
           onClick={onDone}
           className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          Close
+          {t("common:close")}
         </button>
       </div>
     );
@@ -209,17 +212,17 @@ function ChangeEmailForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <p className="text-sm text-foreground/70">
-        Current email: <span className="font-medium text-foreground">{user?.email}</span>
+        {t("changeEmail.currentEmail")} <span className="font-medium text-foreground">{user?.email}</span>
       </p>
       <PasswordField
         id="ce-current"
-        label="Current password"
+        label={t("currentPassword")}
         value={currentPassword}
         onChange={setCurrentPassword}
       />
       <div>
         <label htmlFor="ce-new" className="text-xs font-medium text-foreground/60">
-          New email
+          {t("newEmail")}
         </label>
         <input
           id="ce-new"
@@ -238,17 +241,15 @@ function ChangeEmailForm({ onDone }: { onDone: () => void }) {
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? <Spinner className="size-4" /> : <Mail className="size-4" />}
-        {submitting ? "Requesting…" : "Change email"}
+        {submitting ? t("changeEmail.submitting") : t("changeEmail.submit")}
       </button>
-      <p className="text-xs text-foreground/60">
-        You&apos;ll confirm the change from the link sent to the new address. Your email stays
-        unchanged until then.
-      </p>
+      <p className="text-xs text-foreground/60">{t("changeEmail.hint")}</p>
     </form>
   );
 }
 
 export function AccountSettings() {
+  const { t } = useTranslation("settings");
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -258,10 +259,8 @@ export function AccountSettings() {
       <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Change password</DialogTitle>
-            <DialogDescription>
-              Other sessions will be signed out. This one stays active.
-            </DialogDescription>
+            <DialogTitle>{t("changePassword.title")}</DialogTitle>
+            <DialogDescription>{t("changePassword.description")}</DialogDescription>
           </DialogHeader>
           <ChangePasswordForm onDone={() => setPasswordOpen(false)} />
         </DialogContent>
@@ -270,10 +269,8 @@ export function AccountSettings() {
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Change email</DialogTitle>
-            <DialogDescription>
-              Requires confirmation at the new address. A security alert goes to your current email.
-            </DialogDescription>
+            <DialogTitle>{t("changeEmail.title")}</DialogTitle>
+            <DialogDescription>{t("changeEmail.description")}</DialogDescription>
           </DialogHeader>
           <ChangeEmailForm onDone={() => setEmailOpen(false)} />
         </DialogContent>
@@ -282,11 +279,8 @@ export function AccountSettings() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete account</DialogTitle>
-            <DialogDescription>
-              Your account will be scheduled for permanent deletion in 15 days. You can recover it
-              at any point before then, but all of your data will be erased afterwards.
-            </DialogDescription>
+            <DialogTitle>{t("deleteAccount.title")}</DialogTitle>
+            <DialogDescription>{t("deleteAccount.description")}</DialogDescription>
           </DialogHeader>
           <DeleteAccountForm onDone={() => setDeleteOpen(false)} />
         </DialogContent>
@@ -300,7 +294,7 @@ export function AccountSettings() {
         onClick={() => setPasswordOpen(true)}
       >
         <KeyRound className="size-4" />
-        Change password
+        {t("changePassword.title")}
       </Button>
       <Button
         type="button"
@@ -310,7 +304,7 @@ export function AccountSettings() {
         onClick={() => setEmailOpen(true)}
       >
         <Mail className="size-4" />
-        Change email
+        {t("changeEmail.title")}
       </Button>
       <Button
         type="button"
@@ -320,13 +314,14 @@ export function AccountSettings() {
         onClick={() => setDeleteOpen(true)}
       >
         <Trash2 className="size-4" />
-        Delete account
+        {t("deleteAccount.title")}
       </Button>
     </div>
   );
 }
 
 function DeleteAccountForm({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation("settings");
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState("");
@@ -340,7 +335,7 @@ function DeleteAccountForm({ onDone }: { onDone: () => void }) {
     setSubmitting(true);
     try {
       await api.post("/account/delete", { currentPassword });
-      toast.success("Account deletion scheduled. You can recover it within 15 days.");
+      toast.success(t("deleteAccount.scheduled"));
       onDone();
       // The backend clears the session cookie; clear local auth state and send
       // the user back to the login page (same as after an email change).
@@ -348,9 +343,9 @@ function DeleteAccountForm({ onDone }: { onDone: () => void }) {
       navigate({ to: "/login", replace: true });
     } catch (error) {
       const code = getErrorCode(error);
-      if (code === "INCORRECT_PASSWORD") toast.error("Current password is incorrect");
-      else if (code === "ALREADY_PENDING_DELETION") toast.error("Deletion was already requested");
-      else toast.error(getApiErrorMessage(error, "Failed to request account deletion"));
+      if (code === "INCORRECT_PASSWORD") toast.error(t("currentPasswordIncorrect"));
+      else if (code === "ALREADY_PENDING_DELETION") toast.error(t("deleteAccount.alreadyRequested"));
+      else toast.error(getApiErrorMessage(error, t("deleteAccount.failed")));
     } finally {
       setSubmitting(false);
     }
@@ -360,7 +355,7 @@ function DeleteAccountForm({ onDone }: { onDone: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label htmlFor="da-current" className="text-xs font-medium text-foreground/60">
-          Current password
+          {t("currentPassword")}
         </label>
         <div className="relative">
           <input
@@ -377,7 +372,7 @@ function DeleteAccountForm({ onDone }: { onDone: () => void }) {
             type="button"
             onClick={() => setShow((v) => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-foreground"
-            aria-label={show ? "Hide password" : "Show password"}
+            aria-label={show ? t("hidePassword") : t("showPassword")}
           >
             {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
@@ -389,7 +384,7 @@ function DeleteAccountForm({ onDone }: { onDone: () => void }) {
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
-        {submitting ? "Requesting…" : "Schedule deletion"}
+        {submitting ? t("deleteAccount.submitting") : t("deleteAccount.submit")}
       </button>
     </form>
   );

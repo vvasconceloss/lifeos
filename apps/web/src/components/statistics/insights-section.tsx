@@ -11,7 +11,9 @@ import {
   YAxis,
 } from "recharts";
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { AnalyticsResponse } from "@lifeos/shared";
+import { activeLocale } from "@/lib/i18n-format";
 
 const TOOLTIP_STYLE = {
   background: "var(--popover)",
@@ -78,12 +80,14 @@ function HeadlineCard({ label, value, sub }: { label: string; value: React.React
 }
 
 function formatRange(from: string, to: string): string {
-  const f = new Date(`${from}T00:00:00.000Z`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const t = new Date(`${to}T00:00:00.000Z`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const fmt = new Intl.DateTimeFormat(activeLocale(), { month: "short", day: "numeric" });
+  const f = fmt.format(new Date(`${from}T00:00:00.000Z`));
+  const t = fmt.format(new Date(`${to}T00:00:00.000Z`));
   return `${f} – ${t}`;
 }
 
 export function InsightsSection({ analytics }: { analytics: AnalyticsResponse }) {
+  const { t } = useTranslation("statistics");
   const latestWeek = analytics.weeklyRates[analytics.weeklyRates.length - 1];
   const pillars = analytics.pillarStats.filter((p) => p.activeHabitCount > 0);
   const needsAttention = pillars.length > 0
@@ -93,38 +97,38 @@ export function InsightsSection({ analytics }: { analytics: AnalyticsResponse })
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs font-medium text-foreground/60">How am I progressing?</span>
+        <span className="text-xs font-medium text-foreground/60">{t("insightsSection.howAmIProgressing")}</span>
         <span className="text-[10px] text-foreground/60">
-          last {analytics.weeks} weeks · this week in progress
+          {t("insightsSection.lastWeeks", { weeks: analytics.weeks })}
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <HeadlineCard
-          label="This week"
+          label={t("common:thisWeek")}
           value={`${latestWeek?.rate ?? 0}%`}
-          sub={latestWeek ? `${latestWeek.completed}/${latestWeek.expected} completions · ${formatRange(latestWeek.from, latestWeek.to)}` : undefined}
+          sub={latestWeek ? t("insightsSection.thisWeekSub", { completed: latestWeek.completed, expected: latestWeek.expected, range: formatRange(latestWeek.from, latestWeek.to) }) : undefined}
         />
         <HeadlineCard
-          label="Trend"
+          label={t("insightsSection.trend")}
           value={<TrendBadge direction={analytics.trend.direction} delta={analytics.trend.delta} />}
-          sub="last 4 weeks vs previous 4"
+          sub={t("insightsSection.trendSub")}
         />
-        <HeadlineCard label="Consistency" value={`${analytics.consistency}`} sub="daily-effort stability · last 12 weeks" />
-        <HeadlineCard label="Daily average" value={analytics.dailyAverage} sub="completions per day · last 12 weeks" />
+        <HeadlineCard label={t("insightsSection.consistency")} value={`${analytics.consistency}`} sub={t("insightsSection.consistencySub")} />
+        <HeadlineCard label={t("insightsSection.dailyAverage")} value={analytics.dailyAverage} sub={t("insightsSection.dailyAverageSub")} />
       </div>
 
       <ChartCard
-        title="Completion rate over time"
-        period="last 12 weeks"
-        question="How is my completion rate evolving week over week?"
+        title={t("insightsSection.completionRateOverTime")}
+        period={t("insightsSection.last12Weeks")}
+        question={t("insightsSection.completionRateQuestion")}
       >
         <div style={{ height: 200 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={analytics.weeklyRates} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
               <XAxis dataKey="label" tick={{ fontSize: 9, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} interval={2} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 9, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} width={30} />
-              <ReTooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${v}%`, "Rate"]} />
+              <ReTooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${v}%`, t("insightsSection.rate")]} />
               <Line type="monotone" dataKey="rate" stroke="var(--chart-1)" strokeWidth={2.5} dot={{ r: 2.5, fill: "var(--chart-1)" }} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -132,19 +136,19 @@ export function InsightsSection({ analytics }: { analytics: AnalyticsResponse })
       </ChartCard>
 
       <ChartCard
-        title="Progression by pillar"
-        period="this month"
-        question="Which pillar should I focus on this month?"
+        title={t("insightsSection.progressionByPillar")}
+        period={t("insightsSection.thisMonth")}
+        question={t("insightsSection.focusQuestion")}
       >
         {pillars.length === 0 ? (
-          <p className="py-10 text-center text-xs text-foreground/60">No habits yet.</p>
+          <p className="py-10 text-center text-xs text-foreground/60">{t("insightsSection.noHabits")}</p>
         ) : (
           <div style={{ height: 180 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={pillars} layout="vertical" margin={{ top: 0, right: 40, bottom: 0, left: 8 }}>
                 <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fontFamily: "monospace", fill: "var(--foreground)" }} axisLine={false} tickLine={false} />
                 <YAxis type="category" dataKey="pillarName" width={90} tick={{ fontSize: 10, fill: "var(--foreground)" }} axisLine={false} tickLine={false} />
-                <ReTooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${v}%`, "Rate"]} cursor={{ fill: "var(--accent)" }} />
+                <ReTooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => [`${v}%`, t("insightsSection.rate")]} cursor={{ fill: "var(--accent)" }} />
                 <Bar dataKey="completionRate" radius={[0, 4, 4, 0]}>
                   {pillars.map((p) => (
                     <Cell key={p.pillarId} fill={p.color ?? "var(--chart-1)"} />
@@ -165,8 +169,11 @@ export function InsightsSection({ analytics }: { analytics: AnalyticsResponse })
 
       {needsAttention && (
         <p className="rounded-xl border border-border/80 bg-card px-4 py-3 text-xs text-foreground/70">
-          <span className="font-semibold text-foreground">Focus:</span> {needsAttention.pillarName} is
-          your weakest pillar this month ({needsAttention.completionRate}%).
+          <span className="font-semibold text-foreground">{t("insightsSection.focusLabel")}</span>{" "}
+          {t("insightsSection.focusText", {
+            pillarName: needsAttention.pillarName,
+            rate: needsAttention.completionRate,
+          })}
         </p>
       )}
     </div>

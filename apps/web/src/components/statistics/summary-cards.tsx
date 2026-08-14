@@ -1,6 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { formatMonthLabel, type StatsOverview } from "./types";
+import { formatNumber } from "@/lib/i18n-format";
 
 export function SummaryCards({ overview }: { overview: StatsOverview }) {
+  const { t } = useTranslation("statistics");
   const habitCount = overview.habitStats.length;
   const activePillars = overview.pillarStats.filter((p) => p.activeHabitCount > 0).length;
   const avgStreak =
@@ -11,16 +14,16 @@ export function SummaryCards({ overview }: { overview: StatsOverview }) {
       : 0;
 
   const cards = [
-    { label: "Total completions", value: String(overview.totalCompletions) },
-    { label: "Monthly progress", value: `${overview.successRate}%` },
-    { label: "Habits tracked", value: String(habitCount) },
-    { label: "Avg streak", value: `${avgStreak}d` },
+    { label: t("summaryCards.totalCompletions"), value: formatNumber(overview.totalCompletions) },
+    { label: t("summaryCards.monthlyProgress"), value: `${formatNumber(overview.successRate)}%` },
+    { label: t("summaryCards.habitsTracked"), value: formatNumber(habitCount) },
+    { label: t("summaryCards.avgStreak"), value: `${formatNumber(avgStreak)}d` },
   ];
 
   return (
     <div>
       <div className="mb-3 flex items-baseline gap-2">
-        <span className="text-xs font-medium text-foreground/60">Summary</span>
+        <span className="text-xs font-medium text-foreground/60">{t("summaryCards.summary")}</span>
         <span className="text-[10px] text-foreground/60">{formatMonthLabel(overview.year, overview.month)}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -31,7 +34,7 @@ export function SummaryCards({ overview }: { overview: StatsOverview }) {
           </div>
         ))}
         {activePillars === 0 && habitCount === 0 ? (
-          <p className="text-sm text-foreground/60">No habits yet — create one to start tracking.</p>
+          <p className="text-sm text-foreground/60">{t("summaryCards.empty")}</p>
         ) : null}
       </div>
     </div>

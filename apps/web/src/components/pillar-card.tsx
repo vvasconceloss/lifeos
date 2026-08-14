@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import { EditPillarDialog } from "@/components/edit-pillar-dialog";
 import {
@@ -45,6 +46,7 @@ export function PillarCard({
   onUpdated: (pillar: Pillar) => void;
 }) {
   const [alertOpen, setAlertOpen] = useState(false);
+  const { t } = useTranslation("habits");
 
   return (
     <li className="flex items-center justify-between rounded-xl border border-border/80 bg-card px-5 py-4 shadow-sm transition-colors hover:bg-accent/30">
@@ -65,7 +67,7 @@ export function PillarCard({
             onClick={onMoveUp}
             disabled={!canMoveUp}
             className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-            aria-label={`Move ${pillar.name} up`}
+            aria-label={t("pillarCard.moveUp", { name: pillar.name })}
           >
             <ArrowUp className="size-3.5" />
           </button>
@@ -74,7 +76,7 @@ export function PillarCard({
             onClick={onMoveDown}
             disabled={!canMoveDown}
             className="rounded p-0.5 text-foreground/40 hover:text-foreground disabled:opacity-30"
-            aria-label={`Move ${pillar.name} down`}
+            aria-label={t("pillarCard.moveDown", { name: pillar.name })}
           >
             <ArrowDown className="size-3.5" />
           </button>
@@ -86,19 +88,21 @@ export function PillarCard({
             render={<button />}
             disabled={deletingId === pillar.id}
             className="rounded-md p-1.5 text-foreground/60 hover:text-destructive disabled:opacity-50"
-            aria-label={`Delete ${pillar.name}`}
+            aria-label={t("pillarCard.delete", { name: pillar.name })}
           >
             {deletingId === pillar.id ? <Spinner /> : <Trash2 className="size-4" />}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete pillar?</AlertDialogTitle>
+              <AlertDialogTitle>{t("pillarCard.deleteTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently remove <strong>{pillar.name}</strong>. Pillars that still contain habits cannot be deleted — archive or delete the habits first.
+                <Trans i18nKey="pillarCard.deleteDescription" ns="habits" values={{ name: pillar.name }}>
+                  This will permanently remove <strong>{pillar.name}</strong>. Pillars that still contain habits cannot be deleted — archive or delete the habits first.
+                </Trans>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
                 onClick={() => {
@@ -106,7 +110,7 @@ export function PillarCard({
                   onDelete(pillar.id);
                 }}
               >
-                Delete
+                {t("common:delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

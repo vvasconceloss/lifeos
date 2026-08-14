@@ -1,4 +1,5 @@
 import { Flame } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { type HabitStats } from "./types";
 
 export function HabitStatsTable({
@@ -6,6 +7,8 @@ export function HabitStatsTable({
 }: {
   habits: HabitStats[];
 }) {
+  const { t } = useTranslation("statistics");
+
   if (habits.length === 0) {
     return null;
   }
@@ -13,10 +16,10 @@ export function HabitStatsTable({
   return (
     <div className="flex flex-col rounded-2xl border border-border/80 bg-card shadow-sm">
       <div className="flex shrink-0 border-b border-border text-xs font-medium text-foreground/60">
-        <div className="flex flex-1 items-center px-3 py-3 text-left">Habit</div>
-        <div className="flex w-28 shrink-0 items-center justify-center py-3">Month rate</div>
-        <div className="flex w-24 shrink-0 items-center justify-center py-3">Streak</div>
-        <div className="flex w-24 shrink-0 items-center justify-center py-3">Best</div>
+        <div className="flex flex-1 items-center px-3 py-3 text-left">{t("habitsTable.habit")}</div>
+        <div className="flex w-28 shrink-0 items-center justify-center py-3">{t("habitsTable.monthRate")}</div>
+        <div className="flex w-24 shrink-0 items-center justify-center py-3">{t("habitsTable.streak")}</div>
+        <div className="flex w-24 shrink-0 items-center justify-center py-3">{t("habitsTable.best")}</div>
       </div>
       {habits.map((habit) => (
         <div key={habit.habitId} className="flex border-b border-border/20 last:border-0 hover:bg-accent/20">

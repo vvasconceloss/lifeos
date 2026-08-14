@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/use-theme";
 
 interface AuthLayoutProps {
@@ -7,13 +8,14 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   const { theme } = useTheme();
+  const { t } = useTranslation("auth");
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <main className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         <img
           src={theme === "dark" ? "/lifeos-white-icon.png" : "/lifeos-black-icon.png"}
-          alt="LifeOS logo"
+          alt={t("authLayout.logoAlt")}
           className="mb-6 max-h-12 w-auto"
         />
         <div className="w-full max-w-sm">{children}</div>
@@ -24,7 +26,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="pointer-events-none absolute inset-0 opacity-40 `bg-[radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] bg-size-[28px_28px]" />
         <div className="relative z-10 max-w-lg px-12">
           <p className="text-center text-4xl leading-tight font-semibold tracking-tight text-white">
-            Start tracking your habits and building a better you.
+            {t("authLayout.tagline")}
           </p>
         </div>
       </aside>

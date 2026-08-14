@@ -1,19 +1,21 @@
+import { useTranslation } from "react-i18next";
 import { Check, X } from "lucide-react";
 import { PASSWORD_RULES, passwordStrength, type PasswordStrength } from "@lifeos/shared";
 import { cn } from "@/lib/utils";
 
-const STRENGTH_META: Record<PasswordStrength, { label: string; className: string }> = {
-  weak: { label: "Weak", className: "bg-destructive" },
-  medium: { label: "Medium", className: "bg-amber-500" },
-  strong: { label: "Strong", className: "bg-green-500" },
+const STRENGTH_META: Record<PasswordStrength, { className: string }> = {
+  weak: { className: "bg-destructive" },
+  medium: { className: "bg-amber-500" },
+  strong: { className: "bg-green-500" },
 };
 
-function buildRules(email?: string) {
+type Rule = { id: string; test: (p: string) => boolean };
+
+function buildRules(email?: string): Rule[] {
   return [
-    ...PASSWORD_RULES,
+    ...PASSWORD_RULES.map(({ id, test }) => ({ id, test })),
     {
       id: "email",
-      label: "Different from your email",
       test: (p: string) => (email ? p.toLowerCase() !== email.toLowerCase() : true),
     },
   ];
@@ -26,6 +28,7 @@ export function PasswordRequirementsList({
   password: string;
   email?: string;
 }) {
+  const { t } = useTranslation("auth");
   const hasValue = password.length > 0;
 
   return (
@@ -45,7 +48,7 @@ export function PasswordRequirementsList({
             )}
           >
             {hasValue && (met ? <Check className="size-3.5" /> : <X className="size-3.5" />)}
-            <span>{rule.label}</span>
+            <span>{t(`passwordRules.${rule.id}`)}</span>
           </li>
         );
       })}
@@ -60,13 +63,14 @@ export function PasswordStrengthMeter({
   password: string;
   email?: string;
 }) {
+  const { t } = useTranslation("auth");
   const hasValue = password.length > 0;
   if (!hasValue) return null;
 
   const rules = buildRules(email);
   const metCount = rules.filter((rule) => rule.test(password)).length;
   const strength = passwordStrength(password);
-  const { label, className } = STRENGTH_META[strength];
+  const { className } = STRENGTH_META[strength];
 
   return (
     <div className="mt-2">
@@ -85,7 +89,7 @@ export function PasswordStrengthMeter({
         })}
       </div>
       <p className="mt-1 text-xs font-medium text-foreground/70">
-        {label} · {metCount}/{rules.length}
+        {t(`passwordStrength.${strength}`)} · {metCount}/{rules.length}
       </p>
     </div>
   );

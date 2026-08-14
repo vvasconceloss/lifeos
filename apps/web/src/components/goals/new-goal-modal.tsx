@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -39,6 +40,7 @@ export function NewGoalModal({
   pillars: Pillar[];
   onCreated: (goal: Goal) => void;
 }) {
+  const { t } = useTranslation("goals");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +49,7 @@ export function NewGoalModal({
   const [creating, setCreating] = useState(false);
   const [titleTouched, setTitleTouched] = useState(false);
 
-  const titleError = titleTouched && !title.trim() ? "Title is required" : undefined;
+  const titleError = titleTouched && !title.trim() ? t("newGoal.titleRequired") : undefined;
   const canSubmit = title.trim().length > 0 && !!pillarId;
 
   function reset() {
@@ -71,7 +73,7 @@ export function NewGoalModal({
       reset();
       setOpen(false);
     } catch {
-      toast.error("Failed to create goal");
+      toast.error(t("toast.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -83,19 +85,19 @@ export function NewGoalModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-1.5 size-4" />
-        New Goal
+        {t("newGoal.trigger")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Create new goal</DialogTitle>
+          <DialogTitle>{t("newGoal.title")}</DialogTitle>
           <DialogDescription>
-            Define an outcome you want to achieve, then link the habits that support it.
+            {t("newGoal.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="ng-title">Title</Label>
+            <Label htmlFor="ng-title">{t("newGoal.titleLabel")}</Label>
             <input
               id="ng-title"
               value={title}
@@ -104,7 +106,7 @@ export function NewGoalModal({
                 setTitleTouched(true);
               }}
               onBlur={() => setTitleTouched(true)}
-              placeholder="e.g. Become a better engineer"
+              placeholder={t("newGoal.titlePlaceholder")}
               aria-invalid={titleError ? "true" : undefined}
               aria-describedby={titleError ? "ng-title-error" : undefined}
               className={`${inputClass} ${
@@ -118,21 +120,21 @@ export function NewGoalModal({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ng-desc">Description (optional)</Label>
+            <Label htmlFor="ng-desc">{t("newGoal.descriptionLabel")}</Label>
             <textarea
               id="ng-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What does success look like?"
+              placeholder={t("newGoal.descriptionPlaceholder")}
               rows={3}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ng-pillar">Pillar</Label>
+            <Label htmlFor="ng-pillar">{t("newGoal.pillarLabel")}</Label>
             <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
               <SelectTrigger id="ng-pillar" className="w-full">
-                <SelectValue placeholder="Select a pillar">
+                <SelectValue placeholder={t("newGoal.pillarPlaceholder")}>
                   {selectedPillar ? (
                     <span className="inline-flex items-center gap-2">
                       {selectedPillar.color && (
@@ -158,11 +160,11 @@ export function NewGoalModal({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Deadline (optional)</Label>
+            <Label>{t("newGoal.deadlineLabel")}</Label>
             <DatePicker
               value={deadline ? new Date(`${deadline}T00:00:00`) : null}
               onChange={(d) => setDeadline(d ? format(d, "yyyy-MM-dd") : "")}
-              placeholder="Pick a deadline"
+              placeholder={t("newGoal.deadlinePlaceholder")}
             />
           </div>
         </div>
@@ -170,7 +172,7 @@ export function NewGoalModal({
         <DialogFooter>
           <Button onClick={handleCreate} disabled={creating || !canSubmit} className="w-full sm:w-auto">
             {creating ? <Spinner className="mr-2" /> : null}
-            {creating ? "Saving..." : "Create Goal"}
+            {creating ? t("newGoal.saving") : t("newGoal.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

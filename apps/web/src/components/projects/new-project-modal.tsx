@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -39,6 +40,7 @@ export function NewProjectModal({
   pillars: Pillar[];
   onCreated: (project: Project) => void;
 }) {
+  const { t } = useTranslation("projects");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +49,7 @@ export function NewProjectModal({
   const [creating, setCreating] = useState(false);
   const [titleTouched, setTitleTouched] = useState(false);
 
-  const titleError = titleTouched && !title.trim() ? "Title is required" : undefined;
+  const titleError = titleTouched && !title.trim() ? t("newProject.titleRequired") : undefined;
   const canSubmit = title.trim().length > 0 && !!pillarId;
 
   function reset() {
@@ -71,7 +73,7 @@ export function NewProjectModal({
       reset();
       setOpen(false);
     } catch {
-      toast.error("Failed to create project");
+      toast.error(t("toast.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -83,19 +85,19 @@ export function NewProjectModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-1.5 size-4" />
-        New Project
+        {t("newProject.trigger")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Create new project</DialogTitle>
+          <DialogTitle>{t("newProject.title")}</DialogTitle>
           <DialogDescription>
-            Define structured work to produce an outcome, then add tasks to it.
+            {t("newProject.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="np-title">Title</Label>
+            <Label htmlFor="np-title">{t("newProject.titleLabel")}</Label>
             <input
               id="np-title"
               value={title}
@@ -104,7 +106,7 @@ export function NewProjectModal({
                 setTitleTouched(true);
               }}
               onBlur={() => setTitleTouched(true)}
-              placeholder="e.g. Build the landing page"
+              placeholder={t("newProject.titlePlaceholder")}
               aria-invalid={titleError ? "true" : undefined}
               aria-describedby={titleError ? "np-title-error" : undefined}
               className={`${inputClass} ${
@@ -118,21 +120,21 @@ export function NewProjectModal({
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="np-desc">Description (optional)</Label>
+            <Label htmlFor="np-desc">{t("newProject.descriptionLabel")}</Label>
             <textarea
               id="np-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What is this work about?"
+              placeholder={t("newProject.descriptionPlaceholder")}
               rows={3}
               className={inputClass}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="np-pillar">Pillar</Label>
+            <Label htmlFor="np-pillar">{t("newProject.pillarLabel")}</Label>
             <Select value={pillarId} onValueChange={(v) => setPillarId(v ?? "")}>
               <SelectTrigger id="np-pillar" className="w-full">
-                <SelectValue placeholder="Select a pillar">
+                <SelectValue placeholder={t("newProject.pillarPlaceholder")}>
                   {selectedPillar ? (
                     <span className="inline-flex items-center gap-2">
                       {selectedPillar.color && (
@@ -158,11 +160,11 @@ export function NewProjectModal({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Deadline (optional)</Label>
+            <Label>{t("newProject.deadlineLabel")}</Label>
             <DatePicker
               value={deadline ? new Date(`${deadline}T00:00:00`) : null}
               onChange={(d) => setDeadline(d ? format(d, "yyyy-MM-dd") : "")}
-              placeholder="Pick a deadline"
+              placeholder={t("newProject.deadlinePlaceholder")}
             />
           </div>
         </div>
@@ -170,7 +172,7 @@ export function NewProjectModal({
         <DialogFooter>
           <Button onClick={handleCreate} disabled={creating || !canSubmit} className="w-full sm:w-auto">
             {creating ? <Spinner className="mr-2" /> : null}
-            {creating ? "Saving..." : "Create Project"}
+            {creating ? t("newProject.saving") : t("newProject.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

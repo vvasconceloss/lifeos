@@ -1,7 +1,9 @@
 import { CheckSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import { MobileHabitList } from "@/components/dashboard/mobile-habit-list";
 import { expectedForMonth } from "@/lib/frequency";
+import { activeLocale } from "@/lib/i18n-format";
 import type { Completion, HabitsGrouped } from "./types";
 
 export function HabitGrid({
@@ -23,6 +25,8 @@ export function HabitGrid({
   successRate: number;
   onToggle: (habitId: string, date: string) => void;
 }) {
+  const { t } = useTranslation("dashboard");
+
   function isCompleted(habitId: string, date: string) {
     return completions.some((c) => c.habitId === habitId && c.date.startsWith(date));
   }
@@ -41,10 +45,10 @@ export function HabitGrid({
   }
 
   function formatCellDate(date: string): string {
-    return new Date(`${date}T00:00:00.000Z`).toLocaleDateString("en-US", {
+    return new Intl.DateTimeFormat(activeLocale(), {
       month: "short",
       day: "numeric",
-    });
+    }).format(new Date(`${date}T00:00:00.000Z`));
   }
 
   return (
@@ -52,8 +56,8 @@ export function HabitGrid({
       <div className="hidden flex-1 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm md:flex">
       <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
         <div className="flex w-max min-w-full shrink-0 border-b border-border text-xs font-medium text-foreground/60">
-          <div className="sticky left-0 z-[5] flex w-27.5 shrink-0 items-center bg-card px-3 py-3 text-left">Habit</div>
-          <div className="flex w-11 shrink-0 items-center justify-center py-3">Goal</div>
+          <div className="sticky left-0 z-[5] flex w-27.5 shrink-0 items-center bg-card px-3 py-3 text-left">{t("habitGrid.habit")}</div>
+          <div className="flex w-11 shrink-0 items-center justify-center py-3">{t("habitGrid.goal")}</div>
           <div className="flex flex-1 items-center">
             {monthDays.map((d) => {
               const day = parseInt(d.split("-")[2]);
@@ -101,7 +105,7 @@ export function HabitGrid({
                                 onClick={() => onToggle(habit.id, date)}
                                 disabled={togglingId === cellKey}
                                 className={`flex size-6 cursor-pointer items-center justify-center rounded-md transition-all ${done ? "" : "hover:bg-accent"} disabled:opacity-30`}
-                                aria-label={done ? `Unmark ${habit.name} on ${formatCellDate(date)}` : `Mark ${habit.name} on ${formatCellDate(date)}`}
+                                aria-label={done ? t("habitGrid.unmarkOn", { habit: habit.name, date: formatCellDate(date) }) : t("habitGrid.markOn", { habit: habit.name, date: formatCellDate(date) })}
                               >
                                 {done ? (
                                   <div className="habit-checkbox flex size-5 items-center justify-center rounded-[4px]" style={{ backgroundColor: habit.color }}>
@@ -131,7 +135,7 @@ export function HabitGrid({
         </div>
         {/* Total row — always at the bottom of the grid */}
         <div className="flex w-max min-w-full shrink-0 border-t border-border bg-card text-xs font-semibold text-foreground/70">
-          <div className="sticky left-0 z-[5] flex w-27.5 shrink-0 items-center bg-card px-3 py-3 text-left">Total</div>
+          <div className="sticky left-0 z-[5] flex w-27.5 shrink-0 items-center bg-card px-3 py-3 text-left">{t("habitGrid.total")}</div>
           <div className="flex w-11 shrink-0 items-center justify-center py-3 font-mono tabular-nums">{totalCompleted}</div>
           <div className="flex flex-1 items-center">
             {monthDays.map((date) => {

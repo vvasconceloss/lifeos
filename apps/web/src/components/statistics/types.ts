@@ -25,7 +25,12 @@ export interface StatsOverview {
   habitStats: HabitStats[];
 }
 
+import { activeLocale } from "@/lib/i18n-format";
+
 export function formatMonthLabel(year: number, month: number): string {
   const date = new Date(Date.UTC(year, month - 1, 1));
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return new Intl.DateTimeFormat(activeLocale(), {
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
