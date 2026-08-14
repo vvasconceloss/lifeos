@@ -5,6 +5,8 @@ export {
   onboardingBodySchema,
   verifyEmailBodySchema,
   resendVerificationBodySchema,
+  forgotPasswordBodySchema,
+  resetPasswordBodySchema,
 } from "@lifeos/shared";
 
 export type {
@@ -15,6 +17,8 @@ export type {
   OnboardingResponse,
   VerifyEmailBody,
   ResendVerificationBody,
+  ForgotPasswordBody,
+  ResetPasswordBody,
   UserResponse,
   AuthResponse,
   MeResponse,

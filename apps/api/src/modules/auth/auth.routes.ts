@@ -2,8 +2,8 @@ import { toErrorBody } from '../../lib/errors';
 import { requireAuth } from '../../plugins/auth';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { validateInput } from '../../lib/validation';
-import { onboardingBodySchema, registerBodySchema, loginBodySchema, updateMeBodySchema, verifyEmailBodySchema, resendVerificationBodySchema } from './auth.schemas';
-import { createUser, authenticate, getUserById, updateUser, verifyEmail, resendVerification, DEMO_EMAIL, AUTH_ERRORS } from './auth.service';
+import { onboardingBodySchema, registerBodySchema, loginBodySchema, updateMeBodySchema, verifyEmailBodySchema, resendVerificationBodySchema, forgotPasswordBodySchema, resetPasswordBodySchema } from './auth.schemas';
+import { createUser, authenticate, getUserById, updateUser, verifyEmail, resendVerification, forgotPassword, resetPassword, DEMO_EMAIL, AUTH_ERRORS } from './auth.service';
 import { completeOnboarding } from './onboarding.service';
 import { seedDemoUser, getDemoUserResponse } from './demo.service';
 
@@ -35,6 +35,10 @@ function verificationUrl(token: string, redirect?: string): string {
   return redirect && redirect.startsWith("/") && !redirect.startsWith("//")
     ? `${base}&redirect=${encodeURIComponent(redirect)}`
     : base;
+}
+
+function resetUrl(token: string): string {
+  return `${WEB_URL}/reset-password?token=${encodeURIComponent(token)}`;
 }
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -152,6 +156,74 @@ export async function authRoutes(fastify: FastifyInstance) {
         message:
           'If an account with that email exists and is not yet verified, a new verification email has been sent.',
       };
+    },
+  );
+
+  fastify.post(
+    '/forgot-password',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.FORGOT_PASSWORD_RATE_LIMIT_MAX ?? 3),
+          timeWindow: process.env.FORGOT_PASSWORD_RATE_LIMIT_WINDOW ?? '1 hour',
+        },
+      },
+    },
+    async (request, reply) => {
+      const data = validateInput(forgotPasswordBodySchema, request.body, reply);
+      if (!data) return;
+
+      // Anti-enumeration: always the same message + consistent response time.
+      await forgotPassword(data.email, async (token, email) => {
+        await fastify.emailService.send({
+          to: email,
+          template: 'password-reset',
+          data: { resetUrl: resetUrl(token) },
+        });
+      });
+
+      return {
+        message: 'If an account with that email exists, a password reset link has been sent.',
+      };
+    },
+  );
+
+  fastify.post(
+    '/reset-password',
+    {
+      config: {
+        rateLimit: {
+          max: Number(process.env.RESET_PASSWORD_RATE_LIMIT_MAX ?? 10),
+          timeWindow: process.env.RESET_PASSWORD_RATE_LIMIT_WINDOW ?? '1 hour',
+        },
+      },
+    },
+    async (request, reply) => {
+      const data = validateInput(resetPasswordBodySchema, request.body, reply);
+      if (!data) return;
+
+      const result = await resetPassword(data.token, data.password);
+
+      if (result.status === 'invalid') {
+        return reply.status(400).send({
+          error: toErrorBody('Invalid or expired reset link', undefined, 'INVALID_RESET_TOKEN'),
+        });
+      }
+
+      if (result.status === 'expired') {
+        return reply.status(400).send({
+          error: toErrorBody('Reset link has expired', undefined, 'RESET_EXPIRED'),
+        });
+      }
+
+      // Security notification — even if the user made the request themselves.
+      await fastify.emailService.send({
+        to: result.email,
+        template: 'password-changed',
+        data: {},
+      });
+
+      return { message: 'Your password has been reset. You can now sign in.' };
     },
   );
 

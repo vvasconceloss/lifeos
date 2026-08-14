@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import { prisma } from "../../db/client";
 import { generateToken, hashToken, TOKEN_TTLS } from "../../lib/tokens";
 import type { RegisterBody, UpdateMeBody, UserResponse } from "./auth.schemas";
-
 const SALT_ROUNDS = 10;
 
 export const DEMO_EMAIL = "demo@lifeos.com";
@@ -195,6 +194,86 @@ export async function resendVerification(
 
   const token = await createVerificationToken(user.id);
   await sendEmail(token, user.email);
+}
+
+/**
+ * Creates a single-use password-reset token for the user (1 h TTL), invalidating
+ * any previous one. Returns the plaintext token (never persisted) for the email.
+ */
+export async function createPasswordResetToken(userId: string): Promise<string> {
+  const token = generateToken();
+  await prisma.$transaction([
+    prisma.passwordResetToken.deleteMany({ where: { userId } }),
+    prisma.passwordResetToken.create({
+      data: {
+        userId,
+        tokenHash: hashToken(token),
+        expiresAt: new Date(Date.now() + TOKEN_TTLS.PASSWORD_RESET),
+      },
+    }),
+  ]);
+  return token;
+}
+
+export type ResetPasswordResult =
+  | { status: "reset"; email: string }
+  | { status: "expired" }
+  | { status: "invalid" };
+
+/**
+ * Resets a password with a token. Single-use: on success the token is deleted,
+ * `passwordChangedAt` is bumped (invalidating old sessions) and the new password
+ * hash is stored. An expired token is removed so a stale link can't linger.
+ */
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<ResetPasswordResult> {
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+
+  if (!record) return { status: "invalid" };
+
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  if (!user) return { status: "invalid" };
+
+  if (record.expiresAt < new Date()) {
+    await prisma.passwordResetToken.delete({ where: { id: record.id } });
+    return { status: "expired" };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: hashPassword(newPassword), passwordChangedAt: new Date() },
+    }),
+    prisma.passwordResetToken.delete({ where: { id: record.id } }),
+  ]);
+
+  return { status: "reset", email: user.email };
+}
+
+/**
+ * Handles a password-reset request. Always runs equivalent work so the response
+ * time doesn't reveal whether the email is registered. Returns nothing — callers
+ * always respond with the same generic message (anti-enumeration).
+ */
+export async function forgotPassword(
+  email: string,
+  sendEmail: (token: string, email: string) => Promise<void>,
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (user && !isDemoEmail(user.email)) {
+    const token = await createPasswordResetToken(user.id);
+    await sendEmail(token, user.email);
+    return;
+  }
+
+  // Consistent work for the "email doesn't exist" / demo path — equalise the
+  // response time so the endpoint isn't an enumeration oracle.
+  await bcrypt.hash(email, SALT_ROUNDS);
 }
 
 export const AUTH_ERRORS = {

@@ -2,6 +2,10 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { toErrorBody } from "../lib/errors";
 import { prisma } from "../db/client";
 
+function unauthorized(reply: FastifyReply): void {
+  reply.status(401).send({ error: toErrorBody("Unauthorized", undefined, "UNAUTHORIZED") });
+}
+
 export async function requireAuth(
   request: FastifyRequest,
   reply: FastifyReply,
@@ -9,7 +13,20 @@ export async function requireAuth(
   try {
     await request.jwtVerify();
   } catch {
-    reply.status(401).send({ error: toErrorBody("Unauthorized", undefined, "UNAUTHORIZED") });
+    unauthorized(reply);
+    return;
+  }
+
+  // After a password reset/change, every JWT issued before `passwordChangedAt`
+  // is rejected — forces a fresh login on all devices.
+  const user = await prisma.user.findUnique({
+    where: { id: request.user.sub },
+    select: { passwordChangedAt: true },
+  });
+
+  const issuedAt = request.user.iat ? new Date(request.user.iat * 1000) : null;
+  if (user?.passwordChangedAt && issuedAt && issuedAt < user.passwordChangedAt) {
+    unauthorized(reply);
   }
 }
 

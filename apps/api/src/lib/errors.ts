@@ -24,6 +24,8 @@ const MESSAGE_TO_CODE: Record<string, string> = {
   "Please verify your email to continue": "EMAIL_NOT_VERIFIED",
   "Verification link has expired": "VERIFICATION_EXPIRED",
   "Invalid or expired verification link": "INVALID_VERIFICATION_TOKEN",
+  "Invalid or expired reset link": "INVALID_RESET_TOKEN",
+  "Reset link has expired": "RESET_EXPIRED",
 };
 
 /**
