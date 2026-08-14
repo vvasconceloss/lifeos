@@ -40,8 +40,9 @@ This is an explicit, conscious decision rather than an oversight.
 A lightweight feedback path exists without building a full system:
 
 - **GitHub issue templates** — `.github/ISSUE_TEMPLATE/bug.yml` and `feature.yml`.
-- **In-app links** — the Profile page has a **Feedback** card with "Report a bug" and
-  "Suggest a feature" buttons that open GitHub Issues with the matching template.
+- **In-app links** — a GitHub button in the app header (next to the theme toggle) opens a
+  dropdown with "Report a bug" and "Suggest a feature" links that open GitHub Issues with the
+  matching template.
 
 ## Status page (discarded)
 
