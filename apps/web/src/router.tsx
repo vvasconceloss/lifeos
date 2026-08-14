@@ -7,6 +7,8 @@ const LandingPage = lazy(() => import("./pages/landing"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ForgotPasswordPage = lazy(() => import("./pages/forgot-password"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
+const ConfirmEmailChangePage = lazy(() => import("./pages/confirm-email-change"));
+const CancelEmailChangePage = lazy(() => import("./pages/cancel-email-change"));
 const RegisterPage = lazy(() => import("./pages/register"));
 const VerifyEmailPage = lazy(() => import("./pages/verify-email"));
 const InsightsPage = lazy(() => import("./pages/insights"));
@@ -57,6 +59,26 @@ const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reset-password",
   component: ResetPasswordPage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const confirmEmailChangeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/email/confirm",
+  component: ConfirmEmailChangePage,
+  pendingComponent: RoutePending,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const cancelEmailChangeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/account/email/cancel",
+  component: CancelEmailChangePage,
   pendingComponent: RoutePending,
   validateSearch: (search: Record<string, unknown>) => ({
     token: typeof search.token === "string" ? search.token : undefined,
@@ -172,7 +194,7 @@ const onboardingRoute = createRoute({
   pendingComponent: RoutePending,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute, resetPasswordRoute, verifyEmailRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute, resetPasswordRoute, confirmEmailChangeRoute, cancelEmailChangeRoute, verifyEmailRoute, onboardingRoute, appRoute, pillarsRoute, habitsRoute, statisticsRoute, insightsRoute, habitDetailRoute, goalsRoute, goalDetailRoute, projectsRoute, projectDetailRoute, progressionRoute, journalRoute, profileRoute]);
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

@@ -10,6 +10,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { AccountSettings } from "@/components/account-settings";
 import type { User } from "@/contexts/AuthContextBase";
 
 const TIMEZONES = [
@@ -122,6 +123,12 @@ function ProfileForm({ user, onSaved }: { user: User; onSaved: () => Promise<voi
             </p>
           )}
         </div>
+
+        {!user.isDemo ? (
+          <div className="mt-5 border-t border-border/40 pt-4">
+            <AccountSettings />
+          </div>
+        ) : null}
       </div>
 
       <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
