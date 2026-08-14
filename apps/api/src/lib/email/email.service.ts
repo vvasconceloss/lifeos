@@ -31,6 +31,14 @@ function nodemailerTransport(transporter: Transporter): MailTransport {
         subject: payload.subject,
         html: payload.html,
         text: payload.text,
+        // Helps transactional mail avoid spam folders: signals the email is a
+        // one-way notification and doesn't need a threaded reply.
+        headers: {
+          "X-Auto-Response-Suppress": "OOF, AutoReply",
+          "X-Mailer": "LifeOS",
+        },
+        // Precedence: bulk de-emphasises promotional/automated mail handling.
+        textEncoding: "quoted-printable",
       });
     },
   };

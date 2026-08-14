@@ -101,6 +101,30 @@ describe("renderEmail", () => {
     }
   });
 
+  it("uses the brand design: title, blue CTA, clean footer and a breakable fallback link", () => {
+    const rendered = renderEmail("verify-email", {
+      verificationUrl: "https://lifeos.app/verify?token=abc",
+    });
+    // The header shows the brand name as text (no image) — safe in every client.
+    expect(rendered.html).toContain(">LifeOS</span>");
+    expect(rendered.html).not.toContain("<img");
+    expect(rendered.html).not.toContain('background-color:#111827');
+    // Neutral light-grey page background.
+    expect(rendered.html).toContain('background-color:#f8f9fa');
+    // Blue brand CTA with white text and rounded corners.
+    expect(rendered.html).toContain('background-color:#6366f1;color:#ffffff');
+    expect(rendered.html).toContain('border-radius:6px');
+    // The long link is wrapped to not break the layout.
+    expect(rendered.html).toContain("word-break:break-all");
+    // Natural, human title without the "— LifeOS" suffix.
+    expect(rendered.html).toContain("Confirm your email address");
+    expect(rendered.html).not.toContain("Confirm your email address — LifeOS");
+    // Clean footer: privacy + support links, no repeated project URL.
+    expect(rendered.html).toContain("Privacy Policy");
+    expect(rendered.html).toContain("Support");
+    expect(rendered.html).not.toContain("LifeOS · <a");
+  });
+
   it("escapes HTML in interpolated values", () => {
     const rendered = renderEmail("verify-email", {
       verificationUrl: 'https://lifeos.app/verify?token=<script>',
