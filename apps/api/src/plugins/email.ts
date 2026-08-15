@@ -12,10 +12,10 @@ export const emailPlugin = fp(
   async (fastify: FastifyInstance, opts: { emailService?: EmailService }) => {
     const emailService =
       opts?.emailService ??
-      createEmailService({
+      (await createEmailService({
         config: loadEmailConfig(),
         logger: fastify.log as unknown as Pick<Console, "warn" | "error">,
-      });
+      }));
     fastify.decorate("emailService", emailService);
   },
   { name: "emailPlugin" },

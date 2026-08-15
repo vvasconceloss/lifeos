@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from "nodemailer";
-import { lookup as dnsLookup } from "node:dns";
+import { lookup as dnsLookup, promises as dnsPromises } from "node:dns";
+import { isIP } from "node:net";
 import type { LookupFunction } from "net";
 import type { EmailConfig } from "./email.config";
 import { formatFromAddress } from "./email.config";
@@ -68,24 +69,45 @@ export const ipv4Lookup: LookupFunction = (hostname, options, callback) => {
 /** nodemailer 9 accepts `lookup` and forwards it to `net.connect`; @types/nodemailer@8 doesn't type it. */
 type SmtpTransportConfig = Parameters<typeof nodemailer.createTransport>[0];
 
-function createSmtpTransport(config: EmailConfig, opts: SmtpTransportOptions = {}): MailTransport {
-  // Force IPv4 name resolution at the socket level. `smtp.gmail.com` resolves to
-  // an IPv6 address first; on hosts without an IPv6 route (e.g. free Render
-  // instances) the SMTP connect then fails with ENETUNREACH and emails never
-  // send. `dns.setDefaultResultOrder("ipv4first")` is not reliable here because
-  // nodemailer resolves via its own socket lookup — pass `family: 4` explicitly.
+/**
+ * Resolves the SMTP host to an IPv4 address. Gmail's `smtp.gmail.com` has both A
+ * and AAAA records, and nodemailer 9 resolves them itself and tries IPv6 first —
+ * which fails with ENETUNREACH on hosts without an IPv6 route (free Render).
+ * Passing the resolved IPv4 as `host` makes nodemailer treat it as a literal IP
+ * (`net.isIP`) and skip its own DNS resolution entirely. `servername` keeps the
+ * hostname for SNI / TLS certificate validation.
+ */
+/** @internal exported for tests */
+export async function resolveIpv4Host(host: string): Promise<string> {
+  if (isIP(host) === 4) return host;
+  try {
+    const addresses = await dnsPromises.resolve4(host);
+    if (addresses.length > 0) return addresses[0]!;
+  } catch {
+    // Resolution failed — fall back to the hostname and let nodemailer try.
+  }
+  return host;
+}
+
+function createSmtpTransport(
+  config: EmailConfig,
+  opts: SmtpTransportOptions = {},
+  hostOverride?: string,
+): MailTransport {
+  const host = hostOverride ?? config.host;
   const transporter = nodemailer.createTransport({
-    host: config.host,
+    host,
     port: opts.port ?? config.port,
     secure: opts.secure ?? config.secure,
     auth: config.user
       ? { user: config.user, pass: config.pass }
       : undefined,
-    lookup: ipv4Lookup,
+    // SNI: when `host` is a literal IP, keep the real hostname for TLS.
+    servername: host === config.host ? undefined : config.host,
     connectionTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
     greetingTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
     socketTimeout: DEFAULT_SOCKET_TIMEOUT_MS,
-  } as SmtpTransportConfig & { lookup: LookupFunction });
+  } as SmtpTransportConfig & { servername?: string });
   return nodemailerTransport(transporter);
 }
 
@@ -143,11 +165,11 @@ export function withStartTlsFallback(primary: MailTransport, fallback: MailTrans
  * `send` runs in dry-run mode: it renders the email and logs it, but never
  * contacts any SMTP server — safe for local development and tests.
  */
-export function createEmailService(options: EmailServiceOptions): EmailService {
+export async function createEmailService(options: EmailServiceOptions): Promise<EmailService> {
   const { config, logger = console } = options;
   const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS;
-  const transport = options.transport ?? buildTransport(config, logger);
+  const transport = options.transport ?? (await buildTransport(config, logger));
 
   async function send(input: SendEmailInput): Promise<void> {
     const { to, template, data, locale } = input;
@@ -197,11 +219,16 @@ export function createEmailService(options: EmailServiceOptions): EmailService {
   return { send };
 }
 
-function buildTransport(
+async function buildTransport(
   config: EmailConfig,
   logger: Pick<Console, "warn" | "error">,
-): MailTransport {
-  const primary = createSmtpTransport(config);
+): Promise<MailTransport> {
+  const host = await resolveIpv4Host(config.host);
+  if (host !== config.host) {
+    logger.warn(`[email] resolved ${config.host} to IPv4 ${host} for SMTP`);
+  }
+
+  const primary = createSmtpTransport(config, {}, host);
 
   // STARTTLS fallback only makes sense when the configured port is not already
   // the STARTTLS one. 465 (implicit TLS) is the case that needs it on some hosts.
@@ -209,10 +236,14 @@ function buildTransport(
     return primary;
   }
 
-  const fallback = createSmtpTransport(config, {
-    port: FALLBACK_STARTTLS_PORT,
-    secure: false,
-  });
+  const fallback = createSmtpTransport(
+    config,
+    {
+      port: FALLBACK_STARTTLS_PORT,
+      secure: false,
+    },
+    host,
+  );
 
   logger.warn(
     `[email] enabled SMTP STARTTLS fallback (port ${FALLBACK_STARTTLS_PORT}) for ${config.host}`,

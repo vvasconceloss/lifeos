@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadEmailConfig, formatFromAddress } from "./email.config";
-import { createEmailService, ipv4Lookup, isConnectionError, withStartTlsFallback } from "./email.service";
+import { createEmailService, ipv4Lookup, isConnectionError, resolveIpv4Host, withStartTlsFallback } from "./email.service";
 import { renderEmail } from "./email.templates";
 import type { EmailConfig } from "./email.config";
 import type { MailTransport } from "./email.types";
@@ -158,7 +158,7 @@ describe("renderEmail", () => {
 
   it("passes the locale through the service to the rendered email", async () => {
     const { sendMail, transport } = makeTransport();
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: true }),
       transport,
       logger: { warn: vi.fn(), error: vi.fn() },
@@ -180,7 +180,7 @@ describe("renderEmail", () => {
 describe("EmailService.send", () => {
   it("does not contact the transport when disabled (dry-run)", async () => {
     const { sendMail, transport } = makeTransport();
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: false }),
       transport,
       logger: { warn: vi.fn(), error: vi.fn() },
@@ -197,7 +197,7 @@ describe("EmailService.send", () => {
 
   it("sends with the configured from/reply-to when enabled", async () => {
     const { sendMail, transport } = makeTransport();
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: true }),
       transport,
       logger: { warn: vi.fn(), error: vi.fn() },
@@ -224,7 +224,7 @@ describe("EmailService.send", () => {
       .mockRejectedValueOnce(new Error("connection reset"))
       .mockResolvedValueOnce({ messageId: "test-id" });
     const logger = { warn: vi.fn(), error: vi.fn() };
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: true }),
       transport,
       logger,
@@ -246,7 +246,7 @@ describe("EmailService.send", () => {
     const { sendMail, transport } = makeTransport();
     sendMail.mockRejectedValue(new Error("smtp down"));
     const logger = { warn: vi.fn(), error: vi.fn() };
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: true }),
       transport,
       logger,
@@ -272,7 +272,7 @@ describe("EmailService.send", () => {
 
   it("throws when enabled but no sender address is configured", async () => {
     const { sendMail, transport } = makeTransport();
-    const service = createEmailService({
+    const service = await createEmailService({
       config: makeConfig({ enabled: true, fromAddress: "" }),
       transport,
     });
@@ -285,6 +285,13 @@ describe("EmailService.send", () => {
 });
 
 describe("SMTP STARTTLS fallback (465 → 587)", () => {
+  it("resolves smtp.gmail.com to an IPv4 literal", async () => {
+    const host = await resolveIpv4Host("smtp.gmail.com");
+    expect(host).toMatch(/^(\d+\.){3}\d+$/);
+    // A literal IPv4 passes through unchanged.
+    expect(await resolveIpv4Host("64.233.184.109")).toBe("64.233.184.109");
+  });
+
   it("resolves smtp.gmail.com over IPv4 only (family 4)", async () => {
     const result = await new Promise<{ address: string; family: number }>((resolve, reject) => {
       ipv4Lookup("smtp.gmail.com", { family: 0 }, (err, address) => {

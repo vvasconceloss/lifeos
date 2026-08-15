@@ -10,7 +10,7 @@ import { processAccountDeletions } from "../modules/account/account.service";
  * hitting the Render API. Idempotent — safe to run more than once a day.
  */
 async function main() {
-  const emailService = createEmailService({
+  const emailService = await createEmailService({
     config: loadEmailConfig(),
     logger: console,
   });
