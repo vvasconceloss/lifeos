@@ -1,6 +1,8 @@
 import { createTransport } from "nodemailer";
 import { promises as dnsPromises } from "node:dns";
 import { isIP } from "node:net";
+import { createGmailApiTransport } from "../lib/email/gmail-api.transport";
+import { loadEmailConfig, formatFromAddress } from "../lib/email/email.config";
 
 /**
  * Email connectivity diagnostic.
@@ -8,12 +10,9 @@ import { isIP } from "node:net";
  * Run locally (or in an environment where you can reach the SMTP server):
  *   pnpm --filter @lifeos/api email:diagnose
  *
- * It prints the resolved host/IPs, attempts a raw SMTP connection + auth using
- * the current EMAIL_* env vars, and reports the real error — distinguishing a
- * network/firewall timeout (ENETUNREACH / ETIMEDOUT) from a credentials error
- * (535/534) or a TLS problem. Like the runtime transport, it resolves the host
- * to an IPv4 literal and passes it as `host` (nodemailer skips its own DNS,
- * which otherwise tries IPv6 first and fails on hosts without an IPv6 route).
+ * It uses the current EMAIL_* env vars. For `EMAIL_PROVIDER=smtp` it attempts a
+ * raw SMTP connection + auth and reports the real error. For `gmail-api` it
+ * exchanges the refresh token and verifies the Gmail REST endpoint.
  */
 async function resolveIpv4(host: string): Promise<string> {
   if (isIP(host) === 4) return host;
@@ -27,17 +26,54 @@ async function resolveIpv4(host: string): Promise<string> {
 }
 
 async function main() {
+  const config = loadEmailConfig();
   const env = process.env;
-  const hostname = env.EMAIL_HOST ?? "smtp.gmail.com";
-  const host = await resolveIpv4(hostname);
-  const port = Number(env.EMAIL_PORT ?? 465);
-  const secure = (env.EMAIL_SECURE ?? "true").toLowerCase() !== "false";
-  const user = env.EMAIL_USER ?? "";
-  const pass = env.EMAIL_PASS ? "<set>" : "<MISSING>";
-  const from = env.EMAIL_FROM_ADDRESS ?? env.EMAIL_USER ?? "";
+  const hostname = config.host;
+  const user = config.user;
+  const from = config.fromAddress;
 
   console.log("=== Email diagnostic ===");
   console.log("EMAIL_ENABLED      :", env.EMAIL_ENABLED);
+  console.log("EMAIL_PROVIDER     :", config.provider);
+  if (config.provider === "gmail-api") {
+    console.log("GOOGLE_OAUTH_USER  :", config.oauth.user);
+    console.log("GOOGLE_OAUTH_CLIENT_ID:", config.oauth.clientId ? "<set>" : "<MISSING>");
+    console.log("GOOGLE_OAUTH_CLIENT_SECRET:", config.oauth.clientSecret ? "<set>" : "<MISSING>");
+    console.log("GOOGLE_OAUTH_REFRESH_TOKEN:", config.oauth.refreshToken ? "<set>" : "<MISSING>");
+    console.log("WEB_URL            :", env.WEB_URL ?? "<unset -> localhost links!>");
+    console.log();
+
+    const transport = createGmailApiTransport(config, { warn: console.warn, error: console.error });
+    try {
+      await transport.sendMail({
+        from: formatFromAddress(config),
+        to: config.oauth.user,
+        replyTo: config.replyTo,
+        subject: "LifeOS email diagnostic",
+        html: "<p>If you received this, the Gmail API transport works.</p>",
+        text: "If you received this, the Gmail API transport works.",
+      });
+      console.log("\nGmail API send: OK ✅ — a test email was sent.");
+      process.exit(0);
+    } catch (error) {
+      console.log("\nGmail API send: FAILED ❌");
+      console.log(error);
+      console.log(
+        "\nInterpretation:",
+        "\n  - 'Gmail OAuth token request failed: 400/401'  -> client id/secret/refresh token invalid.",
+        "\n  - 'Gmail API send failed: 403'                 -> the OAuth scope is missing",
+        "\n    (must include https://mail.google.com/).",
+        "\n  - ENOTFOUND / network errors                    -> egress to api.gmail.com is blocked.",
+      );
+      process.exit(1);
+    }
+  }
+
+  const host = await resolveIpv4(hostname);
+  const port = config.port;
+  const secure = config.secure;
+  const pass = config.pass ? "<set>" : "<MISSING>";
+
   console.log("EMAIL_HOST         :", hostname);
   console.log("resolved IPv4      :", host === hostname ? "(same)" : host);
   console.log("EMAIL_PORT         :", port);
@@ -70,8 +106,7 @@ async function main() {
       "\nInterpretation:",
       "\n  - ENETUNREACH / ETIMEDOUT / ECONNREFUSED at CONN  -> network/firewall between",
       "\n    this host and the SMTP server (datacenter IP blocked, no IPv6 route,",
-      "\n    outbound port blocked). The runtime already forces IPv4 and falls back to",
-      "\n    port 587; if this still fails the egress to Gmail is blocked entirely.",
+      "\n    outbound port blocked). Consider EMAIL_PROVIDER=gmail-api (HTTPS).",
       "\n  - '535' / '534' / 'Invalid login'                   -> the app password is wrong",
       "\n    (create a new one at myaccount.google.com > Security > App passwords).",
       "\n  - 'self-signed' / 'certificate'                     -> TLS trust issue.",

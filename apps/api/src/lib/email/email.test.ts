@@ -8,6 +8,7 @@ import type { MailTransport } from "./email.types";
 function makeConfig(overrides: Partial<EmailConfig> = {}): EmailConfig {
   return {
     enabled: false,
+    provider: "smtp",
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
@@ -16,6 +17,12 @@ function makeConfig(overrides: Partial<EmailConfig> = {}): EmailConfig {
     fromName: "LifeOS",
     fromAddress: "noreplylifeos.focus@gmail.com",
     replyTo: "noreplylifeos.focus+support@gmail.com",
+    oauth: {
+      clientId: "",
+      clientSecret: "",
+      refreshToken: "",
+      user: "noreplylifeos.focus@gmail.com",
+    },
     ...overrides,
   };
 }
@@ -364,5 +371,93 @@ describe("SMTP STARTTLS fallback (465 → 587)", () => {
       }),
     ).rejects.toThrow(/535/);
     expect(fallback.sendMail).not.toHaveBeenCalled();
+  });
+});
+
+describe("Gmail API transport (HTTPS)", () => {
+  it("sends via the Gmail REST API with an OAuth2 bearer token", async () => {
+    const fetchMock = vi.fn();
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: "abc-123", expires_in: 3600 }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: "msg-1" }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { createGmailApiTransport } = await import("./gmail-api.transport");
+    const config = makeConfig({
+      enabled: true,
+      provider: "gmail-api",
+      oauth: {
+        clientId: "cid",
+        clientSecret: "csecret",
+        refreshToken: "rt",
+        user: "noreplylifeos.focus@gmail.com",
+      },
+    });
+    const transport = createGmailApiTransport(config, { warn: vi.fn(), error: vi.fn() });
+
+    const result = await transport.sendMail({
+      from: "LifeOS <noreplylifeos.focus@gmail.com>",
+      to: "user@example.com",
+      replyTo: "support@example.com",
+      subject: "Hi",
+      html: "<p>hi</p>",
+      text: "hi",
+    });
+
+    expect(result).toEqual({ id: "msg-1" });
+
+    // Token request
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://oauth2.googleapis.com/token",
+      expect.objectContaining({ method: "POST" }),
+    );
+    // Send request carries the bearer token and a base64url raw message.
+    const [url, init] = fetchMock.mock.calls[1]!;
+    expect(url).toBe("https://gmail.googleapis.com/gmail/v1/users/me/messages/send");
+    expect(init.headers.Authorization).toBe("Bearer abc-123");
+    const body = JSON.parse(init.body);
+    expect(body.raw).toMatch(/^[A-Za-z0-9_-]+$/);
+    vi.unstubAllGlobals();
+  });
+
+  it("throws when the Gmail API send fails", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ access_token: "abc", expires_in: 3600 }),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        text: async () => "forbidden",
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { createGmailApiTransport } = await import("./gmail-api.transport");
+    const config = makeConfig({
+      enabled: true,
+      provider: "gmail-api",
+      oauth: { clientId: "cid", clientSecret: "cs", refreshToken: "rt", user: "u@gmail.com" },
+    });
+    const transport = createGmailApiTransport(config, { warn: vi.fn(), error: vi.fn() });
+
+    await expect(
+      transport.sendMail({
+        from: "LifeOS <u@gmail.com>",
+        to: "user@example.com",
+        replyTo: "support@example.com",
+        subject: "Hi",
+        html: "<p>hi</p>",
+        text: "hi",
+      }),
+    ).rejects.toThrow(/Gmail API send failed: 403/);
+    vi.unstubAllGlobals();
   });
 });

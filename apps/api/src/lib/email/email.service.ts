@@ -5,6 +5,7 @@ import type { LookupFunction } from "net";
 import type { EmailConfig } from "./email.config";
 import { formatFromAddress } from "./email.config";
 import { renderEmail } from "./email.templates";
+import { createGmailApiTransport } from "./gmail-api.transport";
 import type { EmailService, MailTransport, SendEmailInput } from "./email.types";
 
 const DEFAULT_MAX_ATTEMPTS = 2;
@@ -219,35 +220,54 @@ export async function createEmailService(options: EmailServiceOptions): Promise<
   return { send };
 }
 
+function buildSmtpTransport(
+  config: EmailConfig,
+  logger: Pick<Console, "warn" | "error">,
+): Promise<MailTransport> {
+  return (async () => {
+    const host = await resolveIpv4Host(config.host);
+    if (host !== config.host) {
+      logger.warn(`[email] resolved ${config.host} to IPv4 ${host} for SMTP`);
+    }
+
+    const primary = createSmtpTransport(config, {}, host);
+
+    // STARTTLS fallback only makes sense when the configured port is not already
+    // the STARTTLS one. 465 (implicit TLS) is the case that needs it on some hosts.
+    if (config.port === FALLBACK_STARTTLS_PORT) {
+      return primary;
+    }
+
+    const fallback = createSmtpTransport(
+      config,
+      {
+        port: FALLBACK_STARTTLS_PORT,
+        secure: false,
+      },
+      host,
+    );
+
+    logger.warn(
+      `[email] enabled SMTP STARTTLS fallback (port ${FALLBACK_STARTTLS_PORT}) for ${config.host}`,
+    );
+
+    return withStartTlsFallback(primary, fallback);
+  })();
+}
+
 async function buildTransport(
   config: EmailConfig,
   logger: Pick<Console, "warn" | "error">,
 ): Promise<MailTransport> {
-  const host = await resolveIpv4Host(config.host);
-  if (host !== config.host) {
-    logger.warn(`[email] resolved ${config.host} to IPv4 ${host} for SMTP`);
+  if (config.provider === "gmail-api") {
+    if (!config.oauth.clientId || !config.oauth.clientSecret || !config.oauth.refreshToken) {
+      throw new Error(
+        "Email provider is 'gmail-api' but GOOGLE_OAUTH_CLIENT_ID/SECRET/REFRESH_TOKEN are not configured",
+      );
+    }
+    logger.warn("[email] using the Gmail API (HTTPS) transport — SMTP is bypassed");
+    return createGmailApiTransport(config, logger);
   }
 
-  const primary = createSmtpTransport(config, {}, host);
-
-  // STARTTLS fallback only makes sense when the configured port is not already
-  // the STARTTLS one. 465 (implicit TLS) is the case that needs it on some hosts.
-  if (config.port === FALLBACK_STARTTLS_PORT) {
-    return primary;
-  }
-
-  const fallback = createSmtpTransport(
-    config,
-    {
-      port: FALLBACK_STARTTLS_PORT,
-      secure: false,
-    },
-    host,
-  );
-
-  logger.warn(
-    `[email] enabled SMTP STARTTLS fallback (port ${FALLBACK_STARTTLS_PORT}) for ${config.host}`,
-  );
-
-  return withStartTlsFallback(primary, fallback);
+  return buildSmtpTransport(config, logger);
 }

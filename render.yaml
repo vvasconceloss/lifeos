@@ -42,10 +42,16 @@ services:
         value: "10"
       - key: RESET_PASSWORD_RATE_LIMIT_WINDOW
         value: 1 hour
-      # Transactional email (Gmail SMTP). Enabled in production — credentials are
-      # set as secrets (EMAIL_PASS) in the Render dashboard.
+      # Transactional email. SMTP to smtp.gmail.com is blocked from Render free
+      # instances (Gmail drops datacenter SMTP), so production uses the Gmail
+      # REST API over HTTPS (EMAIL_PROVIDER=gmail-api) with OAuth2 credentials
+      # set as secrets in the Render dashboard:
+      #   GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET / GOOGLE_OAUTH_REFRESH_TOKEN
+      #   GOOGLE_OAUTH_USER
       - key: EMAIL_ENABLED
         value: "true"
+      - key: EMAIL_PROVIDER
+        value: gmail-api
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
@@ -61,6 +67,15 @@ services:
       - key: EMAIL_FROM_ADDRESS
         sync: false
       - key: EMAIL_REPLY_TO
+        sync: false
+      # Gmail API OAuth2 (used when EMAIL_PROVIDER=gmail-api).
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_REFRESH_TOKEN
+        sync: false
+      - key: GOOGLE_OAUTH_USER
         sync: false
       # Web origin used to build verification/reset links in emails. MUST be the
       # public Vercel origin (email clients cannot reach localhost).

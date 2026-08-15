@@ -5,8 +5,15 @@
 
 ## Provider
 
-LifeOS sends transactional emails through the **official Gmail SMTP server**, using a dedicated
-central account:
+LifeOS sends transactional emails through the **official Gmail**, using a dedicated central
+account. Two transports are supported:
+
+- **Gmail REST API over HTTPS** (`EMAIL_PROVIDER=gmail-api`, default in production) — used when the
+  SMTP egress is blocked. Gmail SMTP drops connections from datacenter IPs (e.g. free Render
+  instances), so production uses the REST API on port 443 instead, authenticated with OAuth2.
+- **Gmail SMTP** (`EMAIL_PROVIDER=smtp`, default locally) — classic SMTP with an app password.
+
+Account facts:
 
 - **Sending account:** `noreplylifeos.focus@gmail.com`
 - **Reply-to:** `noreplylifeos.focus+support@gmail.com` — Gmail ignores everything after `+`, so
@@ -15,9 +22,6 @@ central account:
 - **No custom domain or paid platform required** — SPF/DKIM/DMARC are already handled by Gmail for
   `gmail.com` addresses.
 
-Credentials are a Gmail **app password** (2FA required on the account) — never the account's
-normal login password.
-
 ## Environment variables
 
 All defined in `apps/api/.env.example` and set in `render.yaml` (secrets via `sync: false`):
@@ -25,19 +29,43 @@ All defined in `apps/api/.env.example` and set in `render.yaml` (secrets via `sy
 | Variable | Purpose |
 |---|---|
 | `EMAIL_ENABLED` | `false` (default) = **dry-run**: emails are rendered and logged, never sent. `true` = real sending. |
-| `EMAIL_HOST` | SMTP host (default `smtp.gmail.com`) |
-| `EMAIL_PORT` | SMTP port (default `465`) |
-| `EMAIL_SECURE` | TLS on connect (default `true`) |
-| `EMAIL_USER` | SMTP username (the Gmail account) |
-| `EMAIL_PASS` | Gmail **app password** |
+| `EMAIL_PROVIDER` | `smtp` (default) or `gmail-api` (HTTPS transport) |
+| `EMAIL_HOST` | SMTP host (default `smtp.gmail.com`) — only used by `smtp` |
+| `EMAIL_PORT` | SMTP port (default `465`) — only used by `smtp` |
+| `EMAIL_SECURE` | TLS on connect (default `true`) — only used by `smtp` |
+| `EMAIL_USER` | The Gmail account / SMTP username |
+| `EMAIL_PASS` | Gmail **app password** — only used by `smtp` |
 | `EMAIL_FROM_NAME` | Display name in the From header (default `LifeOS`) |
 | `EMAIL_FROM_ADDRESS` | From address (defaults to `EMAIL_USER`) |
 | `EMAIL_REPLY_TO` | Reply-To header (defaults to `EMAIL_USER`) |
-| `WEB_URL` | Public web origin used to build email links (e.g. `https://lifeos.app`) |
+| `WEB_URL` | Public web origin used to build email links (e.g. `https://lifeos-focus.vercel.app`) |
+| `GOOGLE_OAUTH_CLIENT_ID` | Gmail API OAuth2 client id — only used by `gmail-api` |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Gmail API OAuth2 client secret — only used by `gmail-api` |
+| `GOOGLE_OAUTH_REFRESH_TOKEN` | Gmail API OAuth2 refresh token — only used by `gmail-api` |
+| `GOOGLE_OAUTH_USER` | Gmail address sent as `me` (defaults to `EMAIL_USER`) — only used by `gmail-api` |
 
 > **Safety:** `EMAIL_ENABLED=false` is the default. Development and CI never contact an SMTP
 > server; the service logs `[email][dry-run] ...` instead. Only flip it to `true` with real
 > credentials in place.
+
+## Gmail API transport (OAuth2)
+
+To use `EMAIL_PROVIDER=gmail-api`:
+
+1. Create a Google Cloud project and an **OAuth 2.0 Client ID** (type: Web/Desktop) at
+   <https://console.cloud.google.com/apis/credentials>.
+2. Enable the **Gmail API** for the project (API Library → Gmail API → Enable).
+3. Add the scope `https://mail.google.com/` to the OAuth consent screen (External user type).
+4. Obtain a **refresh token** (e.g. with `google-auth-cli` or the OAuth playground):
+   - Authorization URL: `https://accounts.google.com/o/oauth2/auth?access_type=offline&prompt=consent&scope=https://mail.google.com/&client_id=...&redirect_uri=...`
+   - Exchange the code at `https://oauth2.googleapis.com/token` for `refresh_token`.
+5. Set the env vars in the Render dashboard:
+   `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`,
+   `GOOGLE_OAUTH_USER`, plus `EMAIL_PROVIDER=gmail-api` and `EMAIL_ENABLED=true`.
+
+The transport builds the RFC822 message with nodemailer's `jsonTransport` and submits it to
+`https://gmail.googleapis.com/gmail/v1/users/me/messages/send` with a short-lived bearer token
+obtained from the refresh token. No SMTP TCP ports are involved.
 
 ## Service abstraction
 
@@ -46,9 +74,10 @@ The code lives in `apps/api/src/lib/email/`:
 | File | Responsibility |
 |---|---|
 | `email.types.ts` | `EmailTemplate` union, `SendEmailInput`, `MailTransport` contract, `EmailService` interface |
-| `email.config.ts` | Reads the `EMAIL_*` env vars into a typed `EmailConfig` |
+| `email.config.ts` | Reads the `EMAIL_*` + `GOOGLE_OAUTH_*` env vars into a typed `EmailConfig` |
 | `email.templates.ts` | Base HTML layout + plain-text fallback + a renderer per template |
-| `email.service.ts` | `createEmailService()` — nodemailer SMTP adapter, retry, failure logging, dry-run mode |
+| `email.service.ts` | `createEmailService()` — transport selection (SMTP or Gmail API), retry, failure logging, dry-run mode |
+| `gmail-api.transport.ts` | `createGmailApiTransport()` — OAuth2 refresh + Gmail REST send over HTTPS |
 
 The service is exposed on the Fastify instance as `fastify.emailService` (decorated by
 `apps/api/src/plugins/email.ts`), so any route can send mail. `buildApp({ emailService })` accepts
@@ -108,6 +137,7 @@ the service automatically retries the send over port 587 with `secure: false`.
 | `connect ENETUNREACH <ipv6>:465/587` | No IPv6 route on the host | resolve to an IPv4 literal (already applied) |
 | `Connection timeout` after ~2 min | Default nodemailer timeout | short timeouts (already applied) |
 | `ETIMEDOUT` / `ENETUNREACH` on `465` but works on `587` | Port 465 blocked by the host network | automatic STARTTLS fallback (already applied) |
+| `Connection timeout` / `ENETUNREACH` on every SMTP port | Gmail drops datacenter SMTP (e.g. Render free) | use `EMAIL_PROVIDER=gmail-api` (HTTPS, already applied in production) |
 | Email received with `localhost` links | `WEB_URL` unset → `http://localhost:5173` fallback | set `WEB_URL` to the public origin in Render |
 | `429 RATE_LIMIT_EXCEEDED` on resend | Slow failed sends consumed the 3/h limit | fix the send; `resend-verification` allows 3/h on purpose |
 
