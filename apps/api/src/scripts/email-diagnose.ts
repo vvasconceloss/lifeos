@@ -1,5 +1,10 @@
 import { createTransport } from "nodemailer";
-import { setDefaultResultOrder } from "node:dns";
+import { lookup as dnsLookup } from "node:dns";
+import type { LookupFunction } from "net";
+
+const ipv4Lookup: LookupFunction = (hostname, options, callback) => {
+  dnsLookup(hostname, { ...(typeof options === "object" ? options : {}), family: 4 }, callback);
+};
 
 /**
  * Email connectivity diagnostic.
@@ -13,8 +18,6 @@ import { setDefaultResultOrder } from "node:dns";
  * (535/534) or a TLS problem.
  */
 async function main() {
-  setDefaultResultOrder("ipv4first");
-
   const env = process.env;
   const host = env.EMAIL_HOST ?? "smtp.gmail.com";
   const port = Number(env.EMAIL_PORT ?? 465);
@@ -47,10 +50,11 @@ async function main() {
     port,
     secure,
     auth: { user, pass },
+    lookup: ipv4Lookup,
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 15_000,
-  });
+  } as Parameters<typeof createTransport>[0] & { lookup: LookupFunction });
 
   try {
     const ok = await transporter.verify();

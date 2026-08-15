@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadEmailConfig, formatFromAddress } from "./email.config";
-import { createEmailService, isConnectionError, withStartTlsFallback } from "./email.service";
+import { createEmailService, ipv4Lookup, isConnectionError, withStartTlsFallback } from "./email.service";
 import { renderEmail } from "./email.templates";
 import type { EmailConfig } from "./email.config";
 import type { MailTransport } from "./email.types";
@@ -285,6 +285,22 @@ describe("EmailService.send", () => {
 });
 
 describe("SMTP STARTTLS fallback (465 → 587)", () => {
+  it("resolves smtp.gmail.com over IPv4 only (family 4)", async () => {
+    const result = await new Promise<{ address: string; family: number }>((resolve, reject) => {
+      ipv4Lookup("smtp.gmail.com", { family: 0 }, (err, address) => {
+        if (err) return reject(err);
+        if (typeof address === "string") return resolve({ address, family: 4 });
+        // `all: true` variant returns an array; use the first entry.
+        const first = address[0];
+        if (first) return resolve({ address: first.address, family: first.family });
+        reject(new Error("no address"));
+      });
+    });
+    expect(result.family).toBe(4);
+    // Gmail's IPv4 addresses are 64.233.x.x / 142.250.x.x — definitely not IPv6.
+    expect(result.address).toMatch(/^(\d+\.){3}\d+$/);
+  });
+
   it("classifies connection-level errors as retryable for the fallback", () => {
     expect(isConnectionError({ code: "ETIMEDOUT" })).toBe(true);
     expect(isConnectionError({ code: "ENETUNREACH" })).toBe(true);

@@ -65,7 +65,7 @@ services:
       # Web origin used to build verification/reset links in emails. MUST be the
       # public Vercel origin (email clients cannot reach localhost).
       - key: WEB_URL
-        value: https://lifeos.app
+        value: https://lifeos-focus.vercel.app
       # Set these in the Render dashboard (never commit secrets):
       # - DATABASE_URL  -> Neon PostgreSQL connection string (include ?sslmode=require)
       # - JWT_SECRET    -> long random value (openssl rand -hex 32)

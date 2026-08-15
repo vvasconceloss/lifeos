@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from "nodemailer";
-import { setDefaultResultOrder } from "node:dns";
+import { lookup as dnsLookup } from "node:dns";
+import type { LookupFunction } from "net";
 import type { EmailConfig } from "./email.config";
 import { formatFromAddress } from "./email.config";
 import { renderEmail } from "./email.templates";
@@ -59,12 +60,20 @@ function nodemailerTransport(transporter: Transporter): MailTransport {
   };
 }
 
-function createSmtpTransport(config: EmailConfig, opts: SmtpTransportOptions = {}): MailTransport {
-  // Force IPv4 name resolution. On IPv6-capable hosts `smtp.gmail.com` resolves
-  // to an IPv6 address first; without an IPv6 route the SMTP connect fails with
-  // ENETUNREACH and emails never send (seen on Render free instances).
-  setDefaultResultOrder("ipv4first");
+/** @internal exported for tests */
+export const ipv4Lookup: LookupFunction = (hostname, options, callback) => {
+  dnsLookup(hostname, { ...(typeof options === "object" ? options : {}), family: 4 }, callback);
+};
 
+/** nodemailer 9 accepts `lookup` and forwards it to `net.connect`; @types/nodemailer@8 doesn't type it. */
+type SmtpTransportConfig = Parameters<typeof nodemailer.createTransport>[0];
+
+function createSmtpTransport(config: EmailConfig, opts: SmtpTransportOptions = {}): MailTransport {
+  // Force IPv4 name resolution at the socket level. `smtp.gmail.com` resolves to
+  // an IPv6 address first; on hosts without an IPv6 route (e.g. free Render
+  // instances) the SMTP connect then fails with ENETUNREACH and emails never
+  // send. `dns.setDefaultResultOrder("ipv4first")` is not reliable here because
+  // nodemailer resolves via its own socket lookup — pass `family: 4` explicitly.
   const transporter = nodemailer.createTransport({
     host: config.host,
     port: opts.port ?? config.port,
@@ -72,10 +81,11 @@ function createSmtpTransport(config: EmailConfig, opts: SmtpTransportOptions = {
     auth: config.user
       ? { user: config.user, pass: config.pass }
       : undefined,
+    lookup: ipv4Lookup,
     connectionTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
     greetingTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
     socketTimeout: DEFAULT_SOCKET_TIMEOUT_MS,
-  });
+  } as SmtpTransportConfig & { lookup: LookupFunction });
   return nodemailerTransport(transporter);
 }
 

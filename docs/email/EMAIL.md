@@ -75,12 +75,13 @@ code changes.
 
 ### Network hardening (SMTP over IPv6 / slow connections)
 
-Gmail's `smtp.gmail.com` may resolve to an **IPv6** address first. On hosts without an IPv6 route
+Gmail's `smtp.gmail.com` resolves to **IPv6** addresses first. On hosts without an IPv6 route
 (e.g. Render free instances) the SMTP connect fails with `ENETUNREACH` and emails are never sent.
-Two safeguards are applied in `email.service.ts`:
+The transport in `email.service.ts`:
 
-- **Force IPv4 resolution** via `dns.setDefaultResultOrder("ipv4first")` before creating the
-  transport — `smtp.gmail.com` connects over IPv4.
+- **Forces IPv4 at the socket level** by passing a `lookup` function with `family: 4` to nodemailer.
+  (`dns.setDefaultResultOrder("ipv4first")` is not reliable — nodemailer resolves via its own
+  socket lookup, so the option must be passed explicitly to the transport.)
 - **Short timeouts** (`connectionTimeout`/`greetingTimeout` 10 s, `socketTimeout` 15 s). The
   nodemailer default is 2 minutes per attempt; with the built-in retry that blocked the request for
   ~4 minutes before failing, which also consumed the `resend-verification` rate limit without ever
@@ -102,7 +103,7 @@ the service automatically retries the send over port 587 with `secure: false`.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `connect ENETUNREACH <ipv6>:465` | No IPv6 route on the host | `ipv4first` DNS order (already applied) |
+| `connect ENETUNREACH <ipv6>:465/587` | No IPv6 route on the host | IPv4-only `lookup` (already applied) |
 | `Connection timeout` after ~2 min | Default nodemailer timeout | short timeouts (already applied) |
 | `ETIMEDOUT` / `ENETUNREACH` on `465` but works on `587` | Port 465 blocked by the host network | automatic STARTTLS fallback (already applied) |
 | Email received with `localhost` links | `WEB_URL` unset → `http://localhost:5173` fallback | set `WEB_URL` to the public origin in Render |
