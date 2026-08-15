@@ -19,6 +19,7 @@
     "lint": "eslint .",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
     "jobs:process-account-deletions": "tsx src/scripts/process-account-deletions.ts",
+    "email:diagnose": "tsx src/scripts/email-diagnose.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:dev": "prisma migrate dev"
   },
