@@ -13,7 +13,7 @@ slowly building a life you can measure, understand and improve.
 
 [![CI](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml/badge.svg)](https://github.com/vvasconceloss/lifeos/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)](CHANGELOG.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
@@ -25,13 +25,13 @@ slowly building a life you can measure, understand and improve.
 
 </div>
 
-**v1.6.0 (Account Security, Lifecycle & i18n) is released**: a strong password policy, email
+**v1.6.1 (Account Security, Lifecycle & i18n) is released**: a strong password policy, email
 verification, password recovery, password/email changes, account soft-delete with a 15-day recovery
 window, and full internationalization (English, Portuguese, Ukrainian) — see
 [`docs/README.md`](docs/README.md) as the documentation entry point (roadmap, domain rules,
 frequencies, gamification, ops, deployment, security), the [`CHANGELOG.md`](CHANGELOG.md) for the
 release history, and [`docs/roadmap/v1.6_ACCOUNT_SECURITY.md`](docs/roadmap/v1.6_ACCOUNT_SECURITY.md)
-for the phase-by-phase roadmap.
+for the phase-by-phase roadmap. v1.6.1 fixes transactional email delivery (Gmail API over HTTPS).
 
 ---
 
