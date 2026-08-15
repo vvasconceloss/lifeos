@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadEmailConfig, formatFromAddress } from "./email.config";
-import { createEmailService } from "./email.service";
+import { createEmailService, isConnectionError, withStartTlsFallback } from "./email.service";
 import { renderEmail } from "./email.templates";
 import type { EmailConfig } from "./email.config";
 import type { MailTransport } from "./email.types";
@@ -281,5 +281,65 @@ describe("EmailService.send", () => {
       service.send({ to: "user@example.com", template: "verify-email", data: {} }),
     ).rejects.toThrow("EMAIL_FROM_ADDRESS");
     expect(sendMail).not.toHaveBeenCalled();
+  });
+});
+
+describe("SMTP STARTTLS fallback (465 → 587)", () => {
+  it("classifies connection-level errors as retryable for the fallback", () => {
+    expect(isConnectionError({ code: "ETIMEDOUT" })).toBe(true);
+    expect(isConnectionError({ code: "ENETUNREACH" })).toBe(true);
+    expect(isConnectionError({ code: "ECONNREFUSED" })).toBe(true);
+    expect(isConnectionError(new Error("Connection timeout"))).toBe(true);
+    expect(isConnectionError(new Error("connect ETIMEDOUT 64.233.167.108:465"))).toBe(true);
+    // Auth/TLS/config errors must NOT trigger the fallback.
+    expect(isConnectionError({ code: "EAUTH" })).toBe(false);
+    expect(isConnectionError(new Error("535 5.7.8 Username and Password not accepted"))).toBe(false);
+    expect(isConnectionError({ code: "DEPTH_ZERO_SELF_SIGNED_CERT" })).toBe(false);
+    expect(isConnectionError(null)).toBe(false);
+  });
+
+  it("falls back to STARTTLS when the primary SMTP connection fails at the network level", async () => {
+    const primary = {
+      sendMail: vi.fn().mockRejectedValue(new Error("Connection timeout")),
+    } as unknown as MailTransport;
+    const fallback = {
+      sendMail: vi.fn().mockResolvedValue({ messageId: "fallback-id" }),
+    } as unknown as MailTransport;
+
+    const transport = withStartTlsFallback(primary, fallback);
+    const result = await transport.sendMail({
+      from: "LifeOS <noreply@example.com>",
+      to: "user@example.com",
+      replyTo: "support@example.com",
+      subject: "Test",
+      html: "<p>hi</p>",
+      text: "hi",
+    });
+
+    expect(primary.sendMail).toHaveBeenCalledTimes(1);
+    expect(fallback.sendMail).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ messageId: "fallback-id" });
+  });
+
+  it("does not fall back on a credentials error — it rethrows", async () => {
+    const primary = {
+      sendMail: vi.fn().mockRejectedValue(new Error("535 5.7.8 Username and Password not accepted")),
+    } as unknown as MailTransport;
+    const fallback = {
+      sendMail: vi.fn().mockResolvedValue({ messageId: "nope" }),
+    } as unknown as MailTransport;
+
+    const transport = withStartTlsFallback(primary, fallback);
+    await expect(
+      transport.sendMail({
+        from: "LifeOS <noreply@example.com>",
+        to: "user@example.com",
+        replyTo: "support@example.com",
+        subject: "Test",
+        html: "<p>hi</p>",
+        text: "hi",
+      }),
+    ).rejects.toThrow(/535/);
+    expect(fallback.sendMail).not.toHaveBeenCalled();
   });
 });

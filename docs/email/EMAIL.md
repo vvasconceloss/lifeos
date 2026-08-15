@@ -86,12 +86,25 @@ Two safeguards are applied in `email.service.ts`:
   ~4 minutes before failing, which also consumed the `resend-verification` rate limit without ever
   sending an email. With short timeouts a failure surfaces in seconds.
 
+### STARTTLS fallback (port 465 → 587)
+
+Some hosts (notably free Render instances) cannot reach Gmail's **465** (implicit TLS) port but
+accept **587** (STARTTLS). When `EMAIL_PORT=465` and the SMTP connection fails with a
+**connection-level** error (`ETIMEDOUT`, `ENETUNREACH`, `ECONNREFUSED`, `Connection timeout`, …),
+the service automatically retries the send over port 587 with `secure: false`.
+
+- **Credentials errors are never retried** — a `535` / `EAUTH` failure means the app password is
+  wrong, and retrying on another port would not help.
+- When `EMAIL_PORT` is already `587`, no fallback is built.
+- Covered by `email.test.ts` → "SMTP STARTTLS fallback (465 → 587)".
+
 ### Common production failure symptoms
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | `connect ENETUNREACH <ipv6>:465` | No IPv6 route on the host | `ipv4first` DNS order (already applied) |
 | `Connection timeout` after ~2 min | Default nodemailer timeout | short timeouts (already applied) |
+| `ETIMEDOUT` / `ENETUNREACH` on `465` but works on `587` | Port 465 blocked by the host network | automatic STARTTLS fallback (already applied) |
 | Email received with `localhost` links | `WEB_URL` unset → `http://localhost:5173` fallback | set `WEB_URL` to the public origin in Render |
 | `429 RATE_LIMIT_EXCEEDED` on resend | Slow failed sends consumed the 3/h limit | fix the send; `resend-verification` allows 3/h on purpose |
 

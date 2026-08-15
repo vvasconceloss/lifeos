@@ -12,6 +12,11 @@ const DEFAULT_RETRY_DELAY_MS = 1_000;
 const DEFAULT_CONNECTION_TIMEOUT_MS = 10_000;
 const DEFAULT_SOCKET_TIMEOUT_MS = 15_000;
 
+// When EMAIL_PORT is 465 (implicit TLS) some hosts (e.g. free Render instances)
+// cannot reach that port but accept 587 (STARTTLS). The service falls back to it
+// automatically on a connection-level failure.
+const FALLBACK_STARTTLS_PORT = 587;
+
 export interface EmailServiceOptions {
   config: EmailConfig;
   maxAttempts?: number;
@@ -23,6 +28,11 @@ export interface EmailServiceOptions {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+interface SmtpTransportOptions {
+  port?: number;
+  secure?: boolean;
 }
 
 /** Adapts a nodemailer Transporter to the provider-agnostic MailTransport. */
@@ -49,7 +59,7 @@ function nodemailerTransport(transporter: Transporter): MailTransport {
   };
 }
 
-function createSmtpTransport(config: EmailConfig): MailTransport {
+function createSmtpTransport(config: EmailConfig, opts: SmtpTransportOptions = {}): MailTransport {
   // Force IPv4 name resolution. On IPv6-capable hosts `smtp.gmail.com` resolves
   // to an IPv6 address first; without an IPv6 route the SMTP connect fails with
   // ENETUNREACH and emails never send (seen on Render free instances).
@@ -57,8 +67,8 @@ function createSmtpTransport(config: EmailConfig): MailTransport {
 
   const transporter = nodemailer.createTransport({
     host: config.host,
-    port: config.port,
-    secure: config.secure,
+    port: opts.port ?? config.port,
+    secure: opts.secure ?? config.secure,
     auth: config.user
       ? { user: config.user, pass: config.pass }
       : undefined,
@@ -67,6 +77,51 @@ function createSmtpTransport(config: EmailConfig): MailTransport {
     socketTimeout: DEFAULT_SOCKET_TIMEOUT_MS,
   });
   return nodemailerTransport(transporter);
+}
+
+/** Connection-level errors that a STARTTLS fallback may fix (network/firewall, not credentials). */
+const CONNECTION_ERROR_CODES = new Set([
+  "ETIMEDOUT",
+  "ENETUNREACH",
+  "ENETDOWN",
+  "EHOSTUNREACH",
+  "EHOSTDOWN",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "EPIPE",
+  "ESOCKET",
+]);
+
+/** @internal exported for tests */
+export function isConnectionError(error: unknown): boolean {
+  if (error && typeof error === "object") {
+    const code = (error as { code?: string }).code;
+    if (code && CONNECTION_ERROR_CODES.has(code)) return true;
+    // nodemailer also reports bare "Connection timeout" / "Socket timeout" strings.
+    const message = (error as { message?: string }).message ?? "";
+    if (/connection timeout|socket timeout|connect/i.test(message)) return true;
+  }
+  return false;
+}
+
+/**
+ * Wraps the primary transport with a fallback that retries the send over STARTTLS
+ * (port 587, `secure: false`) when the primary connection fails at the network
+ * level. Authentication/TLS errors are not retried — they indicate bad config.
+ *
+ * @internal exported for tests
+ */
+export function withStartTlsFallback(primary: MailTransport, fallback: MailTransport): MailTransport {
+  return {
+    async sendMail(payload) {
+      try {
+        return await primary.sendMail(payload);
+      } catch (error) {
+        if (!isConnectionError(error)) throw error;
+        return fallback.sendMail(payload);
+      }
+    },
+  };
 }
 
 /**
@@ -82,7 +137,7 @@ export function createEmailService(options: EmailServiceOptions): EmailService {
   const { config, logger = console } = options;
   const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS;
-  const transport = options.transport ?? createSmtpTransport(config);
+  const transport = options.transport ?? buildTransport(config, logger);
 
   async function send(input: SendEmailInput): Promise<void> {
     const { to, template, data, locale } = input;
@@ -130,4 +185,28 @@ export function createEmailService(options: EmailServiceOptions): EmailService {
   }
 
   return { send };
+}
+
+function buildTransport(
+  config: EmailConfig,
+  logger: Pick<Console, "warn" | "error">,
+): MailTransport {
+  const primary = createSmtpTransport(config);
+
+  // STARTTLS fallback only makes sense when the configured port is not already
+  // the STARTTLS one. 465 (implicit TLS) is the case that needs it on some hosts.
+  if (config.port === FALLBACK_STARTTLS_PORT) {
+    return primary;
+  }
+
+  const fallback = createSmtpTransport(config, {
+    port: FALLBACK_STARTTLS_PORT,
+    secure: false,
+  });
+
+  logger.warn(
+    `[email] enabled SMTP STARTTLS fallback (port ${FALLBACK_STARTTLS_PORT}) for ${config.host}`,
+  );
+
+  return withStartTlsFallback(primary, fallback);
 }
