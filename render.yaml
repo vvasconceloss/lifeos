@@ -42,9 +42,10 @@ services:
         value: "10"
       - key: RESET_PASSWORD_RATE_LIMIT_WINDOW
         value: 1 hour
-      # Transactional email (Gmail SMTP). Set EMAIL_ENABLED=true to start sending.
+      # Transactional email (Gmail SMTP). Enabled in production — credentials are
+      # set as secrets (EMAIL_PASS) in the Render dashboard.
       - key: EMAIL_ENABLED
-        value: "false"
+        value: "true"
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
@@ -61,9 +62,10 @@ services:
         sync: false
       - key: EMAIL_REPLY_TO
         sync: false
-      # Web origin used to build verification/reset links in emails.
+      # Web origin used to build verification/reset links in emails. MUST be the
+      # public Vercel origin (email clients cannot reach localhost).
       - key: WEB_URL
-        sync: false
+        value: https://lifeos.app
       # Set these in the Render dashboard (never commit secrets):
       # - DATABASE_URL  -> Neon PostgreSQL connection string (include ?sslmode=require)
       # - JWT_SECRET    -> long random value (openssl rand -hex 32)

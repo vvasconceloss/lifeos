@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import { setDefaultResultOrder } from "node:dns";
 import type { EmailConfig } from "./email.config";
 import { formatFromAddress } from "./email.config";
 import { renderEmail } from "./email.templates";
@@ -6,6 +7,10 @@ import type { EmailService, MailTransport, SendEmailInput } from "./email.types"
 
 const DEFAULT_MAX_ATTEMPTS = 2;
 const DEFAULT_RETRY_DELAY_MS = 1_000;
+// Gmail SMTP answers well within a few seconds. Short timeouts make a failure
+// fail fast instead of blocking the request for minutes (the default is 2 min).
+const DEFAULT_CONNECTION_TIMEOUT_MS = 10_000;
+const DEFAULT_SOCKET_TIMEOUT_MS = 15_000;
 
 export interface EmailServiceOptions {
   config: EmailConfig;
@@ -45,6 +50,11 @@ function nodemailerTransport(transporter: Transporter): MailTransport {
 }
 
 function createSmtpTransport(config: EmailConfig): MailTransport {
+  // Force IPv4 name resolution. On IPv6-capable hosts `smtp.gmail.com` resolves
+  // to an IPv6 address first; without an IPv6 route the SMTP connect fails with
+  // ENETUNREACH and emails never send (seen on Render free instances).
+  setDefaultResultOrder("ipv4first");
+
   const transporter = nodemailer.createTransport({
     host: config.host,
     port: config.port,
@@ -52,6 +62,9 @@ function createSmtpTransport(config: EmailConfig): MailTransport {
     auth: config.user
       ? { user: config.user, pass: config.pass }
       : undefined,
+    connectionTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
+    greetingTimeout: DEFAULT_CONNECTION_TIMEOUT_MS,
+    socketTimeout: DEFAULT_SOCKET_TIMEOUT_MS,
   });
   return nodemailerTransport(transporter);
 }
