@@ -2,6 +2,35 @@
 
 All notable changes to LifeOS.
 
+## v1.6.1 — Email delivery fix (2026-08)
+
+A production fix for transactional email delivery on free Render instances: Gmail SMTP drops
+connections from datacenter IPs, so sending now uses the **Gmail REST API over HTTPS** (OAuth2)
+instead of SMTP. Includes the related transport hardening (IPv4-only resolution, short timeouts,
+automatic SMTP 587 fallback) and an email connectivity diagnostic script.
+
+### Fixes
+
+- **Gmail SMTP was unreachable from Render free** (`ENETUNREACH`/`ETIMEDOUT` on the SMTP ports) —
+  emails never sent and the `resend-verification` rate limit was consumed by failed attempts.
+  Sending now goes through the **Gmail API** (`EMAIL_PROVIDER=gmail-api`, OAuth2 refresh token,
+  HTTPS port 443) which works on any host with HTTP egress.
+- **Gmail API message body**: switched from nodemailer's `jsonTransport` (which produced a JSON
+  object) to `streamTransport`, so the RFC822 MIME with a proper `To:` header is sent as `raw`.
+- **Network hardening** (still active when `EMAIL_PROVIDER=smtp`): resolve the host to an IPv4
+  literal (nodemailer otherwise tries IPv6 first), short timeouts (10s/15s instead of 2 min), and
+  an automatic fallback to port 587 (STARTTLS) when 465 is blocked.
+- **`WEB_URL`** is now the real Vercel origin (`https://lifeos-focus.vercel.app`), so email links
+  point to the app instead of `localhost`.
+
+### Tooling & docs
+
+- New `pnpm --filter @lifeos/api email:diagnose` script to test the configured provider and report
+  the exact failure (network vs credentials vs TLS).
+- `docs/email/EMAIL.md` and `docs/ops/DEPLOYMENT.md` updated with both transports and the OAuth2
+  setup steps.
+
+
 ## v1.6.0 — Account Security, Lifecycle & i18n (2026-08)
 
 The v1.6 release is a surgical cycle over account management and security: a strong password policy,

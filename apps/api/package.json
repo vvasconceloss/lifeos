@@ -1,7 +1,7 @@
 {
   "name": "@lifeos/api",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Backend API for LifeOS, a personal life management system for tracking habits, goals, projects, and long-term personal growth.",
   "type": "module",
   "main": "index.js",
