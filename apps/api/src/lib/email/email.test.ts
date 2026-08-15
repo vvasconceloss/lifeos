@@ -424,6 +424,12 @@ describe("Gmail API transport (HTTPS)", () => {
     expect(init.headers.Authorization).toBe("Bearer abc-123");
     const body = JSON.parse(init.body);
     expect(body.raw).toMatch(/^[A-Za-z0-9_-]+$/);
+    // The decoded raw must be an RFC822 message with a To header, not JSON.
+    const decoded = Buffer.from(body.raw, "base64url").toString("utf8");
+    expect(decoded).toContain("To: user@example.com");
+    expect(decoded).toContain("Subject: Hi");
+    expect(decoded).toContain("Content-Type:");
+    expect(decoded).not.toMatch(/^{"/);
     vi.unstubAllGlobals();
   });
 

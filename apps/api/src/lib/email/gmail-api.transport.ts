@@ -67,8 +67,9 @@ export function createGmailApiTransport(
 
   return {
     async sendMail(payload) {
-      // Build the RFC822 message with nodemailer (reuses templates + headers).
-      const mailer = nodemailer.createTransport({ jsonTransport: true });
+      // Build the RFC822 message with nodemailer's streamTransport, which emits
+      // the raw MIME text (jsonTransport would produce a JSON object instead).
+      const mailer = nodemailer.createTransport({ streamTransport: true, newline: "unix" });
       const built = await mailer.sendMail({
         from: payload.from || formatFromAddress(config),
         to: payload.to,
@@ -82,7 +83,11 @@ export function createGmailApiTransport(
         },
       });
 
-      const raw = built.message;
+      const chunks: Buffer[] = [];
+      for await (const chunk of built.message) {
+        chunks.push(Buffer.from(chunk as string));
+      }
+      const raw = Buffer.concat(chunks).toString("utf8");
       const base64 = Buffer.from(raw).toString("base64url");
 
       const accessToken = await getAccessToken();
